@@ -52,7 +52,11 @@ export function Onboarding() {
   const saved = storage.getOnboarding()
   const [step, setStep] = useState(saved?.step ?? 0)
   const [answers, setAnswers] = useState(saved?.answers ?? {})
-  const [thread, setThread] = useState(saved?.thread ?? [])
+  // Seed the first Mitra prompt here (not in an effect) so StrictMode's double
+  // invoke can't duplicate it.
+  const [thread, setThread] = useState(
+    saved?.thread?.length ? saved.thread : [{ role: 'mitra', text: QUESTIONS[0].prompt }]
+  )
   const [textValue, setTextValue] = useState('')
   const [dateBasis, setDateBasis] = useState(null) // 'due' | 'lmp'
   const [dateValue, setDateValue] = useState('')
@@ -63,28 +67,12 @@ export function Onboarding() {
   const q = QUESTIONS[step]
   const done = step >= QUESTIONS.length
 
-  // Seed the first Mitra prompt into the thread once.
-  useEffect(() => {
-    if (thread.length === 0 && !done) {
-      pushMitra(QUESTIONS[0].prompt)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [thread])
 
   function persist(next) {
     storage.setOnboarding(next)
-  }
-
-  function pushMitra(text, s = step, a = answers) {
-    setThread((prev) => {
-      const next = [...prev, { role: 'mitra', text }]
-      persist({ step: s, answers: a, thread: next })
-      return next
-    })
   }
 
   function advance(answerValue, displayText) {
