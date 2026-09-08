@@ -1,13 +1,314 @@
+import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Search, Landmark, ExternalLink, Check, FileText, MapPin, ArrowRight, MessageSquare, Star } from 'lucide-react'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
+import { Badge } from '../components/ui/Badge.jsx'
+import { Button } from '../components/ui/Button.jsx'
+import { Modal } from '../components/ui/Modal.jsx'
+import { IconTile } from '../components/ui/IconTile.jsx'
+import {
+  schemes,
+  CATEGORIES,
+  BENEFIT_TYPES,
+  categoryCounts,
+  helpfulResources,
+} from '../data/schemes.js'
 
-// Placeholder — built in Phase 4.
+const SORTS = ['Popular first', 'A–Z', 'Z–A']
+
 export function Schemes() {
+  const [cat, setCat] = useState('all')
+  const [query, setQuery] = useState('')
+  const [benefitType, setBenefitType] = useState('')
+  const [sort, setSort] = useState('Popular first')
+  const [detail, setDetail] = useState(null)
+
+  const counts = useMemo(() => categoryCounts(), [])
+
+  const filtered = useMemo(() => {
+    let list = schemes.filter((s) => {
+      if (cat !== 'all' && !s.categories.includes(cat)) return false
+      if (benefitType && s.benefitType !== benefitType) return false
+      if (query) {
+        const q = query.toLowerCase()
+        if (!s.name.toLowerCase().includes(q) && !s.description.toLowerCase().includes(q))
+          return false
+      }
+      return true
+    })
+    list = [...list]
+    if (sort === 'A–Z') list.sort((a, b) => a.name.localeCompare(b.name))
+    else if (sort === 'Z–A') list.sort((a, b) => b.name.localeCompare(a.name))
+    else list.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0))
+    return list
+  }, [cat, query, benefitType, sort])
+
   return (
     <>
-      <PageHeader title="Schemes" subtitle="Explore government schemes that support your health and your baby's well-being." />
-      <div className="rounded-2xl bg-white border border-line shadow-card p-8 text-sm text-ink-muted">
-        Schemes coming in this build.
+      <PageHeader
+        title="Schemes"
+        subtitle="Explore government schemes that support your health and your baby's well-being."
+      />
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+        <div className="xl:col-span-2 space-y-5">
+          {/* Search + filters */}
+          <div className="rounded-2xl bg-white border border-line shadow-card p-4 space-y-3">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search schemes…"
+                className="w-full rounded-xl border border-line bg-canvas pl-9 pr-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              />
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <label className="text-sm">
+                <span className="sr-only">Benefit type</span>
+                <select
+                  value={benefitType}
+                  onChange={(e) => setBenefitType(e.target.value)}
+                  className="rounded-xl border border-line bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  <option value="">All benefit types</option>
+                  {BENEFIT_TYPES.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm">
+                <span className="sr-only">Sort by</span>
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value)}
+                  className="rounded-xl border border-line bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  {SORTS.map((s) => (
+                    <option key={s} value={s}>
+                      Sort: {s}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
+
+          {/* Category tabs */}
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c.key}
+                onClick={() => setCat(c.key)}
+                className={`rounded-full px-3.5 py-1.5 text-sm font-medium border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                  cat === c.key
+                    ? 'bg-indigo-600 border-indigo-600 text-white'
+                    : 'bg-white border-line text-ink hover:bg-canvas'
+                }`}
+              >
+                {c.label}{' '}
+                <span className={cat === c.key ? 'text-indigo-100' : 'text-ink-faint'}>
+                  {counts[c.key]}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Scheme rows */}
+          {filtered.length === 0 ? (
+            <div className="rounded-2xl bg-white border border-line shadow-card p-10 text-center text-sm text-ink-muted">
+              No schemes match your filters. Try clearing the search or benefit type.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filtered.map((s) => (
+                <SchemeRow key={s.id} scheme={s} onView={() => setDetail(s)} />
+              ))}
+            </div>
+          )}
+
+          <p className="text-xs text-ink-faint">
+            Benefits may vary depending on scheme guidelines and eligibility.
+          </p>
+        </div>
+
+        {/* Right rail */}
+        <aside className="space-y-6">
+          <div className="rounded-2xl border border-indigo-100 shadow-card p-5" style={{ backgroundColor: '#EEF0FF' }}>
+            <h2 className="text-base font-semibold text-ink">Check Your Eligibility</h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              Answer a few quick questions to see which schemes you may be eligible for.
+            </p>
+            <Button as={Link} to="/schemes/eligibility" className="mt-4 w-full">
+              Check Eligibility <ArrowRight size={16} />
+            </Button>
+          </div>
+
+          <div className="rounded-2xl bg-white border border-line shadow-card p-5">
+            <h2 className="text-base font-semibold text-ink mb-3">Top Schemes</h2>
+            <ol className="space-y-3">
+              {schemes.slice(0, 3).map((s, i) => (
+                <li key={s.id}>
+                  <button
+                    onClick={() => setDetail(s)}
+                    className="w-full flex items-start gap-3 text-left group"
+                  >
+                    <span className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold flex items-center justify-center shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-ink group-hover:text-indigo-600">{s.name}</span>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="rounded-2xl bg-white border border-line shadow-card p-5">
+            <h2 className="text-base font-semibold text-ink mb-3">Helpful Resources</h2>
+            <ul className="space-y-2">
+              {helpfulResources.map((r) => (
+                <li key={r} className="flex items-center gap-2 text-sm text-ink">
+                  <FileText size={15} className="text-ink-faint" />
+                  {r}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl bg-white border border-line shadow-card p-5">
+            <h2 className="text-base font-semibold text-ink">Need help?</h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              Ask Mitra about any scheme and how to apply.
+            </p>
+            <Button as={Link} to="/chat?q=How%20do%20I%20apply%20for%20PMMVY" variant="secondary" className="mt-3 w-full">
+              <MessageSquare size={16} /> Ask Mitra
+            </Button>
+          </div>
+        </aside>
       </div>
+
+      <SchemeDetail scheme={detail} onClose={() => setDetail(null)} />
     </>
+  )
+}
+
+function SchemeRow({ scheme, onView }) {
+  return (
+    <section className="rounded-2xl bg-white border border-line shadow-card p-5">
+      <div className="flex items-start gap-4">
+        <IconTile icon={Landmark} fill="#FFFBEB" color="#F59E0B" size={48} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-base font-semibold text-ink">{scheme.name}</h3>
+            {scheme.popular && (
+              <Badge tone="warning">
+                <Star size={11} /> Popular
+              </Badge>
+            )}
+          </div>
+          <p className="mt-1 text-sm text-ink-muted">{scheme.description}</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {scheme.tags.map((t) => (
+              <Badge key={t} tone="neutral">
+                {t}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl bg-canvas p-3">
+        <p className="text-xs font-semibold text-ink mb-2">Benefits</p>
+        <ul className="space-y-1">
+          {scheme.benefits.map((b) => (
+            <li key={b} className="flex items-center gap-2 text-sm text-ink">
+              <Check size={14} className="text-emerald-600 shrink-0" />
+              {b}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-3 flex justify-end">
+        <Button variant="secondary" size="sm" onClick={onView}>
+          View Details
+        </Button>
+      </div>
+    </section>
+  )
+}
+
+function SchemeDetail({ scheme, onClose }) {
+  if (!scheme) return null
+  return (
+    <Modal
+      open={!!scheme}
+      onClose={onClose}
+      title={scheme.name}
+      footer={
+        <Button
+          as="a"
+          href={scheme.portal}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full"
+        >
+          Apply on Official Portal <ExternalLink size={16} />
+        </Button>
+      }
+    >
+      <p className="text-sm text-ink">{scheme.description}</p>
+
+      <Section title="Benefits">
+        <ul className="space-y-1.5">
+          {scheme.benefits.map((b) => (
+            <li key={b} className="flex items-center gap-2 text-sm text-ink">
+              <Check size={14} className="text-emerald-600 shrink-0" /> {b}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Who is eligible">
+        <ul className="space-y-1.5">
+          {scheme.eligibility.map((e) => (
+            <li key={e} className="flex items-start gap-2 text-sm text-ink">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" /> {e}
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <Section title="Required documents">
+        <ul className="space-y-1.5">
+          {scheme.documents.map((d) => (
+            <li key={d} className="flex items-center gap-2 text-sm text-ink">
+              <FileText size={14} className="text-ink-faint shrink-0" /> {d}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-ink-faint">
+          You will never be asked for your Aadhaar or bank account number inside PoshanMitra.
+        </p>
+      </Section>
+
+      <Section title="Where to apply">
+        <p className="flex items-start gap-2 text-sm text-ink">
+          <MapPin size={15} className="text-ink-faint shrink-0 mt-0.5" />
+          {scheme.whereToApply}
+        </p>
+      </Section>
+    </Modal>
+  )
+}
+
+function Section({ title, children }) {
+  return (
+    <div className="mt-4">
+      <h3 className="text-sm font-semibold text-ink mb-2">{title}</h3>
+      {children}
+    </div>
   )
 }

@@ -17,7 +17,7 @@ Diet Plan) next — Phase 2 (Login + Onboarding) was built during Phase 0.
 - [x] Phase 1 — Mitra (redflags, emergency screen, gemini, speech, chatbot)
 - [x] Phase 2 — Onboarding + Login (built early in Phase 0; gate met)
 - [x] Phase 3 — Dashboard + Diet Plan
-- [ ] Phase 4 — Schemes + Eligibility
+- [x] Phase 4 — Schemes + Eligibility
 - [ ] Phase 5 — Hospitals + Videos
 - [ ] Phase 6 — Stubs + polish
 - [ ] Phase 7 — Handover
@@ -73,6 +73,6 @@ no-key fallback, since no API key is configured in this dev env).
 
 ## Next concrete step
 
-Phase 4: `src/data/schemes.js` (12 schemes), Schemes list + detail modal,
-`src/lib/eligibility.js`, and the four-step eligibility wizard. No Aadhaar/bank
-numbers collected anywhere; results say "You may be eligible".
+Phase 5: `src/data/hospitals.js` (10 Pune hospitals, coords, labour-ward & PMJAY
+flags), Hospitals page with working filters + Call 108 card; `src/data/videos.js`
+(verified YouTube IDs only) and the Videos page with a playback modal.

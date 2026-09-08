@@ -53,3 +53,29 @@ of each phase. One or two lines each.
   the API, so the 20-minute cut rule wasn't needed.
 - **Login + Onboarding already satisfy Phase 2** (built in Phase 0 for the route guards);
   Phase 2 is effectively done. Will double-check its gate during polish.
+
+## Phase 3 — Dashboard + Diet Plan
+
+- **Today's Tasks shows 2/6, not the mock's "3/5".** Today's Plan has 6 rows (spec lists
+  6), 2 pre-completed, so 2/6 is what's honestly derived. The "3/5" in the stat table is
+  mock inconsistency; derived-from-data wins.
+- **Meal "food photo" rendered as a tinted icon block**, not a real photo. No local image
+  assets and I won't hot-link external food images (privacy + reliability). Illustration
+  component / tint blocks keep it deliberate, and photos can drop in later.
+- **Plan toggles + diet day are real state**; plan completion persists to localStorage so
+  ticks survive reload.
+
+## Phase 4 — Schemes + Eligibility
+
+- **Category counts computed from data, not hardcoded** — tags were assigned so the live
+  counts equal the spec's (All 12 · Pregnant 6 · Children 4 · Nutrition 5 · Financial 3).
+- **Eligibility leans to "need more info" over a false "not eligible"** so nobody is
+  wrongly discouraged. Only clear disqualifiers (govt employee for PMMVY, no institutional
+  delivery for JSY) return not_eligible. Universal schemes (POSHAN, PM POSHAN) always
+  eligible. Rules documented inline in eligibility.js. Verified via a Node test across
+  three profiles.
+- **Wizard collects only yes/no facts** for Aadhaar and bank account — never numbers
+  (SAFETY.md §5). Answers persist to localStorage only; the screen says so. Results always
+  read "You may be eligible" with the departmental-confirmation note.
+- **Apply always opens the official portal in a new tab** (`target=_blank rel=noopener`);
+  the app never submits anything.
