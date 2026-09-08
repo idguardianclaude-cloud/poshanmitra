@@ -15,8 +15,8 @@ Diet Plan) next — Phase 2 (Login + Onboarding) was built during Phase 0.
 
 - [x] Phase 0 — Foundation (scaffold, UI kit, layout, routing)
 - [x] Phase 1 — Mitra (redflags, emergency screen, gemini, speech, chatbot)
-- [ ] Phase 2 — Onboarding + Login (Login + Onboarding built early in Phase 0)
-- [ ] Phase 3 — Dashboard + Diet Plan
+- [x] Phase 2 — Onboarding + Login (built early in Phase 0; gate met)
+- [x] Phase 3 — Dashboard + Diet Plan
 - [ ] Phase 4 — Schemes + Eligibility
 - [ ] Phase 5 — Hospitals + Videos
 - [ ] Phase 6 — Stubs + polish
@@ -73,5 +73,6 @@ no-key fallback, since no API key is configured in this dev env).
 
 ## Next concrete step
 
-Phase 3: build `src/data/dashboard.js` + `src/data/meals.js`, then the Dashboard
-and Diet Plan pages (Diet Plan must carry the "Sample plan" pill + required note).
+Phase 4: `src/data/schemes.js` (12 schemes), Schemes list + detail modal,
+`src/lib/eligibility.js`, and the four-step eligibility wizard. No Aadhaar/bank
+numbers collected anywhere; results say "You may be eligible".
