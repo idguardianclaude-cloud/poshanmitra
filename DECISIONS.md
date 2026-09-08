@@ -24,3 +24,32 @@ of each phase. One or two lines each.
 - **Right rail is composed per-page**, not a single shared component — each page's rail
   content differs enough that a shared shell would just be a `<div>`. Main content is
   capped at `max-w-main` (1180px) with the rail as a grid column inside each page.
+
+## Phase 1 — Mitra
+
+- **Red-flag engine matches strings AND regexes.** Pure substring matching misses
+  code-mixed phrasing with words between (e.g. "pet me bahut tez dard" — "pet…dard"
+  isn't contiguous). Added regex support per sign for the romanised combos.
+- **Bleeding sign has a suppressible/strong split.** SAFETY.md §8 requires
+  "my gums bleed when I brush" to answer normally, while bleeding in general must always
+  fire. So generic terms (bleed/blood/खून) are suppressed when the message also mentions
+  gum/brush/teeth/nose; strong terms (vaginal bleeding, रक्तस्त्राव, spotting, khoon aa
+  raha…) always fire regardless.
+- **Vomiting requires a persistence qualifier; fever/dizziness fire broadly.** Plain
+  "ulti"/"vomiting" is common benign morning sickness and a first-class supported topic
+  (there's a nausea video), so only "baar baar ulti / can't keep anything down / lagatar"
+  fire. Fever and fainting/dizziness lean broad — the false positive is cheaper there.
+  Documented at the top of redflags.js.
+- **Emergency uses two independent layers.** checkRedFlags() before Gemini, plus a
+  re-check of Gemini's own `urgency==='emergency'` (reply discarded if so). Verified in
+  browser that a red flag makes zero network calls to the model.
+- **Gemini model: `gemini-1.5-flash`.** Fast, cheap, strong enough for short warm
+  replies; good fit for a browser-side private beta. Structured JSON requested in the
+  prompt and parsed defensively (strip ``` fences, take first {...}, fall back to raw
+  text as a routine reply — only ever after the rules layer has cleared the message).
+- **No API key in this dev env → graceful no-key fallback** in the chat instead of a
+  crash. Safety layer still runs. README documents adding VITE_GEMINI_API_KEY.
+- **Web Speech kept (not cut).** STT + TTS wrappers no-op cleanly when the browser lacks
+  the API, so the 20-minute cut rule wasn't needed.
+- **Login + Onboarding already satisfy Phase 2** (built in Phase 0 for the route guards);
+  Phase 2 is effectively done. Will double-check its gate during polish.

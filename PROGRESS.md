@@ -8,13 +8,13 @@ Live build state. Updated at every checkpoint.
 
 ## Where I am right now
 
-Phase 0 (Foundation) — in progress. Scaffold, tokens, UI kit, layout, routing,
-Login and Onboarding done. Verifying the build compiles, then committing.
+Phase 1 (Mitra) complete and verified in-browser. Starting Phase 3 (Dashboard +
+Diet Plan) next — Phase 2 (Login + Onboarding) was built during Phase 0.
 
 ## Phase status
 
-- [~] Phase 0 — Foundation (scaffold, UI kit, layout, routing) — verifying build
-- [ ] Phase 1 — Mitra (redflags, emergency screen, gemini, chatbot)
+- [x] Phase 0 — Foundation (scaffold, UI kit, layout, routing)
+- [x] Phase 1 — Mitra (redflags, emergency screen, gemini, speech, chatbot)
 - [ ] Phase 2 — Onboarding + Login (Login + Onboarding built early in Phase 0)
 - [ ] Phase 3 — Dashboard + Diet Plan
 - [ ] Phase 4 — Schemes + Eligibility
@@ -47,11 +47,31 @@ Login and Onboarding done. Verifying the build compiles, then committing.
 
 - None known. Build verification pending.
 
-## Safety test results
+## Safety test results — SAFETY.md §8 (Phase 1 gate) — ALL PASS
 
-- Not yet run — Phase 1 gate. Will record the ten SAFETY.md §8 strings here.
+Console-tested via Node against `src/lib/redflags.js` (00:05 IST 9 Sep), plus
+one string verified end-to-end in the browser.
+
+MUST trigger the emergency screen (all 7 pass):
+- `mujhe bleeding ho rahi hai` → bleeding ✓
+- `मला रक्तस्त्राव होतोय` → bleeding ✓
+- `baby is not moving since morning` → fetal_movement ✓
+- `pet me bahut tez dard ho raha hai` → abdominal_pain ✓
+- `मुझे बहुत तेज सिरदर्द है और धुंधला दिख रहा है` → headache ✓
+- `water is leaking` → leaking_fluid ✓
+- `I fainted twice today` → fainting ✓
+
+MUST be answered normally (all 3 pass — no emergency screen):
+- `what should I eat for breakfast` → clean ✓
+- `is it safe to do yoga in 5th month` → clean ✓
+- `my gums bleed when I brush` → clean ✓ (gum/brush exclusion on the bleeding sign)
+
+Browser verification: `I fainted twice today` → EmergencyScreen shown, and the
+network panel recorded **zero** requests to `generativelanguage` — Gemini is not
+called on a red flag. `what should I eat for breakfast` → normal path (showed the
+no-key fallback, since no API key is configured in this dev env).
 
 ## Next concrete step
 
-Run `npm run build` to confirm Phase 0 compiles clean, fix any errors, `git init` +
-first commit, then start Phase 1 with `src/lib/redflags.js`.
+Phase 3: build `src/data/dashboard.js` + `src/data/meals.js`, then the Dashboard
+and Diet Plan pages (Diet Plan must carry the "Sample plan" pill + required note).
