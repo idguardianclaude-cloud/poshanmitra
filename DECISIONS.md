@@ -96,3 +96,23 @@ of each phase. One or two lines each.
 - **Filters use an explicit "Apply Filters" commit** (working set vs applied set) to match
   the mockup. Verified in-browser that the name search actually narrows the list.
 - **Emergency card says "Call 108"**, not the mockup's "Emergency Call" (SAFETY.md).
+
+## Phase 6 — Polish
+
+- **Delete-my-data now sweeps every `poshanmitra_*` key**, not a fixed list. Caught that
+  the dashboard plan and eligibility-wizard keys were being left behind — a real privacy
+  gap on a non-cuttable feature. Verified in-browser: after delete, zero keys remain and
+  it redirects to /login.
+- **Disclaimer footer added to Login and Onboarding** so it's literally on every page
+  (the post-login pages already get it from AppShell). SAFETY.md §7 / hard rule 4.
+- **No artificial loading skeletons on the data pages.** All page data is local and
+  synchronous — a skeleton would only flash. The Skeleton/EmptyState components exist and
+  are used where loading/empty is real: the chat typing indicator, and the "no match"
+  empty states on Schemes/Hospitals/Videos. When a real API lands (NEXT_STEPS), wire the
+  skeletons in there.
+- **Router v7 future flags enabled** (`v7_startTransition`, `v7_relativeSplatPath`) to
+  silence the console warnings and ease the eventual v7 upgrade.
+- **Known dev-only quirk:** editing `ProfileContext.jsx` live triggers a Vite Fast Refresh
+  "incompatible export" churn (it exports both the provider and the `useProfile` hook),
+  which can momentarily throw "useProfile must be used within ProfileProvider" in the dev
+  console. A fresh reload and the production build are clean — it never occurs without HMR.

@@ -19,7 +19,7 @@ Diet Plan) next — Phase 2 (Login + Onboarding) was built during Phase 0.
 - [x] Phase 3 — Dashboard + Diet Plan
 - [x] Phase 4 — Schemes + Eligibility
 - [x] Phase 5 — Hospitals + Videos
-- [ ] Phase 6 — Stubs + polish
+- [x] Phase 6 — Stubs + polish
 - [ ] Phase 7 — Handover
 
 ## Done

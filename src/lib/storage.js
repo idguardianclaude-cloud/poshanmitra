@@ -53,9 +53,21 @@ export const storage = {
   getLang: () => read(LANG_KEY, 'en'),
   setLang: (lang) => write(LANG_KEY, lang),
 
-  // Delete all my data — SAFETY.md §6. Must actually clear everything.
+  // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
+  // keys written outside this module (dashboard plan, eligibility wizard). Sweep
+  // every poshanmitra_* key so nothing is left behind as new keys get added.
   deleteAll: () => {
-    ;[PROFILE_KEY, LOGIN_KEY, CHAT_KEY, ONBOARD_KEY, LANG_KEY].forEach(remove)
+    try {
+      const keys = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i)
+        if (k && k.startsWith('poshanmitra')) keys.push(k)
+      }
+      keys.forEach(remove)
+    } catch {
+      // Fallback to the known set if enumeration fails.
+      ;[PROFILE_KEY, LOGIN_KEY, CHAT_KEY, ONBOARD_KEY, LANG_KEY].forEach(remove)
+    }
   },
 }
 

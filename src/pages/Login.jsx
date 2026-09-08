@@ -4,6 +4,7 @@ import { Heart, ShieldCheck } from 'lucide-react'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Illustration } from '../components/Illustration.jsx'
+import { DisclaimerFooter } from '../components/layout/DisclaimerFooter.jsx'
 
 export function Login() {
   const { login, profile } = useProfile()
@@ -26,7 +27,8 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-canvas">
+    <div className="min-h-screen flex flex-col bg-canvas">
+    <div className="flex-1 flex flex-col lg:flex-row">
       {/* Left — brand panel */}
       <div className="lg:w-1/2 bg-gradient-to-br from-indigo-600 to-indigo-700 text-white p-10 lg:p-16 flex flex-col justify-between">
         <div className="flex items-center gap-3">
@@ -99,6 +101,8 @@ export function Login() {
           </div>
         </div>
       </div>
+      </div>
+      <DisclaimerFooter />
     </div>
   )
 }

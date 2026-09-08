@@ -6,6 +6,7 @@ import { storage } from '../lib/storage.js'
 import { derivePregnancy } from '../lib/pregnancy.js'
 import { Chip } from '../components/ui/Chip.jsx'
 import { Button } from '../components/ui/Button.jsx'
+import { DisclaimerFooter } from '../components/layout/DisclaimerFooter.jsx'
 
 // Five questions, asked one at a time, chat-style. Every answer is saved
 // immediately (resume on reload). Every question offers Skip / I don't know,
@@ -329,6 +330,8 @@ export function Onboarding() {
           </div>
         </div>
       )}
+
+      <DisclaimerFooter />
     </div>
   )
 }
