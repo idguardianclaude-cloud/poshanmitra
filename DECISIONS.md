@@ -79,3 +79,20 @@ of each phase. One or two lines each.
   read "You may be eligible" with the departmental-confirmation note.
 - **Apply always opens the official portal in a new tab** (`target=_blank rel=noopener`);
   the app never submits anything.
+
+## Phase 5 — Hospitals + Videos
+
+- **ALL videos show a "Video coming soon" placeholder — no embeds.** SAFETY.md §9 says an
+  unverified embed is worse than an empty slot, and I cannot verify specific YouTube IDs
+  belong to credible channels from here. Every video's `youtubeId` is null, so the player
+  renders a placeholder explaining we only show verified sources. Adding a verified ID
+  later is a one-line data change per item; the iframe path is already built and dormant.
+- **Directions link uses the place name + address query, not raw lat/lng.** Remembered
+  coordinates could misdirect; `destination=<name, address>` routes reliably in Google
+  Maps. Coordinates are kept only to position pins on the placeholder map.
+- **Hospital phone numbers are representative reception lines** in the correct format,
+  flagged in NEXT_STEPS for verification before launch. The emergency path (108) is
+  hardcoded and correct; hospital Call buttons are convenience, not the emergency route.
+- **Filters use an explicit "Apply Filters" commit** (working set vs applied set) to match
+  the mockup. Verified in-browser that the name search actually narrows the list.
+- **Emergency card says "Call 108"**, not the mockup's "Emergency Call" (SAFETY.md).
