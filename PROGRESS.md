@@ -1,78 +1,88 @@
 # PROGRESS.md — PoshanMitra AI
 
-Live build state. Updated at every checkpoint.
+Final build state for the morning review.
 
-**Session start:** Tue 8 Sep 2026, 23:53 IST · Hard stop 06:00 Wed.
+**Session:** Tue 8 Sep 2026 23:53 IST → Wed 9 Sep ~00:40 IST · Hard stop 06:00 (not reached).
+**Status: all seven phases complete. Build is green. Nothing stubbed unintentionally.**
 
 ---
 
-## Where I am right now
+## TL;DR
 
-Phase 1 (Mitra) complete and verified in-browser. Starting Phase 3 (Dashboard +
-Diet Plan) next — Phase 2 (Login + Onboarding) was built during Phase 0.
+The whole app is built and working, verified in the browser on the **production**
+build (`npm run preview`): clean console on every route, and the safety layer proven
+end-to-end. Only real API-dependent piece not exercised is a live Gemini reply
+(no key in this env) — the code path, parsing and fallbacks are all in place; add
+`VITE_GEMINI_API_KEY` to `.env` and Mitra talks.
 
-## Phase status
+To run: `npm install` → copy `.env.example` to `.env` (add a key for live chat) →
+`npm run dev`. Any 10-digit number logs in.
 
-- [x] Phase 0 — Foundation (scaffold, UI kit, layout, routing)
+## Phase status — all complete
+
+- [x] Phase 0 — Foundation (scaffold, tokens, UI kit, layout, routing, guards)
 - [x] Phase 1 — Mitra (redflags, emergency screen, gemini, speech, chatbot)
-- [x] Phase 2 — Onboarding + Login (built early in Phase 0; gate met)
+- [x] Phase 2 — Login + Onboarding (built in Phase 0; gate met)
 - [x] Phase 3 — Dashboard + Diet Plan
 - [x] Phase 4 — Schemes + Eligibility
 - [x] Phase 5 — Hospitals + Videos
 - [x] Phase 6 — Stubs + polish
-- [ ] Phase 7 — Handover
+- [x] Phase 7 — Handover (build, preview smoke test, docs)
 
-## Done
+## Safety test results — SAFETY.md §8 — ALL PASS
 
-- Vite + React 18 + Tailwind scaffold, tokens from DESIGN_SYSTEM in `tailwind.config.js`
-- `index.css` with Plus Jakarta Sans + Noto Devanagari, shimmer/typing keyframes,
-  reduced-motion + print rules
-- UI kit: Card, Button, Badge, Chip, IconTile, StatCard, Skeleton, EmptyState,
-  PageHeader
-- `Illustration.jsx` — 9 flat inline-SVG illustrations
-- Layout: Sidebar (9 nav items), Header (search, language, notifications, avatar menu
-  with Delete all my data + Logout), AppShell, DisclaimerFooter (3 languages)
-- `storage.js`, `ProfileContext.jsx`, `pregnancy.js`, `i18n.js`
-- Router with all routes + route guards; feature pages are placeholders pending their
-  phases; `/checkup` `/campaigns` `/reports` real stub pages; 404 page
-- Login (10-digit phone) and Onboarding (5-question chat, resume-on-reload) fully built
-- README, .env.example, .gitignore
-
-## Stubbed / placeholder (intentional, pending their phase)
-
-- Dashboard, Chatbot, DietPlan, Schemes, SchemeEligibility, Hospitals, Videos render
-  a titled placeholder card.
-
-## Broken
-
-- None known. Build verification pending.
-
-## Safety test results — SAFETY.md §8 (Phase 1 gate) — ALL PASS
-
-Console-tested via Node against `src/lib/redflags.js` (00:05 IST 9 Sep), plus
-one string verified end-to-end in the browser.
+Console-tested via Node against `src/lib/redflags.js`, and re-verified in the
+browser on the production build.
 
 MUST trigger the emergency screen (all 7 pass):
-- `mujhe bleeding ho rahi hai` → bleeding ✓
-- `मला रक्तस्त्राव होतोय` → bleeding ✓
-- `baby is not moving since morning` → fetal_movement ✓
-- `pet me bahut tez dard ho raha hai` → abdominal_pain ✓
-- `मुझे बहुत तेज सिरदर्द है और धुंधला दिख रहा है` → headache ✓
-- `water is leaking` → leaking_fluid ✓
-- `I fainted twice today` → fainting ✓
+`mujhe bleeding ho rahi hai` · `मला रक्तस्त्राव होतोय` ·
+`baby is not moving since morning` · `pet me bahut tez dard ho raha hai` ·
+`मुझे बहुत तेज सिरदर्द है और धुंधला दिख रहा है` · `water is leaking` ·
+`I fainted twice today`
 
 MUST be answered normally (all 3 pass — no emergency screen):
-- `what should I eat for breakfast` → clean ✓
-- `is it safe to do yoga in 5th month` → clean ✓
-- `my gums bleed when I brush` → clean ✓ (gum/brush exclusion on the bleeding sign)
+`what should I eat for breakfast` · `is it safe to do yoga in 5th month` ·
+`my gums bleed when I brush`
 
-Browser verification: `I fainted twice today` → EmergencyScreen shown, and the
-network panel recorded **zero** requests to `generativelanguage` — Gemini is not
-called on a red flag. `what should I eat for breakfast` → normal path (showed the
-no-key fallback, since no API key is configured in this dev env).
+Two independent checks were verified in-browser (dev **and** production build):
+sending a danger-sign message shows the EmergencyScreen with one-tap **Call 108**
+and makes **zero** network requests to Gemini (`generativelanguage`).
 
-## Next concrete step
+Other safety requirements, all in place and verified:
+- Emergency screen hardcoded in en/hi/mr, never runtime-translated, quiet dismiss link.
+- Diet plan carries the **"Sample plan"** pill (not "Personalized") + the required
+  non-dismissable nutrition note; veg/Jain swaps; condition-present warning.
+- Eligibility says **"You may be eligible"** + departmental-confirmation note; only
+  yes/no Aadhaar/bank facts collected, never numbers; answers stay on-device.
+- **Delete all my data** clears every `poshanmitra_*` key and returns to login — verified.
+- Disclaimer footer on every page (including Login and Onboarding).
+- Videos show a "Video coming soon" placeholder — no unverified embeds.
 
-Phase 6: verify stub pages, add loading skeletons + empty states where missing,
-confirm the disclaimer footer + Delete-my-data both work, focus rings, 404, and a
-clean console. Then Phase 7 handover (build, preview smoke test, NEXT_STEPS.md).
+## What works
+
+Every route renders with real Indian content, nav works both ways, keyboard focus
+is visible, `prefers-reduced-motion` respected, 404 route present, console clean on
+the production build. Dashboard toggles + diet day + filters + wizard are all
+interactive. Chat persists, Clear Chat works, language switch changes Mitra's prompt.
+
+## What's stubbed (intentional, per spec)
+
+- `/checkup`, `/campaigns`, `/reports` — spec'd stub pages ("Coming soon…").
+- Live Gemini replies untested here (no API key). Code + fallbacks are complete.
+- Voice STT/TTS present; graceful no-op where the browser lacks Web Speech.
+
+## What's broken
+
+- Nothing known. `npm run build` and `npm run preview` both succeed; production
+  console is clean on every route tested.
+
+## Known non-blocking notes
+
+- Editing `ProfileContext.jsx` live shows a Vite Fast-Refresh warning in the **dev**
+  console (exports provider + `useProfile` hook). Fresh reload / production are clean.
+- Hospital phone numbers are representative — verify before wider launch (NEXT_STEPS).
+
+## If you want to pick something up next
+
+See `NEXT_STEPS.md`. First three: backend proxy for the API key, red-flag tuning
+from real usage, and verifying real YouTube IDs for the video library.
