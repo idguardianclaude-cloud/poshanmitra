@@ -101,6 +101,20 @@ Continued after the plan was complete, all key-independent:
 
 Everything above is committed; build green; `npm test` green.
 
+### Later additions
+
+- **Full Hindi/Marathi UI localization** — new i18n layer; the language switcher now
+  translates the whole interface (nav, titles, buttons, forms, onboarding, dashboard,
+  chat, diet, schemes, eligibility, hospitals, videos, stubs, 404). Proper-noun content
+  (scheme/hospital/food/video names) stays in its real-world form by design. Verified in
+  Hindi and Marathi.
+- **Live Gemini chat now works** — a real API key was provided. Moved it to the gitignored
+  `.env` (it was pasted into the tracked `.env.example`; never committed — `git log -S`
+  confirms). Fixed the model (`gemini-1.5-flash` retired → `gemini-3.1-flash-lite`).
+  Verified end-to-end: on-topic replies in English and Hindi with follow-up chips, no dose
+  named (doctor redirect held), and a red-flag message still shows the emergency screen
+  with zero Gemini calls even with the live key present.
+
 ## If you want to pick something up next
 
 See `NEXT_STEPS.md`. First three: backend proxy for the API key, red-flag tuning

@@ -136,6 +136,29 @@ of each phase. One or two lines each.
   stripped, chips capped at 3. Guarded `import.meta.env` so the module imports under Node.
 - **Deferred the ProfileContext Fast Refresh refactor** — it would touch 10 import sites
   for a dev-only cosmetic gain on a rarely-edited file. Left in NEXT_STEPS.
+
+## Hindi/Marathi localization + live-chat wiring
+
+- **Built a small i18n layer (`src/lib/i18n.js`)** — en/hi/mr dictionary, a `useT()` hook
+  bound to the existing language switcher, dot-path lookup with English fallback, and
+  `{var}` interpolation. No new dependencies. Every screen now translates.
+- **Chrome is translated; proper-noun content is not.** Official scheme names, hospital
+  names/addresses, food item names and video titles stay in their real-world form
+  (translating an official scheme name would break the match to its portal). Meal *tips*
+  and dashboard *health tips* also stay English as long-form content. Documented scope.
+- **Option tokens the rule engines depend on are displayed translated but stored
+  canonically** — onboarding food/conditions chips and the eligibility Yes/No/First/BPL
+  radios show Hindi/Marathi but save the English token, so redflags/eligibility/diet logic
+  is unaffected. Verified live in Hindi and Marathi.
+- **Ordinals stay English (`5th`, `2nd`)** inside otherwise-translated month/trimester
+  strings — a minor mixed-script artifact; left as a future polish (language-aware
+  ordinals in pregnancy.js).
+- **API key handling:** the user pasted a real key into `.env.example` (a *tracked*
+  file). Moved it to the gitignored `.env`, restored the placeholder, and verified
+  `git log -S` finds the key in zero commits — it never entered history.
+- **Gemini model: gemini-1.5-flash → gemini-3.1-flash-lite.** 1.5-flash was retired
+  (404) and 2.5-flash is blocked for new keys; picked a current stable low-cost model by
+  querying the live ListModels API. Live chat verified end-to-end in English and Hindi.
 - **Ran the full onboarding flow end-to-end in the browser** (login → name → skip the
   date → age → food → conditions → dashboard) and found the resume key wasn't being
   cleared on finish: the final `setThread` persist runs during React's commit, AFTER
