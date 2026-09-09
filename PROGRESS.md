@@ -82,6 +82,25 @@ interactive. Chat persists, Clear Chat works, language switch changes Mitra's pr
   console (exports provider + `useProfile` hook). Fresh reload / production are clean.
 - Hospital phone numbers are representative — verify before wider launch (NEXT_STEPS).
 
+## Post-handover hardening (deadline lifted; keys still to come)
+
+Continued after the plan was complete, all key-independent:
+
+- **Added a test suite — `npm test`, 79 tests, all passing** (Node's built-in runner,
+  zero new deps). Locks the SAFETY.md §8 emergency strings as a permanent release gate,
+  plus danger-sign breadth, the Gemini urgency parser, eligibility rules, pregnancy math,
+  and the veg/Jain meal swaps.
+- **The tests caught three real red-flag bugs** — now fixed: apostrophe normalization
+  (`can't breathe` never matched), code-mixed `sir me bahut dard` headache, and a
+  standalone `blurry`. Verified fixed in the live app.
+- **Verified the full onboarding flow in the browser** and fixed the resume key not
+  clearing on finish. Skip → null, derivations, and the diet condition-warning all
+  confirmed live.
+- **Fixed the Jain meal swaps** collapsing a meal to one item (mis-tagged composite
+  dishes). Jain plans stay substantial now.
+
+Everything above is committed; build green; `npm test` green.
+
 ## If you want to pick something up next
 
 See `NEXT_STEPS.md`. First three: backend proxy for the API key, red-flag tuning
