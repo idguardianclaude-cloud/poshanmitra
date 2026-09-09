@@ -14,3 +14,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </React.StrictMode>
 )
+
+// Register the service worker for offline support. Production only — a SW in dev
+// caches Vite's module graph and causes stale-reload confusion.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      /* offline support is progressive enhancement; ignore failures */
+    })
+  })
+}

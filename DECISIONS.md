@@ -159,6 +159,25 @@ of each phase. One or two lines each.
 - **Gemini model: gemini-1.5-flash → gemini-3.1-flash-lite.** 1.5-flash was retired
   (404) and 2.5-flash is blocked for new keys; picked a current stable low-cost model by
   querying the live ListModels API. Live chat verified end-to-end in English and Hindi.
+
+## PWA + offline
+
+- **Added installability + offline** with no new dependencies: `public/manifest.webmanifest`,
+  a hand-written `public/sw.js`, and app icons. SW strategy: precache the app shell;
+  network-first for SPA navigations with a cached-shell fallback; stale-while-revalidate
+  for same-origin assets; cache-first for Google Fonts; and the Gemini API is **never**
+  cached (chat needs a live network; offline it shows the existing fallback message).
+- **SW registers in production only** (`import.meta.env.PROD`) and on `window.load` — a SW
+  in dev caches Vite's module graph and causes stale-reload confusion. Test via
+  `npm run preview`.
+- **Icons generated in Node** with a tiny dependency-free PNG encoder (`scratchpad/gen_icons.mjs`)
+  that rasterizes the rounded-square + heart and deflates it — after a browser-canvas
+  base64 transport attempt produced a corrupted file. 192 and 512, plus a maskable entry.
+- **SW registration can't be verified inside the in-app browser pane** (it sandboxes
+  service workers — register() throws a generic "unknown error" though /sw.js serves 200
+  with the right MIME). Validated instead by: sw.js passes `node --check`, the manifest is
+  valid JSON with proper display/icons, and the production app renders cleanly with all PWA
+  meta. It will register on a real device / HTTPS. Left "verify on device" in NEXT_STEPS.
 - **Ran the full onboarding flow end-to-end in the browser** (login → name → skip the
   date → age → food → conditions → dashboard) and found the resume key wasn't being
   cleared on finish: the final `setThread` persist runs during React's commit, AFTER

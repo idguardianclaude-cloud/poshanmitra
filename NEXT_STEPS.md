@@ -36,6 +36,10 @@ wider release. Nothing here blocks the current private beta.
 
 ## Product
 
+- **PWA installability & offline** — DONE (manifest, icons, service worker with an
+  offline app shell + runtime caching; SW registers in production over HTTPS/localhost).
+  Follow-ups: verify the install prompt and offline load on a real device, add an
+  in-app "Add to Home Screen" hint, and a small "You're offline" banner in the chat.
 - **Real authentication** (OTP via an SMS provider) replacing the any-10-digits stub.
 - **Google Places / Maps integration** for the Hospitals page (live location, real
   map, accurate distances) replacing the placeholder map.
