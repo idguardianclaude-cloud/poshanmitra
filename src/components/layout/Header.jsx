@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Menu, Search, Globe, Bell, ChevronDown, Check, Trash2 } from 'lucide-react'
 import { useProfile } from '../../context/ProfileContext.jsx'
-import { LANGS } from '../../lib/i18n.js'
+import { LANGS, useT } from '../../lib/i18n.js'
 
 function useOutsideClose(ref, onClose) {
   useEffect(() => {
@@ -16,6 +16,7 @@ function useOutsideClose(ref, onClose) {
 
 export function Header({ onToggleSidebar }) {
   const { profile, lang, setLang, logout, deleteAllData } = useProfile()
+  const t = useT()
   const navigate = useNavigate()
   const [langOpen, setLangOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -27,11 +28,7 @@ export function Header({ onToggleSidebar }) {
   const name = profile?.name || 'Priya Sharma'
 
   const handleDelete = () => {
-    if (
-      window.confirm(
-        'Delete all your data? This clears everything stored on this device and cannot be undone.'
-      )
-    ) {
+    if (window.confirm(t('header.deleteConfirm'))) {
       deleteAllData()
       navigate('/login')
     }
@@ -59,7 +56,7 @@ export function Header({ onToggleSidebar }) {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
           <input
             type="search"
-            placeholder="Search anything…"
+            placeholder={t('header.search')}
             className="w-full rounded-xl border border-line bg-canvas pl-9 pr-16 py-2 text-sm text-ink placeholder:text-ink-faint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           />
           <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-ink-faint border border-line rounded px-1.5 py-0.5 bg-white">
@@ -127,36 +124,34 @@ export function Header({ onToggleSidebar }) {
           </span>
           <span className="hidden sm:block text-left leading-tight">
             <span className="block text-sm font-medium text-ink">{name}</span>
-            <span className="block text-[11px] text-ink-faint">Pregnant Woman</span>
+            <span className="block text-[11px] text-ink-faint">{t('common.pregnantWoman')}</span>
           </span>
           <ChevronDown size={14} className="text-ink-faint" />
         </button>
         {menuOpen && (
           <div className="absolute right-0 mt-2 w-52 rounded-xl border border-line bg-white shadow-card py-1 z-40 text-sm">
-            {['Profile', 'Settings', 'Notifications (3)', 'Language', 'Help & Support'].map(
-              (item) => (
-                <button
-                  key={item}
-                  className="w-full text-left px-3 py-2 text-ink hover:bg-canvas"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {item}
-                </button>
-              )
-            )}
+            {['profile', 'settings', 'notifications', 'language', 'help'].map((item) => (
+              <button
+                key={item}
+                className="w-full text-left px-3 py-2 text-ink hover:bg-canvas"
+                onClick={() => setMenuOpen(false)}
+              >
+                {t(`header.${item}`)}
+              </button>
+            ))}
             <div className="my-1 border-t border-line" />
             <button
               onClick={handleDelete}
               className="w-full text-left px-3 py-2 text-ink hover:bg-canvas flex items-center gap-2"
             >
               <Trash2 size={15} className="text-ink-muted" />
-              Delete all my data
+              {t('header.deleteData')}
             </button>
             <button
               onClick={handleLogout}
               className="w-full text-left px-3 py-2 text-ink hover:bg-canvas"
             >
-              Logout
+              {t('header.logout')}
             </button>
           </div>
         )}

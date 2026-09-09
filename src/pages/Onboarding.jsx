@@ -7,47 +7,41 @@ import { derivePregnancy } from '../lib/pregnancy.js'
 import { Chip } from '../components/ui/Chip.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { DisclaimerFooter } from '../components/layout/DisclaimerFooter.jsx'
+import { useT, translate } from '../lib/i18n.js'
 
 // Five questions, asked one at a time, chat-style. Every answer is saved
 // immediately (resume on reload). Every question offers Skip / I don't know,
 // both storing null — never block progress on a skip. PRODUCT_SPEC §2.
+// Chip `values` are the canonical English tokens stored in the profile (the diet
+// and eligibility logic depends on them, e.g. 'Vegetarian', 'Jain', 'None');
+// their DISPLAY is translated via t() at render time.
 const QUESTIONS = [
-  {
-    id: 'name',
-    prompt:
-      "Hello! I'm Mitra 👋 I'll ask you a few quick questions so I can help you better. What should I call you?",
-    type: 'text',
-    placeholder: 'Type your name…',
-  },
-  {
-    id: 'dueBasis',
-    prompt:
-      'Lovely to meet you! Do you know your due date, or the date your last period started?',
-    type: 'date-basis',
-  },
-  {
-    id: 'age',
-    prompt: 'How old are you? This helps me tailor guidance to you.',
-    type: 'age',
-    chips: ['20–25', '26–30', '31–35', 'Other'],
-  },
+  { id: 'name', promptKey: 'onboarding.q_name', type: 'text' },
+  { id: 'dueBasis', promptKey: 'onboarding.q_due', type: 'date-basis' },
+  { id: 'age', promptKey: 'onboarding.q_age', type: 'age', chips: ['20–25', '26–30', '31–35', 'Other'] },
   {
     id: 'food',
-    prompt: 'What do you usually eat? I’ll keep your meal plan in line with it.',
+    promptKey: 'onboarding.q_food',
     type: 'chips',
     chips: ['Vegetarian', 'Non-vegetarian', 'Eggetarian', 'Jain'],
   },
   {
     id: 'conditions',
-    prompt:
-      'Last one — have you been told about any of these? Pick all that apply, or choose None.',
+    promptKey: 'onboarding.q_conditions',
     type: 'multi',
     chips: ['Anemia', 'Gestational diabetes', 'High BP', 'Thyroid', 'None', "I don't know"],
   },
 ]
 
+// Translate a food/condition token for display, keeping the stored value canonical.
+function labelFor(t, kind, value) {
+  if (value === "I don't know") return t('conditions.dontKnow')
+  return t(`${kind}.${value}`)
+}
+
 export function Onboarding() {
-  const { updateProfile, setProfile } = useProfile()
+  const { updateProfile, setProfile, lang } = useProfile()
+  const t = useT()
   const navigate = useNavigate()
 
   const saved = storage.getOnboarding()
@@ -56,7 +50,9 @@ export function Onboarding() {
   // Seed the first Mitra prompt here (not in an effect) so StrictMode's double
   // invoke can't duplicate it.
   const [thread, setThread] = useState(
-    saved?.thread?.length ? saved.thread : [{ role: 'mitra', text: QUESTIONS[0].prompt }]
+    saved?.thread?.length
+      ? saved.thread
+      : [{ role: 'mitra', text: translate(lang, QUESTIONS[0].promptKey) }]
   )
   const [textValue, setTextValue] = useState('')
   const [dateBasis, setDateBasis] = useState(null) // 'due' | 'lmp'
@@ -98,12 +94,15 @@ export function Onboarding() {
     setThread((prev) => {
       const withUser = [...prev, userMsg]
       if (nextStep < QUESTIONS.length) {
-        const withNext = [...withUser, { role: 'mitra', text: QUESTIONS[nextStep].prompt }]
+        const withNext = [
+          ...withUser,
+          { role: 'mitra', text: t(QUESTIONS[nextStep].promptKey) },
+        ]
         persist({ step: nextStep, answers: nextAnswers, thread: withNext })
         return withNext
       }
       // Finished.
-      const closing = { role: 'mitra', text: 'Perfect ✅ Your PoshanMitra is ready.' }
+      const closing = { role: 'mitra', text: t('onboarding.closing') }
       const finalThread = [...withUser, closing]
       persist({ step: nextStep, answers: nextAnswers, thread: finalThread })
       return finalThread
@@ -132,7 +131,7 @@ export function Onboarding() {
   }
 
   function skip() {
-    advance(null, 'Skip')
+    advance(null, t('onboarding.skip'))
   }
 
   const progress = Math.min(step + 1, QUESTIONS.length)
@@ -145,9 +144,11 @@ export function Onboarding() {
           <Heart size={18} fill="#EEF0FF" stroke="#EEF0FF" />
         </span>
         <div className="flex-1">
-          <p className="font-semibold text-ink">Setting up your PoshanMitra</p>
+          <p className="font-semibold text-ink">{t('onboarding.settingUp')}</p>
           <p className="text-xs text-ink-faint">
-            {done ? 'All set' : `${progress} of ${QUESTIONS.length}`}
+            {done
+              ? t('onboarding.allSet')
+              : t('onboarding.stepOf', { current: progress, total: QUESTIONS.length })}
           </p>
         </div>
         <div className="w-32 h-1.5 rounded-full bg-canvas overflow-hidden">
@@ -185,7 +186,7 @@ export function Onboarding() {
                   autoFocus
                   value={textValue}
                   onChange={(e) => setTextValue(e.target.value)}
-                  placeholder={q.placeholder}
+                  placeholder={t('onboarding.typeName')}
                   className="flex-1 rounded-xl border border-line bg-canvas px-4 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 />
                 <Button type="submit" disabled={!textValue.trim()}>
@@ -198,10 +199,10 @@ export function Onboarding() {
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
                   <Chip selected={dateBasis === 'due'} onClick={() => setDateBasis('due')}>
-                    I know my due date
+                    {t('onboarding.knowDueDate')}
                   </Chip>
                   <Chip selected={dateBasis === 'lmp'} onClick={() => setDateBasis('lmp')}>
-                    I know my last period date
+                    {t('onboarding.knowLastPeriod')}
                   </Chip>
                 </div>
                 {dateBasis && (
@@ -210,7 +211,7 @@ export function Onboarding() {
                       e.preventDefault()
                       if (dateValue) {
                         const label =
-                          dateBasis === 'due' ? 'Due date: ' : 'Last period: '
+                          dateBasis === 'due' ? t('onboarding.dueLabel') : t('onboarding.lmpLabel')
                         advance({ basis: dateBasis, date: dateValue }, label + dateValue)
                       }
                     }}
@@ -223,7 +224,7 @@ export function Onboarding() {
                       className="flex-1 rounded-xl border border-line bg-canvas px-4 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                     />
                     <Button type="submit" disabled={!dateValue}>
-                      Next
+                      {t('onboarding.next')}
                     </Button>
                   </form>
                 )}
@@ -254,7 +255,7 @@ export function Onboarding() {
                     onSubmit={(e) => {
                       e.preventDefault()
                       const n = parseInt(textValue, 10)
-                      if (n > 0) advance(n, `${n} years`)
+                      if (n > 0) advance(n, `${n} ${t('onboarding.years')}`)
                     }}
                     className="flex items-center gap-2"
                   >
@@ -265,11 +266,11 @@ export function Onboarding() {
                       autoFocus
                       value={textValue}
                       onChange={(e) => setTextValue(e.target.value)}
-                      placeholder="Enter your age"
+                      placeholder={t('onboarding.enterAge')}
                       className="flex-1 rounded-xl border border-line bg-canvas px-4 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                     />
                     <Button type="submit" disabled={!textValue}>
-                      Next
+                      {t('onboarding.next')}
                     </Button>
                   </form>
                 )}
@@ -279,8 +280,8 @@ export function Onboarding() {
             {q.type === 'chips' && (
               <div className="flex flex-wrap gap-2">
                 {q.chips.map((c) => (
-                  <Chip key={c} onClick={() => advance(c, c)}>
-                    {c}
+                  <Chip key={c} onClick={() => advance(c, labelFor(t, 'food', c))}>
+                    {labelFor(t, 'food', c)}
                   </Chip>
                 ))}
               </div>
@@ -308,16 +309,18 @@ export function Onboarding() {
                           }
                         }}
                       >
-                        {c}
+                        {labelFor(t, 'conditions', c)}
                       </Chip>
                     )
                   })}
                 </div>
                 <Button
                   disabled={multi.length === 0}
-                  onClick={() => advance(multi, multi.join(', '))}
+                  onClick={() =>
+                    advance(multi, multi.map((c) => labelFor(t, 'conditions', c)).join(', '))
+                  }
                 >
-                  Finish setup
+                  {t('onboarding.finishSetup')}
                 </Button>
               </div>
             )}
@@ -328,7 +331,7 @@ export function Onboarding() {
                 onClick={skip}
                 className="text-xs text-ink-faint hover:text-ink-muted underline underline-offset-2"
               >
-                Skip this question
+                {t('onboarding.skip')}
               </button>
             </div>
           </div>

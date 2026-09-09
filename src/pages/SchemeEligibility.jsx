@@ -17,8 +17,25 @@ import { Badge } from '../components/ui/Badge.jsx'
 import { schemes } from '../data/schemes.js'
 import { evaluateEligibility, STATUS } from '../lib/eligibility.js'
 import { ordinalMonth } from '../lib/pregnancy.js'
+import { useT } from '../lib/i18n.js'
 
 const ELIG_KEY = 'poshanmitra_eligibility'
+
+// Canonical option → translation key. Options are STORED canonically (the rule
+// engine checks 'Yes'/'No'/'First' etc.) but DISPLAYED translated. Codes like
+// APL/BPL/SC/ST and ₹ income brackets stay as-is in every language.
+const OPT_KEY = {
+  Yes: 'elig.yes',
+  No: 'elig.no',
+  "Don't know": 'elig.dontKnow',
+  'Not decided': 'elig.notDecided',
+  First: 'elig.first',
+  Second: 'elig.second',
+  'Third or more': 'elig.thirdMore',
+}
+function optLabel(t, v) {
+  return OPT_KEY[v] ? t(OPT_KEY[v]) : v
+}
 
 const STATES = [
   'Maharashtra', 'Uttar Pradesh', 'Bihar', 'Madhya Pradesh', 'Rajasthan',
@@ -35,12 +52,7 @@ const INCOME = ['Below ₹1 lakh', '₹1–2.5 L', '₹2.5–5 L', '₹5–8 L',
 const RATION = ['APL', 'BPL', 'Antyodaya', 'None']
 const CATEGORY = ['General', 'OBC', 'SC', 'ST']
 
-const STEPS = [
-  'Basic Information',
-  'Family & Income Details',
-  'Pregnancy Details',
-  'Review & Results',
-]
+const STEP_KEYS = ['elig.steps.basic', 'elig.steps.family', 'elig.steps.pregnancy', 'elig.steps.review']
 
 function loadAnswers(profile) {
   try {
@@ -77,6 +89,7 @@ function loadAnswers(profile) {
 
 export function SchemeEligibility() {
   const { profile } = useProfile()
+  const t = useT()
   const [step, setStep] = useState(0)
   const [a, setA] = useState(() => loadAnswers(profile))
 
@@ -102,17 +115,14 @@ export function SchemeEligibility() {
   return (
     <>
       <Link to="/schemes" className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 mb-3">
-        <ArrowLeft size={15} /> Back to Schemes
+        <ArrowLeft size={15} /> {t('elig.back')}
       </Link>
-      <PageHeader
-        title="Check Your Eligibility"
-        subtitle="Answer a few questions to see which schemes you may be eligible for."
-      />
+      <PageHeader title={t('elig.title')} subtitle={t('elig.sub')} />
 
       {/* Step indicator */}
       <ol className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
-        {STEPS.map((label, i) => (
-          <li key={label} className="flex items-center gap-2 shrink-0">
+        {STEP_KEYS.map((labelKey, i) => (
+          <li key={labelKey} className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => i < step && setStep(i)}
               disabled={i > step}
@@ -131,9 +141,9 @@ export function SchemeEligibility() {
               >
                 {i < step ? <Check size={12} /> : i + 1}
               </span>
-              <span className="hidden sm:inline">{label}</span>
+              <span className="hidden sm:inline">{t(labelKey)}</span>
             </button>
-            {i < STEPS.length - 1 && <ChevronRight size={14} className="text-ink-faint" />}
+            {i < STEP_KEYS.length - 1 && <ChevronRight size={14} className="text-ink-faint" />}
           </li>
         ))}
       </ol>
@@ -141,14 +151,14 @@ export function SchemeEligibility() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         <div className="xl:col-span-2">
           <div className="rounded-2xl bg-white border border-line shadow-card p-5 sm:p-6">
-            {step === 0 && <Step1 a={a} set={set} />}
-            {step === 1 && <Step2 a={a} set={set} />}
-            {step === 2 && <Step3 a={a} set={set} />}
-            {step === 3 && <Step4 a={a} goto={setStep} />}
+            {step === 0 && <Step1 a={a} set={set} t={t} />}
+            {step === 1 && <Step2 a={a} set={set} t={t} />}
+            {step === 2 && <Step3 a={a} set={set} t={t} />}
+            {step === 3 && <Step4 a={a} goto={setStep} t={t} />}
 
             {/* Local-only privacy note */}
             <div className="mt-5 flex items-center gap-2 text-xs text-ink-faint">
-              <Lock size={13} /> All your answers are stored only on this device.
+              <Lock size={13} /> {t('elig.localOnly')}
             </div>
 
             {/* Nav */}
@@ -158,15 +168,15 @@ export function SchemeEligibility() {
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
                 disabled={step === 0}
               >
-                Back
+                {t('elig.back_btn')}
               </Button>
               {step < 3 ? (
                 <Button onClick={() => canContinue && setStep((s) => s + 1)} disabled={!canContinue}>
-                  Save & Continue <ChevronRight size={16} />
+                  {t('elig.saveContinue')} <ChevronRight size={16} />
                 </Button>
               ) : (
                 <Button as={Link} to="/schemes" variant="secondary">
-                  Done
+                  {t('elig.done')}
                 </Button>
               )}
             </div>
@@ -176,18 +186,14 @@ export function SchemeEligibility() {
         {/* Right rail */}
         <aside className="space-y-6">
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink mb-3">How It Works</h2>
+            <h2 className="text-base font-semibold text-ink mb-3">{t('elig.howItWorks')}</h2>
             <ol className="space-y-3 text-sm">
-              {[
-                'Answer a few quick questions about you and your family.',
-                'We check them against each scheme’s public rules.',
-                'See which schemes you may be eligible for and how to apply.',
-              ].map((t, i) => (
-                <li key={i} className="flex items-start gap-3">
+              {['elig.how1', 'elig.how2', 'elig.how3'].map((k, i) => (
+                <li key={k} className="flex items-start gap-3">
                   <span className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold flex items-center justify-center shrink-0">
                     {i + 1}
                   </span>
-                  <span className="text-ink-muted">{t}</span>
+                  <span className="text-ink-muted">{t(k)}</span>
                 </li>
               ))}
             </ol>
@@ -196,19 +202,16 @@ export function SchemeEligibility() {
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
             <div className="flex items-center gap-2 mb-2">
               <ShieldCheck size={18} className="text-emerald-600" />
-              <h2 className="text-base font-semibold text-ink">Why your information matters</h2>
+              <h2 className="text-base font-semibold text-ink">{t('elig.whyTitle')}</h2>
             </div>
-            <p className="text-sm text-ink-muted">
-              Your answers help us match you to the right schemes. They stay on your device —
-              nothing is uploaded, and we never ask for your Aadhaar or bank account number.
-            </p>
+            <p className="text-sm text-ink-muted">{t('elig.whyBody')}</p>
           </div>
 
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink">Need help?</h2>
-            <p className="mt-1 text-sm text-ink-muted">Ask Mitra about any scheme.</p>
+            <h2 className="text-base font-semibold text-ink">{t('common.needHelp')}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{t('common.askMitra')}</p>
             <Button as={Link} to="/chat?q=Which%20schemes%20can%20I%20apply%20for" variant="secondary" className="mt-3 w-full">
-              <MessageSquare size={16} /> Ask Mitra
+              <MessageSquare size={16} /> {t('common.askMitra')}
             </Button>
           </div>
         </aside>
@@ -218,12 +221,12 @@ export function SchemeEligibility() {
 }
 
 // ---- Field helpers ----
-function Field({ label, optional, children, valid }) {
+function Field({ label, optional, optionalText, children, valid }) {
   return (
     <label className="block">
       <span className="flex items-center gap-1.5 text-[13px] font-medium text-ink mb-1.5">
         {label}
-        {optional && <span className="text-ink-faint font-normal">(optional)</span>}
+        {optional && <span className="text-ink-faint font-normal">{optionalText}</span>}
         {valid && <Check size={14} className="text-emerald-600" />}
       </span>
       {children}
@@ -233,7 +236,8 @@ function Field({ label, optional, children, valid }) {
 const inputCls =
   'w-full rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
 
-function Radio({ label, options, value, onChange, valid }) {
+// `options` are canonical values (stored); display is translated via optLabel.
+function Radio({ label, options, value, onChange, valid, t }) {
   return (
     <Field label={label} valid={valid}>
       <div className="flex flex-wrap gap-2">
@@ -246,7 +250,7 @@ function Radio({ label, options, value, onChange, valid }) {
               value === o ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-line text-ink hover:bg-canvas'
             }`}
           >
-            {o}
+            {optLabel(t, o)}
           </button>
         ))}
       </div>
@@ -254,19 +258,19 @@ function Radio({ label, options, value, onChange, valid }) {
   )
 }
 
-function Step1({ a, set }) {
+function Step1({ a, set, t }) {
   const districts = DISTRICTS[a.state] || ['Other']
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-ink">Basic Information</h2>
+      <h2 className="text-lg font-semibold text-ink">{t('elig.steps.basic')}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Full Name" valid={!!a.fullName}>
+        <Field label={t('elig.fullName')} valid={!!a.fullName}>
           <input className={inputCls} value={a.fullName} onChange={(e) => set('fullName', e.target.value)} />
         </Field>
-        <Field label="Age (years)" valid={!!a.age}>
+        <Field label={t('elig.age')} valid={!!a.age}>
           <input type="number" min="14" max="60" className={inputCls} value={a.age} onChange={(e) => set('age', e.target.value)} />
         </Field>
-        <Field label="State" valid={!!a.state}>
+        <Field label={t('elig.state')} valid={!!a.state}>
           <select
             className={inputCls}
             value={a.state}
@@ -280,7 +284,7 @@ function Step1({ a, set }) {
             ))}
           </select>
         </Field>
-        <Field label="District" valid={!!a.district}>
+        <Field label={t('elig.district')} valid={!!a.district}>
           <select className={inputCls} value={a.district} onChange={(e) => set('district', e.target.value)}>
             {districts.map((d) => (
               <option key={d}>{d}</option>
@@ -288,10 +292,10 @@ function Step1({ a, set }) {
             <option>Other</option>
           </select>
         </Field>
-        <Field label="City / Village" valid={!!a.city}>
+        <Field label={t('elig.cityVillage')} valid={!!a.city}>
           <input className={inputCls} value={a.city} onChange={(e) => set('city', e.target.value)} />
         </Field>
-        <Field label="Mobile Number" valid={/^\d{10}$/.test(a.mobile.replace(/\D/g, ''))}>
+        <Field label={t('elig.mobile')} valid={/^\d{10}$/.test(a.mobile.replace(/\D/g, ''))}>
           <div className="flex items-center rounded-xl border border-line bg-canvas focus-within:ring-2 focus-within:ring-indigo-500">
             <span className="pl-3 pr-1.5 text-sm text-ink-muted">+91</span>
             <input
@@ -303,77 +307,77 @@ function Step1({ a, set }) {
             />
           </div>
         </Field>
-        <Field label="Email" optional valid={false}>
+        <Field label={t('elig.email')} optional optionalText={t('elig.optional')} valid={false}>
           <input type="email" className={inputCls} value={a.email} onChange={(e) => set('email', e.target.value)} />
         </Field>
       </div>
-      <Radio label="Are you an Indian Citizen?" options={['Yes', 'No']} value={a.citizen} onChange={(v) => set('citizen', v)} valid={!!a.citizen} />
-      <Radio label="Do you have an Aadhaar Card?" options={['Yes', 'No']} value={a.hasAadhaar} onChange={(v) => set('hasAadhaar', v)} valid={!!a.hasAadhaar} />
-      <p className="text-xs text-ink-faint">We only ask whether you have an Aadhaar card — never the number.</p>
+      <Radio label={t('elig.citizen')} options={['Yes', 'No']} value={a.citizen} onChange={(v) => set('citizen', v)} valid={!!a.citizen} t={t} />
+      <Radio label={t('elig.hasAadhaar')} options={['Yes', 'No']} value={a.hasAadhaar} onChange={(v) => set('hasAadhaar', v)} valid={!!a.hasAadhaar} t={t} />
+      <p className="text-xs text-ink-faint">{t('elig.aadhaarNote')}</p>
     </div>
   )
 }
 
-function Step2({ a, set }) {
+function Step2({ a, set, t }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-ink">Family & Income Details</h2>
-      <Field label="Annual household income" valid={!!a.income}>
+      <h2 className="text-lg font-semibold text-ink">{t('elig.steps.family')}</h2>
+      <Field label={t('elig.income')} valid={!!a.income}>
         <select className={inputCls} value={a.income} onChange={(e) => set('income', e.target.value)}>
-          <option value="">Select a bracket</option>
+          <option value="">{t('elig.selectBracket')}</option>
           {INCOME.map((i) => (
             <option key={i}>{i}</option>
           ))}
         </select>
       </Field>
-      <Radio label="Ration card type" options={RATION} value={a.rationCard} onChange={(v) => set('rationCard', v)} valid={!!a.rationCard} />
-      <Radio label="Category" options={CATEGORY} value={a.category} onChange={(v) => set('category', v)} valid={!!a.category} />
-      <Radio label="Is anyone in your family a government employee?" options={['Yes', 'No']} value={a.govtEmployee} onChange={(v) => set('govtEmployee', v)} valid={!!a.govtEmployee} />
-      <Radio label="Do you have a bank account linked to Aadhaar?" options={['Yes', 'No']} value={a.bankLinkedAadhaar} onChange={(v) => set('bankLinkedAadhaar', v)} valid={!!a.bankLinkedAadhaar} />
+      <Radio label={t('elig.rationCard')} options={RATION} value={a.rationCard} onChange={(v) => set('rationCard', v)} valid={!!a.rationCard} t={t} />
+      <Radio label={t('elig.category')} options={CATEGORY} value={a.category} onChange={(v) => set('category', v)} valid={!!a.category} t={t} />
+      <Radio label={t('elig.govtEmployee')} options={['Yes', 'No']} value={a.govtEmployee} onChange={(v) => set('govtEmployee', v)} valid={!!a.govtEmployee} t={t} />
+      <Radio label={t('elig.bankLinked')} options={['Yes', 'No']} value={a.bankLinkedAadhaar} onChange={(v) => set('bankLinkedAadhaar', v)} valid={!!a.bankLinkedAadhaar} t={t} />
     </div>
   )
 }
 
-function Step3({ a, set }) {
+function Step3({ a, set, t }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-ink">Pregnancy Details</h2>
-      <Radio label="Which pregnancy is this?" options={['First', 'Second', 'Third or more']} value={a.pregnancyNumber} onChange={(v) => set('pregnancyNumber', v)} valid={!!a.pregnancyNumber} />
-      <Field label="Current month" valid={!!a.currentMonth}>
+      <h2 className="text-lg font-semibold text-ink">{t('elig.steps.pregnancy')}</h2>
+      <Radio label={t('elig.whichPregnancy')} options={['First', 'Second', 'Third or more']} value={a.pregnancyNumber} onChange={(v) => set('pregnancyNumber', v)} valid={!!a.pregnancyNumber} t={t} />
+      <Field label={t('elig.currentMonth')} valid={!!a.currentMonth}>
         <select className={inputCls} value={a.currentMonth} onChange={(e) => set('currentMonth', e.target.value)}>
-          <option value="">Select</option>
+          <option value="">{t('elig.select')}</option>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((m) => (
             <option key={m} value={m}>
-              {ordinalMonth(m)} month
+              {t('elig.monthLabel', { month: ordinalMonth(m) })}
             </option>
           ))}
         </select>
       </Field>
-      <Radio label="Are you registered at an Anganwadi centre?" options={['Yes', 'No', "Don't know"]} value={a.anganwadiRegistered} onChange={(v) => set('anganwadiRegistered', v)} valid={!!a.anganwadiRegistered} />
-      <Radio label="Planning a hospital delivery?" options={['Yes', 'No', 'Not decided']} value={a.hospitalDelivery} onChange={(v) => set('hospitalDelivery', v)} valid={!!a.hospitalDelivery} />
-      <Radio label="Do you have a MCP card?" options={['Yes', 'No']} value={a.mcpCard} onChange={(v) => set('mcpCard', v)} valid={!!a.mcpCard} />
+      <Radio label={t('elig.anganwadi')} options={['Yes', 'No', "Don't know"]} value={a.anganwadiRegistered} onChange={(v) => set('anganwadiRegistered', v)} valid={!!a.anganwadiRegistered} t={t} />
+      <Radio label={t('elig.hospitalDelivery')} options={['Yes', 'No', 'Not decided']} value={a.hospitalDelivery} onChange={(v) => set('hospitalDelivery', v)} valid={!!a.hospitalDelivery} t={t} />
+      <Radio label={t('elig.mcpCard')} options={['Yes', 'No']} value={a.mcpCard} onChange={(v) => set('mcpCard', v)} valid={!!a.mcpCard} t={t} />
     </div>
   )
 }
 
-function Step4({ a, goto }) {
+function Step4({ a, goto, t }) {
   const results = useMemo(() => evaluateEligibility(a), [a])
   const byId = useMemo(() => Object.fromEntries(schemes.map((s) => [s.id, s])), [])
 
   const summaryRows = [
-    { label: 'Name', value: a.fullName, step: 0 },
-    { label: 'Age', value: a.age, step: 0 },
-    { label: 'State / District', value: `${a.state}, ${a.district}`, step: 0 },
-    { label: 'Income', value: a.income, step: 1 },
-    { label: 'Ration card', value: a.rationCard, step: 1 },
-    { label: 'Category', value: a.category, step: 1 },
-    { label: 'Pregnancy', value: a.pregnancyNumber, step: 2 },
-    { label: 'Hospital delivery', value: a.hospitalDelivery, step: 2 },
+    { label: t('elig.sumName'), value: a.fullName, step: 0 },
+    { label: t('elig.sumAge'), value: a.age, step: 0 },
+    { label: t('elig.sumStateDistrict'), value: `${a.state}, ${a.district}`, step: 0 },
+    { label: t('elig.sumIncome'), value: a.income, step: 1 },
+    { label: t('elig.sumRation'), value: a.rationCard, step: 1 },
+    { label: t('elig.sumCategory'), value: a.category, step: 1 },
+    { label: t('elig.sumPregnancy'), value: optLabel(t, a.pregnancyNumber), step: 2 },
+    { label: t('elig.sumHospital'), value: optLabel(t, a.hospitalDelivery), step: 2 },
   ]
 
   return (
     <div className="space-y-5">
-      <h2 className="text-lg font-semibold text-ink">Review & Results</h2>
+      <h2 className="text-lg font-semibold text-ink">{t('elig.steps.review')}</h2>
 
       {/* Answer summary */}
       <div className="rounded-2xl border border-line bg-canvas p-4">
@@ -384,7 +388,7 @@ function Step4({ a, goto }) {
               <dd className="flex items-center gap-2 text-ink text-right">
                 {r.value || '—'}
                 <button onClick={() => goto(r.step)} className="text-xs text-indigo-600 hover:text-indigo-700 underline">
-                  Edit
+                  {t('elig.review_edit')}
                 </button>
               </dd>
             </div>
@@ -397,28 +401,27 @@ function Step4({ a, goto }) {
         {results.map((res) => {
           const s = byId[res.id]
           if (!s) return null
-          return <ResultCard key={res.id} scheme={s} result={res} />
+          return <ResultCard key={res.id} scheme={s} result={res} t={t} />
         })}
       </div>
 
       {/* Departmental confirmation note — SAFETY.md §5 */}
       <div className="rounded-2xl border border-line bg-white p-4 text-sm text-ink-muted">
-        Final eligibility is decided by the government department. Please confirm at your
-        Anganwadi centre or the official portal.
+        {t('elig.deptNote')}
       </div>
     </div>
   )
 }
 
-function ResultCard({ scheme, result }) {
+function ResultCard({ scheme, result, t }) {
   const tone =
     result.status === STATUS.ELIGIBLE ? 'success' : result.status === STATUS.NEED_INFO ? 'warning' : 'neutral'
   const label =
     result.status === STATUS.ELIGIBLE
-      ? 'You may be eligible'
+      ? t('elig.mayBeEligible')
       : result.status === STATUS.NEED_INFO
-      ? 'Need more info'
-      : 'Not eligible'
+      ? t('elig.needMoreInfo')
+      : t('elig.notEligible')
 
   return (
     <section className="rounded-2xl border border-line bg-white shadow-card p-4">
@@ -432,7 +435,7 @@ function ResultCard({ scheme, result }) {
       <p className="mt-2 text-xs text-ink-muted">{result.reason}</p>
 
       <details className="mt-2">
-        <summary className="text-xs text-indigo-600 cursor-pointer">Required documents</summary>
+        <summary className="text-xs text-indigo-600 cursor-pointer">{t('elig.requiredDocs')}</summary>
         <ul className="mt-1.5 space-y-1">
           {scheme.documents.map((d) => (
             <li key={d} className="flex items-center gap-2 text-xs text-ink">
@@ -449,7 +452,7 @@ function ResultCard({ scheme, result }) {
           rel="noopener noreferrer"
           className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
         >
-          Apply on Official Portal <ExternalLink size={14} />
+          {t('elig.applyPortal')} <ExternalLink size={14} />
         </a>
       )}
     </section>

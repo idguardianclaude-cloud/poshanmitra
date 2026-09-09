@@ -21,14 +21,12 @@ import {
   directionsUrl,
   healthcareTips,
 } from '../data/hospitals.js'
+import { useT } from '../lib/i18n.js'
 
-const DISTANCES = [
-  { label: 'Within 5 km', value: 5 },
-  { label: 'Within 10 km', value: 10 },
-  { label: 'Within 25 km', value: 25 },
-]
+const DISTANCES = [5, 10, 25]
 
 export function Hospitals() {
+  const t = useT()
   const [name, setName] = useState('')
   const [speciality, setSpeciality] = useState('')
   const [facilities, setFacilities] = useState({ '24x7 Emergency': true, Cashless: true, Ambulance: true })
@@ -55,10 +53,7 @@ export function Hospitals() {
 
   return (
     <>
-      <PageHeader
-        title="Nearby Hospitals"
-        subtitle="Find hospitals and healthcare centers near you."
-      />
+      <PageHeader title={t('hospitals.title')} subtitle={t('hospitals.sub')} />
 
       {/* Location + stat chips */}
       <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-6">
@@ -67,19 +62,19 @@ export function Hospitals() {
           <input
             defaultValue="Pune, Maharashtra, India"
             className="w-full rounded-xl border border-line bg-white pl-9 pr-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            aria-label="Your location"
+            aria-label={t('hospitals.yourLocation')}
           />
         </div>
         <Button variant="secondary">
-          <Crosshair size={16} /> Use Current Location
+          <Crosshair size={16} /> {t('hospitals.useCurrent')}
         </Button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <StatChip icon={Building2} label="Hospitals Found" value="25+" />
-        <StatChip icon={MapPin} label="Search Radius" value="5 km" />
-        <StatChip icon={ShieldCheck} label="Emergency Care" value="24x7" />
-        <StatChip icon={BadgeCheck} label="Cashless" value="Available" />
+        <StatChip icon={Building2} label={t('hospitals.found')} value="25+" />
+        <StatChip icon={MapPin} label={t('hospitals.radius')} value="5 km" />
+        <StatChip icon={ShieldCheck} label={t('hospitals.emergencyCare')} value="24x7" />
+        <StatChip icon={BadgeCheck} label={t('hospitals.cashless')} value="✓" />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
@@ -101,19 +96,19 @@ export function Hospitals() {
               </span>
             ))}
             <span className="absolute bottom-2 right-2 text-[11px] text-ink-faint bg-white/80 rounded px-2 py-0.5">
-              Map preview
+              {t('hospitals.mapPreview')}
             </span>
           </div>
 
           {/* List */}
           {filtered.length === 0 ? (
             <div className="rounded-2xl bg-white border border-line shadow-card p-10 text-center text-sm text-ink-muted">
-              No hospitals match your filters. Try widening the distance or clearing a facility.
+              {t('hospitals.noMatch')}
             </div>
           ) : (
             <div className="space-y-4">
               {filtered.map((h, i) => (
-                <HospitalRow key={h.id} hospital={h} index={i + 1} />
+                <HospitalRow key={h.id} hospital={h} index={i + 1} t={t} />
               ))}
             </div>
           )}
@@ -122,29 +117,29 @@ export function Hospitals() {
         {/* Filter rail */}
         <aside className="space-y-6">
           <div className="rounded-2xl bg-white border border-line shadow-card p-5 space-y-4">
-            <h2 className="text-base font-semibold text-ink">Filters</h2>
+            <h2 className="text-base font-semibold text-ink">{t('hospitals.filters')}</h2>
 
             <label className="block">
-              <span className="text-[13px] font-medium text-ink mb-1.5 block">Search Hospital Name</span>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">{t('hospitals.searchName')}</span>
               <div className="relative">
                 <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Ruby Hall"
+                  placeholder={t('hospitals.searchNamePlaceholder')}
                   className="w-full rounded-xl border border-line bg-canvas pl-9 pr-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 />
               </div>
             </label>
 
             <label className="block">
-              <span className="text-[13px] font-medium text-ink mb-1.5 block">Speciality</span>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">{t('hospitals.speciality')}</span>
               <select
                 value={speciality}
                 onChange={(e) => setSpeciality(e.target.value)}
                 className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
-                <option value="">All specialities</option>
+                <option value="">{t('hospitals.allSpecialities')}</option>
                 {SPECIALITIES.map((s) => (
                   <option key={s}>{s}</option>
                 ))}
@@ -152,7 +147,7 @@ export function Hospitals() {
             </label>
 
             <div>
-              <span className="text-[13px] font-medium text-ink mb-1.5 block">Facilities</span>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">{t('hospitals.facilities')}</span>
               <div className="space-y-2">
                 {FACILITY_OPTIONS.map((f) => (
                   <label key={f} className="flex items-center gap-2 text-sm text-ink">
@@ -169,22 +164,22 @@ export function Hospitals() {
             </div>
 
             <label className="block">
-              <span className="text-[13px] font-medium text-ink mb-1.5 block">Distance</span>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">{t('hospitals.distance')}</span>
               <select
                 value={distance}
                 onChange={(e) => setDistance(Number(e.target.value))}
                 className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 {DISTANCES.map((d) => (
-                  <option key={d.value} value={d.value}>
-                    {d.label}
+                  <option key={d} value={d}>
+                    {t('hospitals.within', { km: d })}
                   </option>
                 ))}
               </select>
             </label>
 
             <Button className="w-full" onClick={applyFilters}>
-              Apply Filters
+              {t('hospitals.applyFilters')}
             </Button>
           </div>
 
@@ -193,10 +188,8 @@ export function Hospitals() {
             <div className="flex items-start gap-3">
               <Illustration name="ambulance" size={56} />
               <div>
-                <h2 className="text-base font-semibold text-ink">Need Emergency Help?</h2>
-                <p className="mt-1 text-sm text-ink-muted">
-                  Get immediate assistance for you and your baby.
-                </p>
+                <h2 className="text-base font-semibold text-ink">{t('hospitals.emergencyTitle')}</h2>
+                <p className="mt-1 text-sm text-ink-muted">{t('hospitals.emergencySub')}</p>
               </div>
             </div>
             <a
@@ -204,13 +197,13 @@ export function Hospitals() {
               className="mt-4 flex items-center justify-center gap-2 w-full rounded-xl px-4 py-3 text-base font-bold text-white"
               style={{ backgroundColor: '#DC2626' }}
             >
-              <Phone size={18} /> Call 108
+              <Phone size={18} /> {t('hospitals.call108')}
             </a>
           </div>
 
           {/* Healthcare tips */}
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink mb-3">Healthcare Tips</h2>
+            <h2 className="text-base font-semibold text-ink mb-3">{t('hospitals.tips')}</h2>
             <ul className="space-y-2">
               {healthcareTips.map((t) => (
                 <li key={t} className="flex items-start gap-2 text-sm text-ink-muted">
@@ -253,7 +246,7 @@ function MapGrid() {
   )
 }
 
-function HospitalRow({ hospital: h, index }) {
+function HospitalRow({ hospital: h, index, t }) {
   return (
     <section className="rounded-2xl bg-white border border-line shadow-card p-5">
       <div className="flex gap-4">
@@ -271,24 +264,26 @@ function HospitalRow({ hospital: h, index }) {
             <h3 className="text-base font-semibold text-ink">{h.name}</h3>
             {h.verified && (
               <Badge tone="info">
-                <BadgeCheck size={12} /> Verified
+                <BadgeCheck size={12} /> {t('hospitals.verified')}
               </Badge>
             )}
           </div>
           <p className="mt-1 text-sm text-ink-muted flex items-start gap-1.5">
             <MapPin size={14} className="text-ink-faint shrink-0 mt-0.5" /> {h.address}
           </p>
-          <p className="mt-1 text-xs text-ink-faint">{h.distanceKm} km away · {h.speciality}</p>
+          <p className="mt-1 text-xs text-ink-faint">
+            {t('hospitals.kmAway', { km: h.distanceKm, speciality: h.speciality })}
+          </p>
 
           <div className="mt-2 flex flex-wrap gap-1.5">
             {h.labourWard && (
               <Badge tone="success">
-                <Baby size={11} /> Labour ward
+                <Baby size={11} /> {t('hospitals.labourWard')}
               </Badge>
             )}
             {h.pmjay && (
               <Badge tone="primary">
-                <ShieldCheck size={11} /> PMJAY cashless
+                <ShieldCheck size={11} /> {t('hospitals.pmjay')}
               </Badge>
             )}
             {h.tags.map((t) => (
@@ -307,10 +302,10 @@ function HospitalRow({ hospital: h, index }) {
               variant="secondary"
               size="sm"
             >
-              <Navigation size={15} /> Directions
+              <Navigation size={15} /> {t('hospitals.directions')}
             </Button>
             <Button as="a" href={`tel:${h.phone.replace(/\s/g, '')}`} size="sm">
-              <Phone size={15} /> Call
+              <Phone size={15} /> {t('hospitals.call')}
             </Button>
           </div>
         </div>

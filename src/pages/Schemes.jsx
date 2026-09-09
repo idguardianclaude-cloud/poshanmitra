@@ -13,10 +13,12 @@ import {
   categoryCounts,
   helpfulResources,
 } from '../data/schemes.js'
+import { useT } from '../lib/i18n.js'
 
 const SORTS = ['Popular first', 'A–Z', 'Z–A']
 
 export function Schemes() {
+  const t = useT()
   const [cat, setCat] = useState('all')
   const [query, setQuery] = useState('')
   const [benefitType, setBenefitType] = useState('')
@@ -45,10 +47,7 @@ export function Schemes() {
 
   return (
     <>
-      <PageHeader
-        title="Schemes"
-        subtitle="Explore government schemes that support your health and your baby's well-being."
-      />
+      <PageHeader title={t('schemes.title')} subtitle={t('schemes.sub')} />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         <div className="xl:col-span-2 space-y-5">
@@ -59,7 +58,7 @@ export function Schemes() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search schemes…"
+                placeholder={t('schemes.search')}
                 className="w-full rounded-xl border border-line bg-canvas pl-9 pr-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               />
             </div>
@@ -71,7 +70,7 @@ export function Schemes() {
                   onChange={(e) => setBenefitType(e.target.value)}
                   className="rounded-xl border border-line bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
-                  <option value="">All benefit types</option>
+                  <option value="">{t('schemes.allBenefit')}</option>
                   {BENEFIT_TYPES.map((b) => (
                     <option key={b} value={b}>
                       {b}
@@ -88,7 +87,7 @@ export function Schemes() {
                 >
                   {SORTS.map((s) => (
                     <option key={s} value={s}>
-                      Sort: {s}
+                      {t('schemes.sortBy')}: {s}
                     </option>
                   ))}
                 </select>
@@ -108,7 +107,7 @@ export function Schemes() {
                     : 'bg-white border-line text-ink hover:bg-canvas'
                 }`}
               >
-                {c.label}{' '}
+                {t(`schemes.cat.${c.key}`)}{' '}
                 <span className={cat === c.key ? 'text-indigo-100' : 'text-ink-faint'}>
                   {counts[c.key]}
                 </span>
@@ -119,35 +118,31 @@ export function Schemes() {
           {/* Scheme rows */}
           {filtered.length === 0 ? (
             <div className="rounded-2xl bg-white border border-line shadow-card p-10 text-center text-sm text-ink-muted">
-              No schemes match your filters. Try clearing the search or benefit type.
+              {t('schemes.noMatch')}
             </div>
           ) : (
             <div className="space-y-4">
               {filtered.map((s) => (
-                <SchemeRow key={s.id} scheme={s} onView={() => setDetail(s)} />
+                <SchemeRow key={s.id} scheme={s} onView={() => setDetail(s)} t={t} />
               ))}
             </div>
           )}
 
-          <p className="text-xs text-ink-faint">
-            Benefits may vary depending on scheme guidelines and eligibility.
-          </p>
+          <p className="text-xs text-ink-faint">{t('schemes.footnote')}</p>
         </div>
 
         {/* Right rail */}
         <aside className="space-y-6">
           <div className="rounded-2xl border border-indigo-100 shadow-card p-5" style={{ backgroundColor: '#EEF0FF' }}>
-            <h2 className="text-base font-semibold text-ink">Check Your Eligibility</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              Answer a few quick questions to see which schemes you may be eligible for.
-            </p>
+            <h2 className="text-base font-semibold text-ink">{t('schemes.checkEligibility')}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{t('schemes.checkEligibilitySub')}</p>
             <Button as={Link} to="/schemes/eligibility" className="mt-4 w-full">
-              Check Eligibility <ArrowRight size={16} />
+              {t('schemes.checkEligibilityCta')} <ArrowRight size={16} />
             </Button>
           </div>
 
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink mb-3">Top Schemes</h2>
+            <h2 className="text-base font-semibold text-ink mb-3">{t('schemes.topSchemes')}</h2>
             <ol className="space-y-3">
               {schemes.slice(0, 3).map((s, i) => (
                 <li key={s.id}>
@@ -166,7 +161,7 @@ export function Schemes() {
           </div>
 
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink mb-3">Helpful Resources</h2>
+            <h2 className="text-base font-semibold text-ink mb-3">{t('schemes.resources')}</h2>
             <ul className="space-y-2">
               {helpfulResources.map((r) => (
                 <li key={r} className="flex items-center gap-2 text-sm text-ink">
@@ -178,12 +173,10 @@ export function Schemes() {
           </div>
 
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink">Need help?</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              Ask Mitra about any scheme and how to apply.
-            </p>
+            <h2 className="text-base font-semibold text-ink">{t('common.needHelp')}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{t('schemes.needHelpSub')}</p>
             <Button as={Link} to="/chat?q=How%20do%20I%20apply%20for%20PMMVY" variant="secondary" className="mt-3 w-full">
-              <MessageSquare size={16} /> Ask Mitra
+              <MessageSquare size={16} /> {t('common.askMitra')}
             </Button>
           </div>
         </aside>
@@ -194,7 +187,7 @@ export function Schemes() {
   )
 }
 
-function SchemeRow({ scheme, onView }) {
+function SchemeRow({ scheme, onView, t }) {
   return (
     <section className="rounded-2xl bg-white border border-line shadow-card p-5">
       <div className="flex items-start gap-4">
@@ -204,7 +197,7 @@ function SchemeRow({ scheme, onView }) {
             <h3 className="text-base font-semibold text-ink">{scheme.name}</h3>
             {scheme.popular && (
               <Badge tone="warning">
-                <Star size={11} /> Popular
+                <Star size={11} /> {t('schemes.popular')}
               </Badge>
             )}
           </div>
@@ -220,7 +213,7 @@ function SchemeRow({ scheme, onView }) {
       </div>
 
       <div className="mt-4 rounded-xl bg-canvas p-3">
-        <p className="text-xs font-semibold text-ink mb-2">Benefits</p>
+        <p className="text-xs font-semibold text-ink mb-2">{t('schemes.benefits')}</p>
         <ul className="space-y-1">
           {scheme.benefits.map((b) => (
             <li key={b} className="flex items-center gap-2 text-sm text-ink">
@@ -233,7 +226,7 @@ function SchemeRow({ scheme, onView }) {
 
       <div className="mt-3 flex justify-end">
         <Button variant="secondary" size="sm" onClick={onView}>
-          View Details
+          {t('schemes.viewDetails')}
         </Button>
       </div>
     </section>
@@ -241,6 +234,7 @@ function SchemeRow({ scheme, onView }) {
 }
 
 function SchemeDetail({ scheme, onClose }) {
+  const t = useT()
   if (!scheme) return null
   return (
     <Modal
@@ -255,13 +249,13 @@ function SchemeDetail({ scheme, onClose }) {
           rel="noopener noreferrer"
           className="w-full"
         >
-          Apply on Official Portal <ExternalLink size={16} />
+          {t('schemes.applyPortal')} <ExternalLink size={16} />
         </Button>
       }
     >
       <p className="text-sm text-ink">{scheme.description}</p>
 
-      <Section title="Benefits">
+      <Section title={t('schemes.benefits')}>
         <ul className="space-y-1.5">
           {scheme.benefits.map((b) => (
             <li key={b} className="flex items-center gap-2 text-sm text-ink">
@@ -271,7 +265,7 @@ function SchemeDetail({ scheme, onClose }) {
         </ul>
       </Section>
 
-      <Section title="Who is eligible">
+      <Section title={t('schemes.whoEligible')}>
         <ul className="space-y-1.5">
           {scheme.eligibility.map((e) => (
             <li key={e} className="flex items-start gap-2 text-sm text-ink">
@@ -281,7 +275,7 @@ function SchemeDetail({ scheme, onClose }) {
         </ul>
       </Section>
 
-      <Section title="Required documents">
+      <Section title={t('schemes.requiredDocs')}>
         <ul className="space-y-1.5">
           {scheme.documents.map((d) => (
             <li key={d} className="flex items-center gap-2 text-sm text-ink">
@@ -289,12 +283,10 @@ function SchemeDetail({ scheme, onClose }) {
             </li>
           ))}
         </ul>
-        <p className="mt-2 text-xs text-ink-faint">
-          You will never be asked for your Aadhaar or bank account number inside PoshanMitra.
-        </p>
+        <p className="mt-2 text-xs text-ink-faint">{t('schemes.noAadhaar')}</p>
       </Section>
 
-      <Section title="Where to apply">
+      <Section title={t('schemes.whereApply')}>
         <p className="flex items-start gap-2 text-sm text-ink">
           <MapPin size={15} className="text-ink-faint shrink-0 mt-0.5" />
           {scheme.whereToApply}

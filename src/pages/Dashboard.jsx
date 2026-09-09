@@ -31,6 +31,7 @@ import {
 } from '../data/dashboard.js'
 import { ordinalMonth, ordinalTrimester, formatDateIN } from '../lib/pregnancy.js'
 import { Illustration } from '../components/Illustration.jsx'
+import { useT } from '../lib/i18n.js'
 
 const PLAN_KEY = 'poshanmitra_plan'
 function loadPlan() {
@@ -52,11 +53,11 @@ function savePlan(rows) {
   }
 }
 
-function greeting() {
+function greetingKey() {
   const h = new Date().getHours()
-  if (h < 12) return 'Good Morning'
-  if (h < 17) return 'Good Afternoon'
-  return 'Good Evening'
+  if (h < 12) return 'greetMorning'
+  if (h < 17) return 'greetAfternoon'
+  return 'greetEvening'
 }
 
 const QUICK = [
@@ -70,6 +71,7 @@ const QUICK = [
 
 export function Dashboard() {
   const { profile } = useProfile()
+  const t = useT()
   const navigate = useNavigate()
   const [plan, setPlan] = useState(loadPlan)
 
@@ -94,11 +96,9 @@ export function Dashboard() {
       {/* Greeting */}
       <div className="mb-6">
         <h1 className="text-[28px] font-bold text-ink leading-tight">
-          {greeting()}, {name}! 👋
+          {t(`dash.${greetingKey()}`)}, {name}! 👋
         </h1>
-        <p className="mt-1 text-sm text-ink-muted">
-          You are doing great! Let's continue your healthy journey.
-        </p>
+        <p className="mt-1 text-sm text-ink-muted">{t('dash.sub')}</p>
       </div>
 
       {/* Stat cards */}
@@ -107,37 +107,37 @@ export function Dashboard() {
           icon={Baby}
           fill="#FDF2F8"
           color="#EC4899"
-          label="Pregnancy Month"
-          value={`${ordinalMonth(month)} Month`}
-          sub={`${ordinalTrimester(trimester)} Trimester · ${weeks} Weeks + ${days} Days`}
+          label={t('dash.pregnancyMonth')}
+          value={t('dash.monthValue', { month: ordinalMonth(month) })}
+          sub={t('dash.trimesterSub', { trimester: ordinalTrimester(trimester), weeks, days })}
           progress={Math.round((weeks / 40) * 100)}
         />
         <StatCard
           icon={HeartPulse}
           fill="#ECFDF5"
           color="#10B981"
-          label="Poshan Score"
+          label={t('dash.poshanScore')}
           value={
             <>
               {score}
               <span className="text-lg text-ink-faint font-semibold">/100</span>
             </>
           }
-          sub="Good ↑ · Keep following your plan"
+          sub={t('dash.scoreSub')}
         />
         <StatCard
           icon={ListChecks}
           fill="#FFFBEB"
           color="#F59E0B"
-          label="Today's Tasks"
+          label={t('dash.tasks')}
           value={`${doneCount}/${plan.length}`}
-          sub={`Completed · ${plan.length - doneCount} tasks remaining`}
+          sub={t('dash.tasksSub', { remaining: plan.length - doneCount })}
         />
         <StatCard
           icon={CalendarCheck}
           fill="#F5F3FF"
           color="#8B5CF6"
-          label="Next Checkup"
+          label={t('dash.nextCheckup')}
           value={formatDateIN(nextCheckup.date)}
           sub={`${nextCheckup.time} · ${nextCheckup.hospital}`}
         />
@@ -149,9 +149,9 @@ export function Dashboard() {
           {/* Today's Plan */}
           <section className="rounded-2xl bg-white border border-line shadow-card">
             <header className="flex items-center justify-between px-5 pt-5 pb-2">
-              <h2 className="text-base font-semibold text-ink">Today's Plan</h2>
+              <h2 className="text-base font-semibold text-ink">{t('dash.todaysPlan')}</h2>
               <Link to="/checkup" className="text-sm text-indigo-600 hover:text-indigo-700">
-                View All
+                {t('common.viewAll')}
               </Link>
             </header>
             <ul className="px-5 pb-4">
@@ -176,12 +176,12 @@ export function Dashboard() {
                     </span>
                     <span className="flex-1">
                       <span className={`text-sm font-medium ${row.done ? 'text-ink-faint line-through' : 'text-ink'}`}>
-                        {row.label}
+                        {t(`dash.plan.${row.label}`)}
                       </span>
                       <span className="block text-xs text-ink-faint">{row.time}</span>
                     </span>
                     <span className={`text-xs font-medium ${row.done ? 'text-emerald-600' : 'text-ink-faint'}`}>
-                      {row.done ? 'Completed' : 'Pending'}
+                      {row.done ? t('dash.completed') : t('dash.pending')}
                     </span>
                   </button>
                 </li>
@@ -196,27 +196,27 @@ export function Dashboard() {
                 <Heart size={20} fill="#EEF0FF" stroke="#EEF0FF" />
               </span>
               <div className="flex-1">
-                <h2 className="text-base font-semibold text-ink">AI PoshanMitra</h2>
+                <h2 className="text-base font-semibold text-ink">{t('dash.chatTitle')}</h2>
                 <p className="text-sm text-ink-muted mt-0.5">
-                  Hello {name}! 👋 I'm your AI PoshanMitra. How can I help you today?
+                  {t('dash.chatGreeting', { name })}
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2 mt-4">
               {chatChips.map((c) => (
-                <Chip key={c} onClick={() => navigate(`/chat?q=${encodeURIComponent(c)}`)}>
-                  {c}
+                <Chip key={c} onClick={() => navigate(`/chat?q=${encodeURIComponent(t(`chat.chips.${c}`))}`)}>
+                  {t(`chat.chips.${c}`)}
                 </Chip>
               ))}
             </div>
             <Button className="mt-4" onClick={() => navigate('/chat')}>
-              Chat Now <ArrowRight size={16} />
+              {t('dash.chatNow')} <ArrowRight size={16} />
             </Button>
           </section>
 
           {/* Quick Access */}
           <section className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink mb-4">Quick Access</h2>
+            <h2 className="text-base font-semibold text-ink mb-4">{t('dash.quickAccess')}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {QUICK.map((q) => (
                 <Link
@@ -225,7 +225,7 @@ export function Dashboard() {
                   className="flex flex-col items-center gap-2 rounded-2xl border border-line p-4 hover:bg-canvas transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
                   <IconTile icon={q.icon} fill={q.fill} color={q.color} size={44} />
-                  <span className="text-[13px] font-medium text-ink">{q.label}</span>
+                  <span className="text-[13px] font-medium text-ink">{t(`quick.${q.label}`)}</span>
                 </Link>
               ))}
             </div>
@@ -237,9 +237,9 @@ export function Dashboard() {
           {/* Recent Videos */}
           <section className="rounded-2xl bg-white border border-line shadow-card p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-ink">Recent Videos</h2>
+              <h2 className="text-base font-semibold text-ink">{t('dash.recentVideos')}</h2>
               <Link to="/videos" className="text-sm text-indigo-600 hover:text-indigo-700">
-                View All
+                {t('common.viewAll')}
               </Link>
             </div>
             <div className="rounded-xl overflow-hidden border border-line">
@@ -255,7 +255,7 @@ export function Dashboard() {
                 <Badge tone="danger">{recentVideo.tag}</Badge>
                 <p className="mt-2 text-sm font-medium text-ink">{recentVideo.title}</p>
                 <Button as={Link} to="/videos" variant="secondary" size="sm" className="mt-3 w-full">
-                  Watch Now
+                  {t('dash.watchNow')}
                 </Button>
               </div>
             </div>
@@ -270,13 +270,14 @@ export function Dashboard() {
 }
 
 function HealthTip() {
+  const t = useT()
   const tip = tipOfTheDay()
   return (
     <section className="rounded-2xl border border-emerald-100 shadow-card p-5" style={{ backgroundColor: '#ECFDF5' }}>
       <div className="flex items-start gap-3">
         <Illustration name="water-glass" size={56} />
         <div>
-          <h2 className="text-base font-semibold text-ink">Health Tip for You</h2>
+          <h2 className="text-base font-semibold text-ink">{t('dash.healthTip')}</h2>
           <p className="mt-1 text-sm text-ink-muted">{tip.text}</p>
         </div>
       </div>

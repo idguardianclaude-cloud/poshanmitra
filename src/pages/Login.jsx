@@ -5,9 +5,11 @@ import { useProfile } from '../context/ProfileContext.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Illustration } from '../components/Illustration.jsx'
 import { DisclaimerFooter } from '../components/layout/DisclaimerFooter.jsx'
+import { useT } from '../lib/i18n.js'
 
 export function Login() {
   const { login, profile } = useProfile()
+  const t = useT()
   const navigate = useNavigate()
   const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
@@ -18,7 +20,7 @@ export function Login() {
   const handleContinue = (e) => {
     e.preventDefault()
     if (!valid) {
-      setError('Please enter a 10-digit mobile number.')
+      setError(t('login.invalidNumber'))
       return
     }
     login()
@@ -36,24 +38,19 @@ export function Login() {
             <Heart size={22} fill="#EEF0FF" stroke="#EEF0FF" />
           </span>
           <div>
-            <p className="font-bold text-lg">PoshanMitra AI</p>
-            <p className="text-[12px] text-indigo-100">Swasth Maa, Swasth Shishu, Swasth Bharat</p>
+            <p className="font-bold text-lg">{t('common.appName')}</p>
+            <p className="text-[12px] text-indigo-100">{t('common.tagline')}</p>
           </div>
         </div>
 
         <div className="my-10">
           <Illustration name="pregnant-seated" size={160} className="opacity-95" />
-          <h1 className="mt-6 text-3xl font-bold leading-tight max-w-sm">
-            Your caring companion through pregnancy.
-          </h1>
-          <p className="mt-3 text-indigo-100 max-w-sm text-sm">
-            Trusted guidance on diet, health and government schemes — in your language,
-            on your device.
-          </p>
+          <h1 className="mt-6 text-3xl font-bold leading-tight max-w-sm">{t('login.heroTitle')}</h1>
+          <p className="mt-3 text-indigo-100 max-w-sm text-sm">{t('login.heroSub')}</p>
         </div>
 
         <p className="text-[12px] text-indigo-100 flex items-center gap-2">
-          <ShieldCheck size={15} /> Private beta. Your information stays on your device.
+          <ShieldCheck size={15} /> {t('login.privacy')}
         </p>
       </div>
 
@@ -61,15 +58,13 @@ export function Login() {
       <div className="lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
           <div className="rounded-2xl bg-white border border-line shadow-card p-7">
-            <h2 className="text-xl font-bold text-ink">Welcome</h2>
-            <p className="mt-1 text-sm text-ink-muted">
-              Enter your mobile number to continue.
-            </p>
+            <h2 className="text-xl font-bold text-ink">{t('login.welcome')}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{t('login.enterNumber')}</p>
 
             <form onSubmit={handleContinue} className="mt-6 space-y-4">
               <div>
                 <label htmlFor="phone" className="block text-[13px] font-medium text-ink mb-1.5">
-                  Mobile number
+                  {t('login.mobile')}
                 </label>
                 <div className="flex items-center rounded-xl border border-line bg-canvas focus-within:ring-2 focus-within:ring-indigo-500">
                   <span className="pl-3 pr-2 text-sm text-ink-muted">+91</span>
@@ -91,13 +86,11 @@ export function Login() {
               </div>
 
               <Button type="submit" className="w-full" disabled={!valid}>
-                Continue
+                {t('login.continue')}
               </Button>
             </form>
 
-            <p className="mt-5 text-[12px] text-ink-faint text-center">
-              Private beta. Your information stays on your device.
-            </p>
+            <p className="mt-5 text-[12px] text-ink-faint text-center">{t('login.privacy')}</p>
           </div>
         </div>
       </div>

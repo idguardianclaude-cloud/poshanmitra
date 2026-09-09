@@ -6,10 +6,12 @@ import { Button } from '../components/ui/Button.jsx'
 import { Modal } from '../components/ui/Modal.jsx'
 import { Illustration } from '../components/Illustration.jsx'
 import { categories, videos, continueWatching, trending } from '../data/videos.js'
+import { useT } from '../lib/i18n.js'
 
 const SORTS = ['Latest', 'Most Popular', 'Most Viewed', 'Highest Rated', 'Shortest', 'Longest', 'A–Z', 'Z–A']
 
 export function Videos() {
+  const t = useT()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('')
   const [sort, setSort] = useState('Latest')
@@ -31,10 +33,7 @@ export function Videos() {
 
   return (
     <>
-      <PageHeader
-        title="Videos"
-        subtitle="Trusted videos to guide you through pregnancy, nutrition and baby care."
-      />
+      <PageHeader title={t('videos.title')} subtitle={t('videos.sub')} />
 
       {/* Search + sort */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -43,7 +42,7 @@ export function Videos() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search videos…"
+            placeholder={t('videos.search')}
             className="w-full rounded-xl border border-line bg-white pl-9 pr-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           />
         </div>
@@ -52,7 +51,7 @@ export function Videos() {
           onChange={(e) => setCategory(e.target.value)}
           className="rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
-          <option value="">All Categories</option>
+          <option value="">{t('videos.allCategories')}</option>
           {categories.map((c) => (
             <option key={c.key} value={c.key}>
               {c.label}
@@ -65,19 +64,17 @@ export function Videos() {
           className="rounded-xl border border-line bg-white px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           {SORTS.map((s) => (
-            <option key={s}>Sort: {s}</option>
+            <option key={s}>{t('videos.sort')}: {s}</option>
           ))}
         </select>
       </div>
 
       {/* Hero */}
       <div className="rounded-2xl p-6 sm:p-8 mb-6 text-white bg-gradient-to-br from-indigo-600 to-indigo-700">
-        <h2 className="text-xl sm:text-2xl font-bold max-w-xl">Welcome to PoshanMitra Videos</h2>
-        <p className="mt-2 text-sm text-indigo-100 max-w-xl">
-          Learn from experts and take care of yourself and your baby every day.
-        </p>
+        <h2 className="text-xl sm:text-2xl font-bold max-w-xl">{t('videos.heroTitle')}</h2>
+        <p className="mt-2 text-sm text-indigo-100 max-w-xl">{t('videos.heroSub')}</p>
         <Button variant="secondary" className="mt-4" onClick={() => setPlaying(videos[0])}>
-          <Play size={16} /> Watch Popular Videos
+          <Play size={16} /> {t('videos.watchPopular')}
         </Button>
       </div>
 
@@ -89,7 +86,7 @@ export function Videos() {
             category === '' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-line text-ink hover:bg-canvas'
           }`}
         >
-          All
+          {t('videos.all')}
         </button>
         {categories.map((c) => (
           <button
@@ -107,10 +104,10 @@ export function Videos() {
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
         <div className="xl:col-span-3">
-          <h2 className="text-base font-semibold text-ink mb-3">Popular Videos</h2>
+          <h2 className="text-base font-semibold text-ink mb-3">{t('videos.popular')}</h2>
           {filtered.length === 0 ? (
             <div className="rounded-2xl bg-white border border-line shadow-card p-10 text-center text-sm text-ink-muted">
-              No videos match your search.
+              {t('videos.noMatch')}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -122,7 +119,7 @@ export function Videos() {
           {visible < filtered.length && (
             <div className="mt-5 text-center">
               <Button variant="secondary" onClick={() => setVisible((n) => n + 4)}>
-                Load More Videos
+                {t('videos.loadMore')}
               </Button>
             </div>
           )}
@@ -131,7 +128,7 @@ export function Videos() {
         {/* Right rail */}
         <aside className="space-y-6">
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink mb-3">Continue Watching</h2>
+            <h2 className="text-base font-semibold text-ink mb-3">{t('videos.continueWatching')}</h2>
             <ul className="space-y-3">
               {continueWatching.map((c) => {
                 const v = videos.find((x) => x.id === c.id)
@@ -152,20 +149,20 @@ export function Videos() {
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp size={17} className="text-indigo-600" />
-              <h2 className="text-base font-semibold text-ink">Trending Videos</h2>
+              <h2 className="text-base font-semibold text-ink">{t('videos.trending')}</h2>
             </div>
             <ol className="space-y-3">
-              {trending.map((t, i) => {
-                const v = videos.find((x) => x.id === t.id)
+              {trending.map((tr, i) => {
+                const v = videos.find((x) => x.id === tr.id)
                 return (
-                  <li key={`${t.id}-${i}`}>
+                  <li key={`${tr.id}-${i}`}>
                     <button onClick={() => v && setPlaying(v)} className="w-full flex items-start gap-3 text-left group">
                       <span className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold flex items-center justify-center shrink-0">
                         {i + 1}
                       </span>
                       <span>
-                        <span className="block text-sm text-ink group-hover:text-indigo-600 line-clamp-2">{t.title}</span>
-                        <span className="block text-xs text-ink-faint">{t.views} views</span>
+                        <span className="block text-sm text-ink group-hover:text-indigo-600 line-clamp-2">{tr.title}</span>
+                        <span className="block text-xs text-ink-faint">{tr.views} {t('videos.views')}</span>
                       </span>
                     </button>
                   </li>
@@ -176,9 +173,9 @@ export function Videos() {
 
           <div className="rounded-2xl border border-indigo-100 shadow-card p-5 text-center" style={{ backgroundColor: '#EEF0FF' }}>
             <Bell size={22} className="mx-auto text-indigo-600" />
-            <h2 className="mt-2 text-base font-semibold text-ink">New Videos Every Week!</h2>
-            <p className="mt-1 text-sm text-ink-muted">Fresh, trusted guidance added regularly.</p>
-            <Button className="mt-3 w-full">Subscribe</Button>
+            <h2 className="mt-2 text-base font-semibold text-ink">{t('videos.newWeekly')}</h2>
+            <p className="mt-1 text-sm text-ink-muted">{t('videos.newWeeklySub')}</p>
+            <Button className="mt-3 w-full">{t('videos.subscribe')}</Button>
           </div>
         </aside>
       </div>
@@ -221,6 +218,7 @@ function VideoCard({ video, onPlay }) {
 }
 
 function VideoModal({ video, onClose }) {
+  const t = useT()
   if (!video) return null
   return (
     <Modal open={!!video} onClose={onClose} title={video.title}>
@@ -238,11 +236,8 @@ function VideoModal({ video, onClose }) {
         // SAFETY.md §9 — no verified source yet, so no embed.
         <div className="rounded-xl border border-line bg-canvas p-8 text-center">
           <Illustration name="shield-check" size={96} />
-          <p className="mt-4 text-base font-medium text-ink">Video coming soon</p>
-          <p className="mt-1 text-sm text-ink-muted max-w-sm mx-auto">
-            We only show videos from verified, credible sources — hospitals, government
-            health channels and qualified doctors. This one is still being verified.
-          </p>
+          <p className="mt-4 text-base font-medium text-ink">{t('videos.comingSoon')}</p>
+          <p className="mt-1 text-sm text-ink-muted max-w-sm mx-auto">{t('videos.comingSoonBody')}</p>
           <Badge tone="neutral" className="mt-3">
             {video.tag} · {video.duration}
           </Badge>

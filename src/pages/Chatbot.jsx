@@ -21,7 +21,7 @@ import { ordinalMonth, ordinalTrimester, formatDateIN } from '../lib/pregnancy.j
 import { EmergencyScreen } from '../components/EmergencyScreen.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Chip } from '../components/ui/Chip.jsx'
-import { LANGS } from '../lib/i18n.js'
+import { LANGS, useT } from '../lib/i18n.js'
 
 const TOPICS = [
   'Diet & Nutrition',
@@ -47,6 +47,7 @@ const nextId = () => `${now()}-${idc++}`
 
 export function Chatbot() {
   const { profile, lang, setLang } = useProfile()
+  const t = useT()
   const [messages, setMessages] = useState(() => storage.getChat())
   const [input, setInput] = useState('')
   const [typing, setTyping] = useState(false)
@@ -181,18 +182,16 @@ export function Chatbot() {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-[28px] font-bold text-ink leading-tight">AI Chatbot</h1>
-            <Badge tone="primary">Your Health Companion</Badge>
+            <h1 className="text-[28px] font-bold text-ink leading-tight">{t('chat.title')}</h1>
+            <Badge tone="primary">{t('chat.pill')}</Badge>
           </div>
-          <p className="mt-1 text-sm text-ink-muted">
-            Hi {name}! 👋 I'm here to support you and your baby's health journey.
-          </p>
+          <p className="mt-1 text-sm text-ink-muted">{t('chat.sub', { name })}</p>
         </div>
         <button
           onClick={clearChat}
           className="inline-flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink border border-line rounded-xl px-3 py-2 hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
-          <Trash2 size={15} /> Clear Chat
+          <Trash2 size={15} /> {t('chat.clear')}
         </button>
       </div>
 
@@ -231,7 +230,7 @@ export function Chatbot() {
                 <button
                   onClick={toggleVoice}
                   disabled={!speechSupported()}
-                  title={speechSupported() ? 'Voice input' : 'Voice input not supported in this browser'}
+                  title={speechSupported() ? t('chat.voiceInput') : t('chat.voiceUnsupported')}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${
                     listening
                       ? 'bg-red-50 border-red-200 text-red-600'
@@ -239,22 +238,22 @@ export function Chatbot() {
                   }`}
                 >
                   {listening ? <Square size={14} /> : <Mic size={14} />}
-                  {listening ? 'Listening…' : 'Voice Input'}
+                  {listening ? t('chat.listening') : t('chat.voiceInput')}
                 </button>
 
                 <button
                   disabled
-                  title="Coming soon"
+                  title={t('common.comingSoon')}
                   className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[13px] font-medium text-ink-faint bg-white cursor-not-allowed"
                 >
-                  <ImagePlus size={14} /> Upload Image
+                  <ImagePlus size={14} /> {t('chat.uploadImage')}
                 </button>
 
                 <button
                   onClick={injectHealthSummary}
                   className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[13px] font-medium text-ink bg-white hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
-                  <ClipboardList size={14} /> My Health Summary
+                  <ClipboardList size={14} /> {t('chat.healthSummary')}
                 </button>
 
                 <button
@@ -269,7 +268,7 @@ export function Chatbot() {
                   }`}
                   aria-pressed={autoSpeak}
                 >
-                  <Volume2 size={14} /> Auto-speak {autoSpeak ? 'on' : 'off'}
+                  <Volume2 size={14} /> {autoSpeak ? t('chat.autoSpeakOn') : t('chat.autoSpeakOff')}
                 </button>
               </div>
 
@@ -277,8 +276,8 @@ export function Chatbot() {
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Type your message…"
-                  aria-label="Message Mitra"
+                  placeholder={t('chat.placeholder')}
+                  aria-label={t('chat.placeholder')}
                   className="flex-1 rounded-xl border border-line bg-canvas px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 />
                 <button
@@ -290,9 +289,7 @@ export function Chatbot() {
                   <Send size={18} />
                 </button>
               </form>
-              <p className="mt-2 text-xs text-ink-faint">
-                You can ask anything about pregnancy, diet, exercise, baby care and more…
-              </p>
+              <p className="mt-2 text-xs text-ink-faint">{t('chat.helper')}</p>
             </div>
           )}
         </div>
@@ -302,11 +299,11 @@ export function Chatbot() {
           <HealthSummaryCard profile={profile} />
 
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-            <h2 className="text-base font-semibold text-ink mb-3">Chat Topics</h2>
+            <h2 className="text-base font-semibold text-ink mb-3">{t('chat.chatTopics')}</h2>
             <div className="flex flex-wrap gap-2">
               {TOPICS.map((tp) => (
-                <Chip key={tp} onClick={() => send(tp)}>
-                  {tp}
+                <Chip key={tp} onClick={() => send(t(`chat.topics.${tp}`))}>
+                  {t(`chat.topics.${tp}`)}
                 </Chip>
               ))}
             </div>
@@ -324,18 +321,19 @@ export function Chatbot() {
   )
 }
 
-function FirstRun({ name, lang }) {
+function FirstRun({ name }) {
+  const t = useT()
   return (
     <div className="space-y-4">
       <div className="flex items-start gap-2.5">
         <MitraAvatar />
         <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white border border-line px-4 py-2.5 text-sm text-ink shadow-card">
-          Hello {name}! 👋 I'm your AI PoshanMitra. How can I help you today?
+          {t('chat.greeting', { name })}
         </div>
       </div>
       <div className="flex items-center gap-2 rounded-xl bg-canvas border border-line px-3 py-2 text-xs text-ink-muted">
         <Info size={14} className="shrink-0 text-ink-faint" />
-        <span>Your messages are processed by Google's AI to generate replies.</span>
+        <span>{t('chat.privacyNote')}</span>
       </div>
     </div>
   )
@@ -350,6 +348,7 @@ function MitraAvatar() {
 }
 
 function MessageBubble({ msg, lang, isLastMitra, onChip }) {
+  const t = useT()
   if (msg.role === 'user') {
     return (
       <div className="flex justify-end">
@@ -383,8 +382,8 @@ function MessageBubble({ msg, lang, isLastMitra, onChip }) {
           <span className="text-[11px] text-ink-faint">{fmtTime(msg.ts)}</span>
           <button
             onClick={() => speak(msg.text, lang)}
-            title="Read aloud"
-            aria-label="Read this message aloud"
+            title={t('chat.readAloud')}
+            aria-label={t('chat.readAloud')}
             className="text-ink-faint hover:text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
           >
             <Volume2 size={14} />
@@ -419,18 +418,21 @@ function TypingIndicator() {
 }
 
 function HealthSummaryCard({ profile }) {
+  const t = useT()
   return (
     <div className="rounded-2xl bg-white border border-line shadow-card p-5">
-      <h2 className="text-base font-semibold text-ink mb-3">My Health Summary</h2>
+      <h2 className="text-base font-semibold text-ink mb-3">{t('chat.healthSummary')}</h2>
       <dl className="space-y-2.5 text-sm">
-        <Row label="Pregnancy Month">
-          {ordinalMonth(profile?.month)} ({ordinalTrimester(profile?.trimester)} Trimester)
+        <Row label={t('chat.pregnancyMonthRail')}>
+          {ordinalMonth(profile?.month)} ({ordinalTrimester(profile?.trimester)})
         </Row>
-        <Row label="Poshan Score">
-          <span className="font-semibold text-emerald-600">{profile?.poshanScore ?? 78}/100 Good ↑</span>
+        <Row label={t('chat.poshanScoreRail')}>
+          <span className="font-semibold text-emerald-600">{profile?.poshanScore ?? 78}/100 ↑</span>
         </Row>
-        <Row label="Last Check-up">5 Days Ago</Row>
-        <Row label="Next Check-up">{formatDateIN(profile?.nextCheckup) !== '—' ? formatDateIN(profile?.nextCheckup) : '12 May 2025'}</Row>
+        <Row label={t('chat.lastCheckup')}>{t('chat.daysAgo')}</Row>
+        <Row label={t('chat.nextCheckupRail')}>
+          {formatDateIN(profile?.nextCheckup) !== '—' ? formatDateIN(profile?.nextCheckup) : '12 May 2025'}
+        </Row>
       </dl>
     </div>
   )
@@ -446,9 +448,10 @@ function Row({ label, children }) {
 }
 
 function VoiceAssistantPanel({ lang, setLang, listening, onToggle }) {
+  const t = useT()
   return (
     <div className="rounded-2xl bg-white border border-line shadow-card p-5 text-center">
-      <h2 className="text-base font-semibold text-ink mb-4">Voice Assistant</h2>
+      <h2 className="text-base font-semibold text-ink mb-4">{t('chat.voiceAssistant')}</h2>
       <button
         onClick={onToggle}
         disabled={!speechSupported()}
@@ -471,9 +474,9 @@ function VoiceAssistantPanel({ lang, setLang, listening, onToggle }) {
       <p className="mt-2 text-xs text-ink-faint">
         {speechSupported()
           ? listening
-            ? 'Listening… speak now'
-            : 'Tap to speak your question'
-          : 'Voice input isn’t supported in this browser'}
+            ? t('chat.listeningNow')
+            : t('chat.tapToSpeak')
+          : t('chat.voiceUnsupported')}
       </p>
 
       <div className="mt-4 inline-flex rounded-full border border-line p-0.5 bg-canvas">
