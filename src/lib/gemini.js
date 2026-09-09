@@ -15,7 +15,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 // Guarded so this module can be imported outside Vite (e.g. Node test runner),
 // where import.meta.env is undefined.
 const API_KEY = import.meta.env?.VITE_GEMINI_API_KEY
-const MODEL = 'gemini-1.5-flash'
+// Pinned to a current, stable, low-cost flash model. Google retires older names
+// (1.5-flash and 2.5-flash both 404'd for new keys), so if this 404s in future,
+// list models at GET https://generativelanguage.googleapis.com/v1beta/models?key=…
+// and pick a current *-flash / *-flash-lite (avoid -preview for production).
+const MODEL = 'gemini-3.1-flash-lite'
 
 const LANG_NAME = { en: 'English', hi: 'Hindi', mr: 'Marathi' }
 
