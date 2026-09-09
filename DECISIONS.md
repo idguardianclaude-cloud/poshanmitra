@@ -136,3 +136,14 @@ of each phase. One or two lines each.
   stripped, chips capped at 3. Guarded `import.meta.env` so the module imports under Node.
 - **Deferred the ProfileContext Fast Refresh refactor** — it would touch 10 import sites
   for a dev-only cosmetic gain on a rarely-edited file. Left in NEXT_STEPS.
+- **Ran the full onboarding flow end-to-end in the browser** (login → name → skip the
+  date → age → food → conditions → dashboard) and found the resume key wasn't being
+  cleared on finish: the final `setThread` persist runs during React's commit, AFTER
+  `finish()` cleared it, re-writing it. Moved `clearOnboarding()` into the same deferred
+  step as the navigate so it runs last. Verified the key is now `null` after completion.
+- **Retagged the Jain meal swaps.** A Jain profile was collapsing dinner to a single
+  "2 Phulka" because composite dishes (Paneer Bhurji, Vegetable Soup, Sprouts Chaat) were
+  tagged `allium` and dropped wholesale. Those are commonly prepared Jain-style, so the
+  tags were wrong, not the logic — removed them; only genuine onion/root items
+  (Mixed Vegetable Sabzi, Steamed Vegetables) now drop. Still a simple remove-map per
+  spec; meals stay substantial. Verified live: Jain dinner is now Soup + Phulka + Bhurji.

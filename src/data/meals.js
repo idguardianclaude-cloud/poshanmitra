@@ -44,7 +44,7 @@ export const meals = [
     time: '10:30 AM',
     tint: '#ECFDF5',
     items: [
-      { name: 'Sprouts Chaat', allium: true },
+      { name: 'Sprouts Chaat' },
       { name: 'Almonds (5)' },
       { name: 'Coconut Water (1 glass)' },
     ],
@@ -62,7 +62,7 @@ export const meals = [
       { name: 'Mixed Vegetable Sabzi', root: true, allium: true },
       { name: 'Brown Rice (1 cup)' },
       { name: 'Curd (1 bowl)' },
-      { name: 'Salad', root: true },
+      { name: 'Salad' },
     ],
     nutrients: { kcal: 600, protein: 22, carbs: 85, fats: 15 },
     tip: 'Include protein, fiber and calcium in your lunch.',
@@ -86,9 +86,9 @@ export const meals = [
     time: '7:30–8:30 PM',
     tint: '#F0FDFA',
     items: [
-      { name: 'Vegetable Soup', allium: true },
+      { name: 'Vegetable Soup' },
       { name: '2 Phulka' },
-      { name: 'Paneer Bhurji', allium: true },
+      { name: 'Paneer Bhurji' },
       { name: 'Steamed Vegetables', root: true },
     ],
     nutrients: { kcal: 500, protein: 20, carbs: 30, fats: 14 },
@@ -97,8 +97,10 @@ export const meals = [
 ]
 
 // One simple swap map, not a rules engine (SAFETY.md §4 / PRODUCT_SPEC §5).
-// Vegetarian: boiled egg → paneer cubes. Jain: drop onion/garlic (allium) and
-// root vegetables; swap egg for paneer too.
+// Vegetarian: boiled egg → paneer cubes. Jain: also drop items tagged as an
+// onion/garlic (`allium`) or root vegetable. Only items that genuinely are those
+// carry the tag — composite dishes commonly made Jain-style (paneer bhurji,
+// vegetable soup, sprouts chaat) are left in so a meal is never starved to one item.
 export function applyFoodPreference(mealList, food) {
   const pref = (food || '').toLowerCase()
   const isVeg = pref === 'vegetarian' || pref === 'jain'
@@ -110,9 +112,7 @@ export function applyFoodPreference(mealList, food) {
       return it
     })
     if (isJain) {
-      items = items
-        .filter((it) => !it.root && !it.allium)
-        .map((it) => ({ ...it, name: it.name.replace(/\s*\(with onion.*?\)/i, '') }))
+      items = items.filter((it) => !it.root && !it.allium)
     }
     return { ...meal, items }
   })

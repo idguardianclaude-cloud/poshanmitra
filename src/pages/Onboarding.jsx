@@ -123,8 +123,12 @@ export function Onboarding() {
   function finish(finalAnswers) {
     // Seed poshanScore to match the approved mockups (78 across the app).
     updateProfile({ poshanScore: 78, onboarded: true })
-    storage.clearOnboarding()
-    setTimeout(() => navigate('/'), 900)
+    // Clear inside the deferred step so it runs AFTER the final setThread/persist
+    // commits — otherwise that persist re-writes the resume key we just cleared.
+    setTimeout(() => {
+      storage.clearOnboarding()
+      navigate('/')
+    }, 900)
   }
 
   function skip() {
