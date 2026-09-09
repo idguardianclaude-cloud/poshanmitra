@@ -12,7 +12,9 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+// Guarded so this module can be imported outside Vite (e.g. Node test runner),
+// where import.meta.env is undefined.
+const API_KEY = import.meta.env?.VITE_GEMINI_API_KEY
 const MODEL = 'gemini-1.5-flash'
 
 const LANG_NAME = { en: 'English', hi: 'Hindi', mr: 'Marathi' }
@@ -71,7 +73,7 @@ export function hasGeminiKey() {
 
 // Parse defensively. If JSON parsing fails, treat the raw text as `reply` with
 // urgency "routine" — but only ever after the rules layer has already cleared it.
-function parseResponse(raw) {
+export function parseResponse(raw) {
   if (!raw) return { reply: '', urgency: 'routine', chips: [] }
   let text = String(raw).trim()
 

@@ -48,7 +48,12 @@ If no key is set, the chatbot still runs the safety red-flag layer and shows a c
 npm run dev       # start dev server
 npm run build     # production build to dist/
 npm run preview   # preview the production build
+npm test          # run the test suite (Node's built-in runner)
 ```
+
+The test suite includes the SAFETY.md §8 emergency strings as a permanent
+regression gate — if `npm test` fails on those, the red-flag layer has regressed
+and the build must not ship.
 
 ## Safety
 

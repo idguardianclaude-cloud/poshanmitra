@@ -116,3 +116,23 @@ of each phase. One or two lines each.
   "incompatible export" churn (it exports both the provider and the `useProfile` hook),
   which can momentarily throw "useProfile must be used within ProfileProvider" in the dev
   console. A fresh reload and the production build are clean — it never occurs without HMR.
+
+## Post-plan hardening (deadline lifted, keys to be added later)
+
+- **Added a dependency-free test suite** (`npm test`, Node's built-in `node --test`): the
+  SAFETY.md §8 strings as a permanent release gate, broader danger-sign coverage, the
+  Gemini urgency-parser, eligibility rules, and pregnancy math. 75 tests.
+- **Writing the tests caught three real red-flag gaps**, now fixed and regression-locked:
+  1. `normalize()` replaced apostrophes with spaces, so `can't breathe` became `can t
+     breathe` and never matched. Now apostrophes are stripped to nothing (`can't` →
+     `cant`), also repairing `can't see clearly`, `hasn't moved`, `can't keep anything down`.
+  2. Headache missed code-mixed `sir me bahut dard` (words between `sir` and `dard`) —
+     broadened to `/(sir|sar)\s.*(dard|dukh)/`.
+  3. Vision missed a standalone `blurry` / `blurred`.
+  All three verified fixed in the live app (e.g. `I can't breathe properly` now fires).
+- **Exported and tested `parseResponse`** (gemini.js) — the second safety layer's parser.
+  Locked: an `emergency` urgency is preserved, an unknown urgency falls back to `routine`
+  (never invents an emergency), malformed JSON degrades to a routine reply, fences are
+  stripped, chips capped at 3. Guarded `import.meta.env` so the module imports under Node.
+- **Deferred the ProfileContext Fast Refresh refactor** — it would touch 10 import sites
+  for a dev-only cosmetic gain on a rarely-edited file. Left in NEXT_STEPS.
