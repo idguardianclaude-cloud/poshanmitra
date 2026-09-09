@@ -34,7 +34,11 @@ function normalize(text) {
   return String(text || '')
     .toLowerCase()
     .normalize('NFC')
-    .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'’“”\[\]|<>@+]/g, ' ')
+    // Strip apostrophes to nothing so contractions collapse: can't → cant,
+    // hasn't → hasnt. (Replacing them with a space would break those patterns.)
+    .replace(/['’‘]/g, '')
+    // Everything else punctuation-like becomes a space.
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()?"“”\[\]|<>@+]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 }
@@ -111,9 +115,9 @@ export const RED_FLAGS = [
       'डोकं दुखत',
       'डोके दुखत',
       'डोकं खूप दुखत',
-      /sir\s*(me|mein|ma)?\s*dard/,
+      // Allow words between "sir/sar" and "dard/dukh" (code-mixed: "sir me bahut dard").
+      /(sir|sar)\s.*(dard|dukh)/,
       /sar\s*dard/,
-      /sir\s*dukh/,
       'sirdard',
     ],
   },
@@ -126,6 +130,9 @@ export const RED_FLAGS = [
       'blur vision',
       'vision blurry',
       'vision is blurry',
+      'blurry',
+      'blurred',
+      'looks blurry',
       'seeing spots',
       'spots in front',
       'double vision',
