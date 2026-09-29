@@ -15,9 +15,10 @@ import {
 import { useProfile } from '../context/ProfileContext.jsx'
 import { storage } from '../lib/storage.js'
 import { checkRedFlags } from '../lib/redflags.js'
-import { askMitra, hasGeminiKey, FALLBACKS } from '../lib/gemini.js'
+import { askMitra, FALLBACKS } from '../lib/gemini.js'
 import { startListening, speak, stopSpeaking, speechSupported } from '../lib/speech.js'
-import { ordinalMonth, ordinalTrimester, formatDateIN } from '../lib/pregnancy.js'
+import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
+import { formatIN, nextCheckupDate } from '../lib/dates.js'
 import { EmergencyScreen } from '../components/EmergencyScreen.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Chip } from '../components/ui/Chip.jsx'
@@ -296,7 +297,7 @@ export function Chatbot() {
 
         {/* Right rail */}
         <aside className="space-y-6">
-          <HealthSummaryCard profile={profile} />
+          <HealthSummaryCard profile={profile} lang={lang} />
 
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
             <h2 className="text-base font-semibold text-ink mb-3">{t('chat.chatTopics')}</h2>
@@ -417,22 +418,22 @@ function TypingIndicator() {
   )
 }
 
-function HealthSummaryCard({ profile }) {
+function HealthSummaryCard({ profile, lang }) {
   const t = useT()
   return (
     <div className="rounded-2xl bg-white border border-line shadow-card p-5">
       <h2 className="text-base font-semibold text-ink mb-3">{t('chat.healthSummary')}</h2>
       <dl className="space-y-2.5 text-sm">
         <Row label={t('chat.pregnancyMonthRail')}>
-          {ordinalMonth(profile?.month)} ({ordinalTrimester(profile?.trimester)})
+          {profile?.month
+            ? `${ordinalMonth(profile.month, lang)} (${ordinalTrimester(profile.trimester, lang)})`
+            : '—'}
         </Row>
         <Row label={t('chat.poshanScoreRail')}>
           <span className="font-semibold text-emerald-600">{profile?.poshanScore ?? 78}/100 ↑</span>
         </Row>
         <Row label={t('chat.lastCheckup')}>{t('chat.daysAgo')}</Row>
-        <Row label={t('chat.nextCheckupRail')}>
-          {formatDateIN(profile?.nextCheckup) !== '—' ? formatDateIN(profile?.nextCheckup) : '12 May 2025'}
-        </Row>
+        <Row label={t('chat.nextCheckupRail')}>{formatIN(nextCheckupDate(), lang)}</Row>
       </dl>
     </div>
   )

@@ -53,6 +53,9 @@ export const storage = {
   getLang: () => read(LANG_KEY, 'en'),
   setLang: (lang) => write(LANG_KEY, lang),
 
+  getNotifications: () => read('poshanmitra_notifications', true) !== false,
+  setNotifications: (v) => write('poshanmitra_notifications', v),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.

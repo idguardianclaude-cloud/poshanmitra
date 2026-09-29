@@ -29,7 +29,8 @@ import {
   nextCheckup,
   tipOfTheDay,
 } from '../data/dashboard.js'
-import { ordinalMonth, ordinalTrimester, formatDateIN } from '../lib/pregnancy.js'
+import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
+import { formatIN, nextCheckupDate } from '../lib/dates.js'
 import { Illustration } from '../components/Illustration.jsx'
 import { useT } from '../lib/i18n.js'
 
@@ -70,16 +71,19 @@ const QUICK = [
 ]
 
 export function Dashboard() {
-  const { profile } = useProfile()
+  const { profile, lang } = useProfile()
   const t = useT()
   const navigate = useNavigate()
   const [plan, setPlan] = useState(loadPlan)
 
   const name = profile?.name?.split(' ')[0] || 'Priya'
-  const month = profile?.month ?? 5
-  const trimester = profile?.trimester ?? 2
-  const weeks = profile?.weeks ?? 18
-  const days = profile?.days ?? 3
+  // Only show pregnancy figures we actually derived (she may have skipped the due
+  // date in onboarding) — never fabricate weeks/month.
+  const hasPregData = profile?.month != null && profile?.weeks != null
+  const month = profile?.month
+  const trimester = profile?.trimester
+  const weeks = profile?.weeks
+  const days = profile?.days ?? 0
   const score = profile?.poshanScore ?? 78
   const doneCount = plan.filter((r) => r.done).length
 
@@ -103,15 +107,30 @@ export function Dashboard() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          icon={Baby}
-          fill="#FDF2F8"
-          color="#EC4899"
-          label={t('dash.pregnancyMonth')}
-          value={t('dash.monthValue', { month: ordinalMonth(month) })}
-          sub={t('dash.trimesterSub', { trimester: ordinalTrimester(trimester), weeks, days })}
-          progress={Math.round((weeks / 40) * 100)}
-        />
+        {hasPregData ? (
+          <StatCard
+            icon={Baby}
+            fill="#FDF2F8"
+            color="#EC4899"
+            label={t('dash.pregnancyMonth')}
+            value={t('dash.monthValue', { month: ordinalMonth(month, lang) })}
+            sub={t('dash.trimesterSub', {
+              trimester: ordinalTrimester(trimester, lang),
+              weeks,
+              days,
+            })}
+            progress={Math.round((weeks / 40) * 100)}
+          />
+        ) : (
+          <button
+            onClick={() => navigate('/settings')}
+            className="rounded-2xl bg-white border border-dashed border-indigo-200 shadow-card p-5 text-left hover:bg-indigo-50/40 transition-colors"
+          >
+            <p className="text-[13px] font-medium text-ink-muted">{t('dash.pregnancyMonth')}</p>
+            <p className="mt-1 text-base font-semibold text-indigo-600">{t('settings.addDueDate')}</p>
+            <p className="mt-2 text-xs text-ink-muted">{t('settings.addDueDateSub')}</p>
+          </button>
+        )}
         <StatCard
           icon={HeartPulse}
           fill="#ECFDF5"
@@ -138,7 +157,7 @@ export function Dashboard() {
           fill="#F5F3FF"
           color="#8B5CF6"
           label={t('dash.nextCheckup')}
-          value={formatDateIN(nextCheckup.date)}
+          value={formatIN(nextCheckupDate(), lang)}
           sub={`${nextCheckup.time} · ${nextCheckup.hospital}`}
         />
       </div>

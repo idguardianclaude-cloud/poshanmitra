@@ -46,14 +46,25 @@ export function derivePregnancy(dateStr, basis = 'due') {
   }
 }
 
-const ORDINAL = ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th']
-export function ordinalMonth(m) {
-  if (!m || m < 1) return '—'
-  return ORDINAL[m] || `${m}th`
+// Language-aware ordinals. महीना/महिना is masculine (…वाँ / …वा); तिमाही is
+// feminine (…ली / …री) — so month and trimester use different endings.
+const MONTH_ORD = {
+  en: ['', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th'],
+  hi: ['', 'पहला', 'दूसरा', 'तीसरा', 'चौथा', 'पाँचवाँ', 'छठा', 'सातवाँ', 'आठवाँ', 'नौवाँ'],
+  mr: ['', 'पहिला', 'दुसरा', 'तिसरा', 'चौथा', 'पाचवा', 'सहावा', 'सातवा', 'आठवा', 'नववा'],
 }
-export function ordinalTrimester(t) {
+const TRIMESTER_ORD = {
+  en: ['', '1st', '2nd', '3rd'],
+  hi: ['', 'पहली', 'दूसरी', 'तीसरी'],
+  mr: ['', 'पहिली', 'दुसरी', 'तिसरी'],
+}
+export function ordinalMonth(m, lang = 'en') {
+  if (!m || m < 1) return '—'
+  return (MONTH_ORD[lang] || MONTH_ORD.en)[m] || `${m}`
+}
+export function ordinalTrimester(t, lang = 'en') {
   if (!t) return '—'
-  return ['', '1st', '2nd', '3rd'][t] || `${t}th`
+  return (TRIMESTER_ORD[lang] || TRIMESTER_ORD.en)[t] || `${t}`
 }
 
 // 12 May 2025 — Indian long-date formatting.

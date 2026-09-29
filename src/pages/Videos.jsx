@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Search, Play, Clock, Eye, MoreVertical, TrendingUp, Bell } from 'lucide-react'
+import { Search, Play, Clock, Eye, TrendingUp, Bell, Check } from 'lucide-react'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Button } from '../components/ui/Button.jsx'
@@ -7,8 +7,18 @@ import { Modal } from '../components/ui/Modal.jsx'
 import { Illustration } from '../components/Illustration.jsx'
 import { categories, videos, continueWatching, trending } from '../data/videos.js'
 import { useT } from '../lib/i18n.js'
+import { storage } from '../lib/storage.js'
 
 const SORTS = ['Latest', 'Most Popular', 'Most Viewed', 'Highest Rated', 'Shortest', 'Longest', 'A–Z', 'Z–A']
+
+// Editorial rating per video (0–5), used by the "Highest Rated" sort.
+const RATING = { v1: 4.8, v2: 4.9, v3: 4.7, v4: 4.8, v5: 4.5, v6: 4.6, v7: 4.7, v8: 4.6 }
+function parseViews(v) {
+  const n = parseFloat(v)
+  if (/m/i.test(v)) return n * 1e6
+  if (/k/i.test(v)) return n * 1e3
+  return n || 0
+}
 
 export function Videos() {
   const t = useT()
@@ -17,6 +27,7 @@ export function Videos() {
   const [sort, setSort] = useState('Latest')
   const [visible, setVisible] = useState(8)
   const [playing, setPlaying] = useState(null)
+  const [subscribed, setSubscribed] = useState(() => storage.getNotifications())
 
   const filtered = useMemo(() => {
     let list = videos.filter((v) => {
@@ -24,12 +35,22 @@ export function Videos() {
       if (query && !v.title.toLowerCase().includes(query.toLowerCase())) return false
       return true
     })
-    if (sort === 'A–Z') list = [...list].sort((a, b) => a.title.localeCompare(b.title))
-    else if (sort === 'Z–A') list = [...list].sort((a, b) => b.title.localeCompare(a.title))
-    else if (sort === 'Shortest') list = [...list].sort((a, b) => dur(a) - dur(b))
-    else if (sort === 'Longest') list = [...list].sort((a, b) => dur(b) - dur(a))
+    const by = (fn) => (list = [...list].sort(fn))
+    if (sort === 'A–Z') by((a, b) => a.title.localeCompare(b.title))
+    else if (sort === 'Z–A') by((a, b) => b.title.localeCompare(a.title))
+    else if (sort === 'Shortest') by((a, b) => dur(a) - dur(b))
+    else if (sort === 'Longest') by((a, b) => dur(b) - dur(a))
+    else if (sort === 'Most Popular' || sort === 'Most Viewed')
+      by((a, b) => parseViews(b.views) - parseViews(a.views))
+    else if (sort === 'Highest Rated') by((a, b) => (RATING[b.id] || 0) - (RATING[a.id] || 0))
     return list
   }, [query, category, sort])
+
+  function toggleSubscribe() {
+    const next = !subscribed
+    setSubscribed(next)
+    storage.setNotifications(next)
+  }
 
   return (
     <>
@@ -175,7 +196,19 @@ export function Videos() {
             <Bell size={22} className="mx-auto text-indigo-600" />
             <h2 className="mt-2 text-base font-semibold text-ink">{t('videos.newWeekly')}</h2>
             <p className="mt-1 text-sm text-ink-muted">{t('videos.newWeeklySub')}</p>
-            <Button className="mt-3 w-full">{t('videos.subscribe')}</Button>
+            <Button
+              className="mt-3 w-full"
+              variant={subscribed ? 'secondary' : 'primary'}
+              onClick={toggleSubscribe}
+            >
+              {subscribed ? (
+                <>
+                  <Check size={16} /> {t('settings.on')}
+                </>
+              ) : (
+                t('videos.subscribe')
+              )}
+            </Button>
           </div>
         </aside>
       </div>
@@ -208,9 +241,11 @@ function VideoCard({ video, onPlay }) {
           <span className="flex items-center gap-1">
             <Eye size={12} /> {video.views} · {video.age}
           </span>
-          <button aria-label="More options" className="p-1 rounded hover:bg-canvas">
-            <MoreVertical size={14} />
-          </button>
+          {RATING[video.id] && (
+            <span className="flex items-center gap-0.5 text-amber-500" title="Rating">
+              ★ <span className="text-ink-faint">{RATING[video.id].toFixed(1)}</span>
+            </span>
+          )}
         </div>
       </div>
     </div>

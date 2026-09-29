@@ -88,7 +88,7 @@ function loadAnswers(profile) {
 }
 
 export function SchemeEligibility() {
-  const { profile } = useProfile()
+  const { profile, lang } = useProfile()
   const t = useT()
   const [step, setStep] = useState(0)
   const [a, setA] = useState(() => loadAnswers(profile))
@@ -153,7 +153,7 @@ export function SchemeEligibility() {
           <div className="rounded-2xl bg-white border border-line shadow-card p-5 sm:p-6">
             {step === 0 && <Step1 a={a} set={set} t={t} />}
             {step === 1 && <Step2 a={a} set={set} t={t} />}
-            {step === 2 && <Step3 a={a} set={set} t={t} />}
+            {step === 2 && <Step3 a={a} set={set} t={t} lang={lang} />}
             {step === 3 && <Step4 a={a} goto={setStep} t={t} />}
 
             {/* Local-only privacy note */}
@@ -338,7 +338,7 @@ function Step2({ a, set, t }) {
   )
 }
 
-function Step3({ a, set, t }) {
+function Step3({ a, set, t, lang }) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-ink">{t('elig.steps.pregnancy')}</h2>
@@ -348,7 +348,7 @@ function Step3({ a, set, t }) {
           <option value="">{t('elig.select')}</option>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((m) => (
             <option key={m} value={m}>
-              {t('elig.monthLabel', { month: ordinalMonth(m) })}
+              {t('elig.monthLabel', { month: ordinalMonth(m, lang) })}
             </option>
           ))}
         </select>

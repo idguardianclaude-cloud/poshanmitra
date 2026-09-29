@@ -10,6 +10,7 @@ import { Videos } from './pages/Videos.jsx'
 import { Schemes } from './pages/Schemes.jsx'
 import { SchemeEligibility } from './pages/SchemeEligibility.jsx'
 import { Hospitals } from './pages/Hospitals.jsx'
+import { Settings } from './pages/Settings.jsx'
 import { CheckupPage, CampaignsPage, ReportsPage } from './pages/StubPage.jsx'
 import { NotFound } from './pages/NotFound.jsx'
 
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/schemes" element={<Schemes />} />
         <Route path="/schemes/eligibility" element={<SchemeEligibility />} />
         <Route path="/hospitals" element={<Hospitals />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/checkup" element={<CheckupPage />} />
         <Route path="/campaigns" element={<CampaignsPage />} />
         <Route path="/reports" element={<ReportsPage />} />

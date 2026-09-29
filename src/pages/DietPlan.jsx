@@ -22,8 +22,10 @@ import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { IconTile } from '../components/ui/IconTile.jsx'
-import { summary, days, meals, applyFoodPreference } from '../data/meals.js'
+import { Modal } from '../components/ui/Modal.jsx'
+import { summary, meals, applyFoodPreference } from '../data/meals.js'
 import { useT } from '../lib/i18n.js'
+import { weekDays, todayKey, nextMonday, formatIN, weekdayLong } from '../lib/dates.js'
 
 const MEAL_ICON = {
   breakfast: Coffee,
@@ -33,15 +35,14 @@ const MEAL_ICON = {
   dinner: Soup,
 }
 
-function currentDayKey() {
-  const idx = (new Date().getDay() + 6) % 7 // 0 = Monday
-  return days[idx]?.key || 'mon'
-}
+const FOODS = ['Vegetarian', 'Non-vegetarian', 'Eggetarian', 'Jain']
 
 export function DietPlan() {
-  const { profile } = useProfile()
+  const { profile, updateProfile, lang } = useProfile()
   const t = useT()
-  const [activeDay, setActiveDay] = useState(currentDayKey)
+  const days = useMemo(() => weekDays(lang), [lang])
+  const [activeDay, setActiveDay] = useState(todayKey)
+  const [modal, setModal] = useState(null) // 'swap' | 'grocery' | null
 
   const planned = useMemo(
     () => applyFoodPreference(meals, profile?.food),
@@ -120,13 +121,54 @@ export function DietPlan() {
         <aside className="space-y-6">
           <NutritionDonut score={profile?.poshanScore ?? 78} t={t} />
           <DietHighlights t={t} />
-          <QuickActions t={t} />
+          <QuickActions t={t} onSwap={() => setModal('swap')} onGrocery={() => setModal('grocery')} />
           <div className="rounded-2xl bg-white border border-line shadow-card p-5">
             <h2 className="text-base font-semibold text-ink">{t('diet.nextReview')}</h2>
-            <p className="mt-1 text-sm text-ink-muted">{t('diet.nextReviewDate')}</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              {formatIN(nextMonday(), lang)} ({weekdayLong(nextMonday(), lang)})
+            </p>
           </div>
         </aside>
       </div>
+
+      {/* Swap food preference — actually updates the profile and re-swaps the plan */}
+      <Modal open={modal === 'swap'} onClose={() => setModal(null)} title={t('diet.qa.Swap Food')}>
+        <p className="text-sm text-ink-muted mb-3">{t('settings.foodPref')}</p>
+        <div className="flex flex-col gap-2">
+          {FOODS.map((f) => (
+            <button
+              key={f}
+              onClick={() => {
+                updateProfile({ food: f })
+                setModal(null)
+              }}
+              className={`flex items-center justify-between rounded-xl border px-4 py-2.5 text-sm transition-colors ${
+                profile?.food === f
+                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  : 'bg-white border-line text-ink hover:bg-canvas'
+              }`}
+            >
+              {t(`food.${f}`)}
+              {profile?.food === f && <Check size={15} />}
+            </button>
+          ))}
+        </div>
+      </Modal>
+
+      {/* Grocery list generated from the current plan */}
+      <Modal open={modal === 'grocery'} onClose={() => setModal(null)} title={t('diet.qa.Grocery List')}>
+        <ul className="space-y-1.5">
+          {[...new Set(planned.flatMap((m) => m.items.map((i) => i.name)))].map((item) => (
+            <li key={item} className="flex items-center gap-2 text-sm text-ink">
+              <span className="w-4 h-4 rounded border border-line inline-block shrink-0" />
+              {item}
+            </li>
+          ))}
+        </ul>
+        <Button variant="secondary" className="mt-4 w-full no-print" onClick={() => window.print()}>
+          <Download size={15} /> {t('diet.download')}
+        </Button>
+      </Modal>
 
       {/* Required bottom note — SAFETY.md §4, non-dismissable. */}
       <div className="mt-8 rounded-2xl border border-line bg-white px-5 py-4">
@@ -286,27 +328,36 @@ function DietHighlights({ t }) {
   )
 }
 
-function QuickActions({ t }) {
+function QuickActions({ t, onSwap, onGrocery }) {
   const actions = [
-    { label: 'Swap Food', icon: Repeat, to: '/diet' },
-    { label: 'Grocery List', icon: ShoppingCart, to: '/diet' },
-    { label: 'Recipes', icon: BookOpen, to: '/diet' },
+    { label: 'Swap Food', icon: Repeat, onClick: onSwap },
+    { label: 'Grocery List', icon: ShoppingCart, onClick: onGrocery },
+    { label: 'Recipes', icon: BookOpen, to: '/chat?q=Share%20a%20simple%20healthy%20pregnancy%20recipe' },
     { label: 'Ask AI', icon: MessageSquare, to: '/chat?q=Help%20me%20with%20my%20diet' },
   ]
   return (
     <div className="rounded-2xl bg-white border border-line shadow-card p-5">
       <h2 className="text-base font-semibold text-ink mb-3">{t('diet.quickActions')}</h2>
       <div className="grid grid-cols-2 gap-2">
-        {actions.map((a) => (
-          <Link
-            key={a.label}
-            to={a.to}
-            className="flex items-center gap-2 rounded-xl border border-line px-3 py-2.5 text-sm text-ink hover:bg-canvas transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
-            <a.icon size={16} className="text-indigo-600" />
-            {t(`diet.qa.${a.label}`)}
-          </Link>
-        ))}
+        {actions.map((a) => {
+          const cls =
+            'flex items-center gap-2 rounded-xl border border-line px-3 py-2.5 text-sm text-ink hover:bg-canvas transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
+          const inner = (
+            <>
+              <a.icon size={16} className="text-indigo-600" />
+              {t(`diet.qa.${a.label}`)}
+            </>
+          )
+          return a.to ? (
+            <Link key={a.label} to={a.to} className={cls}>
+              {inner}
+            </Link>
+          ) : (
+            <button key={a.label} type="button" onClick={a.onClick} className={cls}>
+              {inner}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

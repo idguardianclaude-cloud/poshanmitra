@@ -31,8 +31,24 @@ export function Hospitals() {
   const [speciality, setSpeciality] = useState('')
   const [facilities, setFacilities] = useState({ '24x7 Emergency': true, Cashless: true, Ambulance: true })
   const [distance, setDistance] = useState(10)
+  const [location, setLocation] = useState('Pune, Maharashtra, India')
+  const [locating, setLocating] = useState(false)
   // "Apply Filters" commits the working filters; the list reads the applied set.
   const [applied, setApplied] = useState({ name: '', speciality: '', facilities: {}, distance: 25 })
+
+  function useCurrentLocation() {
+    if (!('geolocation' in navigator)) return
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords
+        setLocation(`Current location (${latitude.toFixed(3)}, ${longitude.toFixed(3)})`)
+        setLocating(false)
+      },
+      () => setLocating(false),
+      { enableHighAccuracy: false, timeout: 8000 }
+    )
+  }
 
   const filtered = useMemo(() => {
     const active = Object.keys(applied.facilities).filter((k) => applied.facilities[k])
@@ -60,19 +76,20 @@ export function Hospitals() {
         <div className="relative flex-1 max-w-md">
           <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
           <input
-            defaultValue="Pune, Maharashtra, India"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
             className="w-full rounded-xl border border-line bg-white pl-9 pr-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             aria-label={t('hospitals.yourLocation')}
           />
         </div>
-        <Button variant="secondary">
-          <Crosshair size={16} /> {t('hospitals.useCurrent')}
+        <Button variant="secondary" onClick={useCurrentLocation} disabled={locating}>
+          <Crosshair size={16} /> {locating ? t('common.loading') : t('hospitals.useCurrent')}
         </Button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <StatChip icon={Building2} label={t('hospitals.found')} value="25+" />
-        <StatChip icon={MapPin} label={t('hospitals.radius')} value="5 km" />
+        <StatChip icon={Building2} label={t('hospitals.found')} value={`${filtered.length}`} />
+        <StatChip icon={MapPin} label={t('hospitals.radius')} value={`${applied.distance} km`} />
         <StatChip icon={ShieldCheck} label={t('hospitals.emergencyCare')} value="24x7" />
         <StatChip icon={BadgeCheck} label={t('hospitals.cashless')} value="✓" />
       </div>
