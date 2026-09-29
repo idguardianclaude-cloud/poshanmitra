@@ -145,7 +145,25 @@ Ran a two-agent audit (pages + libs/data) before deploy and fixed everything act
   therapeutic/condition-specific) diet guidance — verified live.
 - 87 tests pass; production build clean; live preview refreshed (v3).
 
+## RAG-grounded chat (29 Sep 2026)
+
+- **Added `src/lib/rag.js`** — an on-device retrieval layer over the app's own vetted
+  content (schemes + eligibility summaries, weekly milestones, hospital-bag, the sample
+  diet, Pune hospitals, the video index, and 8 curated safe FAQs). Keyword / semantic-lite
+  scoring (IDF-lite + a trilingual synonym map), no extra key, no new dependency.
+- **Wired into `gemini.js`**: `buildGrounding(message)` retrieves the top ≤3 passages and
+  injects them as a leading part of the user turn (her actual message untouched); a new
+  GROUNDING section in the system prompt tells Mitra to prefer these facts but that the
+  reference NEVER loosens a safety rule. Off-topic / empty messages ground nothing.
+- **Safety preserved**: RAG runs only after `checkRedFlags()` clears the message, so it
+  never touches the emergency path; the second urgency layer is unchanged; the diet passage
+  stays labelled general/sample and the supplements FAQ names no dose. Verified the grounding
+  output for English and romanised-Hindi queries (money→PMMVY, iron→diet+iron FAQ, kicks→
+  milestone+movement FAQ).
+- **Tests**: added `src/lib/rag.test.js` (14 tests). **101 tests pass**; `npm run build` clean.
+
 ## If you want to pick something up next
 
-See `NEXT_STEPS.md`. First three: backend proxy for the API key, red-flag tuning
-from real usage, and verifying real YouTube IDs for the video library.
+See `NEXT_STEPS.md` and the remaining unchecked boxes in `TODO.md` (Reports, Local
+reminders, Campaigns, Videos, Chat image upload, API-key proxy). Next up in TODO order:
+**Reports** (`/reports`) — local Hb/BP/sugar/weight tracking with trend charts.

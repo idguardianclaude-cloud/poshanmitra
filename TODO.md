@@ -18,10 +18,15 @@ below is designed to need **none** of that.
 ## In progress / next (no account needed)
 - [x] **Verify the Leaflet map renders in-browser** — confirmed: real Pune OSM tiles +
       numbered markers + popups render correctly, no key.
-- [ ] **RAG-grounded chat** — build a small on-device retrieval layer over the app's own
-      vetted content (schemes + eligibility rules, weekly milestones, hospitals, diet,
-      safe FAQs); inject top matches into Mitra's prompt so answers are grounded, not
-      guessed. Keyword/semantic-lite retrieval, no extra key. Keep all safety rules.
+- [x] **RAG-grounded chat** — built `src/lib/rag.js`: an on-device retrieval layer over the
+      app's own vetted content (12 schemes + eligibility summaries, weekly milestones,
+      hospital-bag, the sample diet, Pune hospitals, the video index, and 8 curated safe
+      FAQs). Keyword/semantic-lite scoring (IDF-lite + a trilingual synonym map: English /
+      romanised / Devanagari), no extra key, no new dependency. `buildGrounding()` injects
+      the top matches into Mitra's prompt as a leading part of the user turn; a new GROUNDING
+      section in the system prompt tells her to prefer these facts but that it NEVER loosens a
+      safety rule. Runs only after the red-flag layer clears a message. 14 new tests (101 total
+      passing); build green. See DECISIONS.md.
 - [ ] **Reports** (`/reports`) — real local tracking: manually log Hb, BP, blood sugar,
       weight; simple trend charts; stored on-device. Replaces the stub.
 - [ ] **Local reminders** — ANC-visit / tablet reminders via the browser Notification API
@@ -44,5 +49,6 @@ below is designed to need **none** of that.
 
 ## Notes / status
 - Gemini chat: WORKING with the user's key (`AQ.Ab8…WhGA`). Caretaker + safety verified.
-- Build: green. Tests: 87 passing. Dev server managed by preview_start on :5173.
+  Now RAG-grounded over the app's own vetted content (`src/lib/rag.js`).
+- Build: green. Tests: 101 passing (added rag.test.js). Dev server managed by preview_start on :5173.
 - Live preview artifact (keyless): https://claude.ai/artifact/Jpk2JGydwg3ZP4AH5gsAzW

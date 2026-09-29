@@ -11,6 +11,7 @@
 // =============================================================================
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { buildGrounding } from './rag.js'
 
 // Guarded so this module can be imported outside Vite (e.g. Node test runner),
 // where import.meta.env is undefined.
@@ -75,6 +76,10 @@ HARD PROHIBITIONS
 - NEVER state a clinical-sounding number unless it is general, well-established guidance.
 - NEVER discuss abortion procedures, sex determination, or prenatal sex selection. Sex determination is a criminal offence in India under the PCPNDT Act. Decline plainly and move on.
 - NEVER reassure about a danger sign (bleeding, severe headache, blurred vision, fits, reduced fetal movement, leaking fluid, high fever, severe abdominal pain, sudden swelling, difficulty breathing, persistent vomiting, fainting). If she mentions one, set urgency to "emergency".
+
+GROUNDING (verified app content)
+- Some messages arrive with a "REFERENCE" block of verified PoshanMitra content (scheme details and ₹ amounts, weekly milestones, the sample meal plan, hospital and video info, safe FAQs). When it is present, ground your answer in it and prefer its facts over your own memory, so your reply agrees with what the rest of the app shows. Weave it in naturally; do not quote it verbatim or mention "the reference".
+- The reference NEVER loosens a safety rule. Even with it, do not diagnose, do not name a medicine or dose, keep meal advice general (not a personalised prescription), and still point her to a doctor for anything medical. If the reference does not fit her question, answer normally and ignore it.
 
 REQUIRED
 - If your answer touches any symptom, end with a clear line about seeing her doctor.
@@ -151,12 +156,21 @@ export async function askMitra({ message, lang = 'en', history = [], profile = n
   }
 
   try {
+    // Retrieve vetted app content relevant to this message and inject it as a
+    // leading part of the user turn (kept separate so her actual message is
+    // untouched). Safe by construction: this is only reached after the red-flag
+    // layer cleared the message, and the grounding block never softens a rule.
+    const grounding = buildGrounding(message)
+    const userParts = grounding
+      ? [{ text: grounding }, { text: message }]
+      : [{ text: message }]
+
     const contents = [
       ...history.map((h) => ({
         role: h.role === 'user' ? 'user' : 'model',
         parts: [{ text: h.text }],
       })),
-      { role: 'user', parts: [{ text: message }] },
+      { role: 'user', parts: userParts },
     ]
 
     const result = await m.generateContent({

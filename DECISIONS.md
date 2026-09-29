@@ -182,6 +182,39 @@ of each phase. One or two lines each.
   (404) and 2.5-flash is blocked for new keys; picked a current stable low-cost model by
   querying the live ListModels API. Live chat verified end-to-end in English and Hindi.
 
+## RAG-grounded chat (`src/lib/rag.js`)
+
+- **Retrieval over the app's OWN vetted content, not the open web.** The corpus is built
+  once at module load from existing data files: all 12 schemes (name, benefits, ₹ amounts,
+  eligibility, portal), the weekly milestones + hospital-bag, the sample diet, a compact
+  Pune-hospitals passage (which hospitals have a labour ward / accept PMJAY, and that 108
+  is the ambulance), and the video index. Plus 8 curated **safe FAQs** written to
+  SAFETY.md tone. This grounds Mitra so her replies agree with what the rest of the app
+  shows, instead of guessing scheme amounts or milestones.
+- **Keyword / semantic-lite, no extra key, no new dependency.** Scoring is IDF-lite (rarer
+  query terms weigh more) with a 2× boost for a passage's own keywords, over a small
+  synonym map that maps English + romanised + Devanagari variants onto the corpus's English
+  terms (so "ulti", "vomiting" and "मळमळ" all reach the nausea FAQ; "paisa"/"yojana"/"₹"
+  reach the financial schemes). A MIN_SCORE floor and top-K cap (3) keep noise out — an
+  off-topic query grounds *nothing* and Mitra answers as before.
+- **Safe by construction.** Retrieval is only reached AFTER `checkRedFlags()` has cleared
+  the message (Chatbot.jsx runs the red-flag layer first; askMitra — and thus RAG — is
+  never called on a danger sign), so grounding never touches the emergency path. The
+  grounding block is injected as a *separate* part of the user turn, leaving her actual
+  message untouched, and its header + a new GROUNDING section in the system prompt state
+  that the reference must be preferred for facts but NEVER loosens a safety rule: still no
+  diagnosis, no medicine names/doses, diet stays general (not a personalised prescription),
+  and anything medical still routes to a doctor. The FAQ passages themselves carry no dose
+  and end symptom topics with a doctor pointer; the diet passage is labelled
+  "general guidance, not personalised".
+- **Held the line on the diet, again.** The RAG diet passage repeats the sample-plan
+  labelling verbatim rather than letting retrieval turn it into personalised nutrition —
+  same reasoning as the caretaker-mode decision above.
+- **14 tests (`rag.test.js`)** lock the routing (diet → sample plan, money → PMMVY, nausea
+  → nausea FAQ incl. romanised, yoga → exercise, hospital → Pune passage, week → milestone),
+  the empty/off-topic = no-grounding guarantee, sorting, the limit cap, and that the
+  supplements FAQ names no dose. 101 tests pass overall; production build clean.
+
 ## PWA + offline
 
 - **Added installability + offline** with no new dependencies: `public/manifest.webmanifest`,
