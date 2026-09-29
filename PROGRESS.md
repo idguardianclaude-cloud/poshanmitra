@@ -134,6 +134,17 @@ Ran a two-agent audit (pages + libs/data) before deploy and fixed everything act
 - Gemini model re-verified live (`gemini-3.1-flash-lite`, HTTP 200); chat works in
   English and Hindi. 79 tests pass; production build clean.
 
+## Final deploy version (30 Sep 2026)
+
+- **Proper input validation everywhere** — `src/lib/validate.js` (unit-tested): Indian
+  mobile (normalises +91 / leading 0, requires 6–9 start), optional-valid email, name
+  cleaning (trim/collapse/cap, reject digits-only), age 14–60, pregnancy-date sanity,
+  message cap. Wired into Login, Onboarding, the Eligibility wizard, Settings and Chat,
+  with trilingual inline error messages and gated submit buttons.
+- **Caretaker mode**: Mitra is personalised to her profile and gives general (never
+  therapeutic/condition-specific) diet guidance — verified live.
+- 87 tests pass; production build clean; live preview refreshed (v3).
+
 ## If you want to pick something up next
 
 See `NEXT_STEPS.md`. First three: backend proxy for the API key, red-flag tuning
