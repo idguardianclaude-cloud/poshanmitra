@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button.jsx'
 import { Illustration } from '../components/Illustration.jsx'
 import { DisclaimerFooter } from '../components/layout/DisclaimerFooter.jsx'
 import { useT } from '../lib/i18n.js'
+import { normalizeMobile, isValidMobile } from '../lib/validate.js'
 
 export function Login() {
   const { login, profile } = useProfile()
@@ -14,8 +15,7 @@ export function Login() {
   const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
 
-  const digits = phone.replace(/\D/g, '')
-  const valid = digits.length === 10
+  const valid = isValidMobile(phone)
 
   const handleContinue = (e) => {
     e.preventDefault()
@@ -73,9 +73,10 @@ export function Login() {
                     type="tel"
                     inputMode="numeric"
                     autoComplete="tel"
+                    maxLength={10}
                     value={phone}
                     onChange={(e) => {
-                      setPhone(e.target.value)
+                      setPhone(normalizeMobile(e.target.value))
                       setError('')
                     }}
                     placeholder="98765 43210"

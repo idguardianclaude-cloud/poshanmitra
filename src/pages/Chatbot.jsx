@@ -19,6 +19,7 @@ import { askMitra, FALLBACKS } from '../lib/gemini.js'
 import { startListening, speak, stopSpeaking, speechSupported } from '../lib/speech.js'
 import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
 import { formatIN, nextCheckupDate } from '../lib/dates.js'
+import { cleanMessage, MAX_MESSAGE } from '../lib/validate.js'
 import { EmergencyScreen } from '../components/EmergencyScreen.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Chip } from '../components/ui/Chip.jsx'
@@ -87,7 +88,7 @@ export function Chatbot() {
   }
 
   async function send(rawText) {
-    const text = String(rawText || '').trim()
+    const text = cleanMessage(String(rawText || '').trim())
     if (!text || typing) return
     setInput('')
 
@@ -277,6 +278,7 @@ export function Chatbot() {
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  maxLength={MAX_MESSAGE}
                   placeholder={t('chat.placeholder')}
                   aria-label={t('chat.placeholder')}
                   className="flex-1 rounded-xl border border-line bg-canvas px-4 py-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"

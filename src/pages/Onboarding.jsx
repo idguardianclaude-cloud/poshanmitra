@@ -8,6 +8,7 @@ import { Chip } from '../components/ui/Chip.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { DisclaimerFooter } from '../components/layout/DisclaimerFooter.jsx'
 import { useT, translate } from '../lib/i18n.js'
+import { cleanName, isValidName, isValidAge, validatePregnancyDate } from '../lib/validate.js'
 
 // Five questions, asked one at a time, chat-style. Every answer is saved
 // immediately (resume on reload). Every question offers Skip / I don't know,
@@ -59,6 +60,7 @@ export function Onboarding() {
   const [dateValue, setDateValue] = useState('')
   const [ageValue, setAgeValue] = useState('')
   const [multi, setMulti] = useState([])
+  const [err, setErr] = useState('')
   const endRef = useRef(null)
 
   const q = QUESTIONS[step]
@@ -115,6 +117,7 @@ export function Onboarding() {
     setDateValue('')
     setAgeValue('')
     setMulti([])
+    setErr('')
 
     if (nextStep >= QUESTIONS.length) finish(nextAnswers)
   }
@@ -177,15 +180,20 @@ export function Onboarding() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
-                  const v = textValue.trim()
-                  if (v) advance(v, v)
+                  const v = cleanName(textValue)
+                  if (isValidName(v)) advance(v, v)
+                  else setErr(t('valid.name'))
                 }}
                 className="flex items-center gap-2"
               >
                 <input
                   autoFocus
+                  maxLength={40}
                   value={textValue}
-                  onChange={(e) => setTextValue(e.target.value)}
+                  onChange={(e) => {
+                    setTextValue(e.target.value)
+                    setErr('')
+                  }}
                   placeholder={t('onboarding.typeName')}
                   className="flex-1 rounded-xl border border-line bg-canvas px-4 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 />
@@ -209,18 +217,32 @@ export function Onboarding() {
                   <form
                     onSubmit={(e) => {
                       e.preventDefault()
-                      if (dateValue) {
-                        const label =
-                          dateBasis === 'due' ? t('onboarding.dueLabel') : t('onboarding.lmpLabel')
-                        advance({ basis: dateBasis, date: dateValue }, label + dateValue)
+                      const code = validatePregnancyDate(dateValue, dateBasis)
+                      if (code) {
+                        setErr(
+                          code === 'future'
+                            ? t('valid.dateFuture')
+                            : code === 'past'
+                            ? t('valid.datePast')
+                            : code === 'required'
+                            ? t('valid.required')
+                            : t('valid.dateRange')
+                        )
+                        return
                       }
+                      const label =
+                        dateBasis === 'due' ? t('onboarding.dueLabel') : t('onboarding.lmpLabel')
+                      advance({ basis: dateBasis, date: dateValue }, label + dateValue)
                     }}
                     className="flex items-center gap-2"
                   >
                     <input
                       type="date"
                       value={dateValue}
-                      onChange={(e) => setDateValue(e.target.value)}
+                      onChange={(e) => {
+                        setDateValue(e.target.value)
+                        setErr('')
+                      }}
                       className="flex-1 rounded-xl border border-line bg-canvas px-4 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                     />
                     <Button type="submit" disabled={!dateValue}>
@@ -255,7 +277,8 @@ export function Onboarding() {
                     onSubmit={(e) => {
                       e.preventDefault()
                       const n = parseInt(textValue, 10)
-                      if (n > 0) advance(n, `${n} ${t('onboarding.years')}`)
+                      if (isValidAge(n)) advance(n, `${n} ${t('onboarding.years')}`)
+                      else setErr(t('valid.age'))
                     }}
                     className="flex items-center gap-2"
                   >
@@ -265,7 +288,10 @@ export function Onboarding() {
                       max="60"
                       autoFocus
                       value={textValue}
-                      onChange={(e) => setTextValue(e.target.value)}
+                      onChange={(e) => {
+                        setTextValue(e.target.value)
+                        setErr('')
+                      }}
                       placeholder={t('onboarding.enterAge')}
                       className="flex-1 rounded-xl border border-line bg-canvas px-4 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                     />
@@ -324,6 +350,8 @@ export function Onboarding() {
                 </Button>
               </div>
             )}
+
+            {err && <p className="mt-2 text-xs text-red-600">{err}</p>}
 
             {/* Universal skip */}
             <div className="mt-3">

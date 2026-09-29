@@ -17,6 +17,7 @@ import { Badge } from '../components/ui/Badge.jsx'
 import { schemes } from '../data/schemes.js'
 import { evaluateEligibility, STATUS } from '../lib/eligibility.js'
 import { ordinalMonth } from '../lib/pregnancy.js'
+import { isValidName, isValidAge, isValidMobile, isValidEmail, normalizeMobile } from '../lib/validate.js'
 import { useT } from '../lib/i18n.js'
 
 const ELIG_KEY = 'poshanmitra_eligibility'
@@ -106,7 +107,15 @@ export function SchemeEligibility() {
   }
 
   const step1Valid =
-    a.fullName && a.age && a.state && a.district && a.city && /^\d{10}$/.test(a.mobile.replace(/\D/g, '')) && a.citizen && a.hasAadhaar
+    isValidName(a.fullName) &&
+    isValidAge(a.age) &&
+    a.state &&
+    a.district &&
+    String(a.city).trim() &&
+    isValidMobile(a.mobile) &&
+    isValidEmail(a.email) &&
+    a.citizen &&
+    a.hasAadhaar
   const step2Valid = a.income && a.rationCard && a.category && a.govtEmployee && a.bankLinkedAadhaar
   const step3Valid = a.pregnancyNumber && a.currentMonth && a.anganwadiRegistered && a.hospitalDelivery && a.mcpCard
 
@@ -236,6 +245,10 @@ function Field({ label, optional, optionalText, children, valid }) {
 const inputCls =
   'w-full rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500'
 
+function FieldError({ text }) {
+  return <p className="mt-1 text-xs text-red-600">{text}</p>
+}
+
 // `options` are canonical values (stored); display is translated via optLabel.
 function Radio({ label, options, value, onChange, valid, t }) {
   return (
@@ -264,11 +277,13 @@ function Step1({ a, set, t }) {
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-ink">{t('elig.steps.basic')}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label={t('elig.fullName')} valid={!!a.fullName}>
-          <input className={inputCls} value={a.fullName} onChange={(e) => set('fullName', e.target.value)} />
+        <Field label={t('elig.fullName')} valid={isValidName(a.fullName)}>
+          <input className={inputCls} maxLength={40} value={a.fullName} onChange={(e) => set('fullName', e.target.value)} />
+          {a.fullName && !isValidName(a.fullName) && <FieldError text={t('valid.name')} />}
         </Field>
-        <Field label={t('elig.age')} valid={!!a.age}>
+        <Field label={t('elig.age')} valid={isValidAge(a.age)}>
           <input type="number" min="14" max="60" className={inputCls} value={a.age} onChange={(e) => set('age', e.target.value)} />
+          {a.age && !isValidAge(a.age) && <FieldError text={t('valid.age')} />}
         </Field>
         <Field label={t('elig.state')} valid={!!a.state}>
           <select
@@ -292,23 +307,37 @@ function Step1({ a, set, t }) {
             <option>Other</option>
           </select>
         </Field>
-        <Field label={t('elig.cityVillage')} valid={!!a.city}>
-          <input className={inputCls} value={a.city} onChange={(e) => set('city', e.target.value)} />
+        <Field label={t('elig.cityVillage')} valid={!!String(a.city).trim()}>
+          <input className={inputCls} maxLength={60} value={a.city} onChange={(e) => set('city', e.target.value)} />
         </Field>
-        <Field label={t('elig.mobile')} valid={/^\d{10}$/.test(a.mobile.replace(/\D/g, ''))}>
+        <Field label={t('elig.mobile')} valid={isValidMobile(a.mobile)}>
           <div className="flex items-center rounded-xl border border-line bg-canvas focus-within:ring-2 focus-within:ring-indigo-500">
             <span className="pl-3 pr-1.5 text-sm text-ink-muted">+91</span>
             <input
               type="tel"
               inputMode="numeric"
+              maxLength={10}
               className="flex-1 bg-transparent py-2.5 pr-3 text-sm focus:outline-none"
               value={a.mobile}
-              onChange={(e) => set('mobile', e.target.value)}
+              onChange={(e) => set('mobile', normalizeMobile(e.target.value))}
             />
           </div>
+          {a.mobile && !isValidMobile(a.mobile) && <FieldError text={t('valid.mobile')} />}
         </Field>
-        <Field label={t('elig.email')} optional optionalText={t('elig.optional')} valid={false}>
-          <input type="email" className={inputCls} value={a.email} onChange={(e) => set('email', e.target.value)} />
+        <Field
+          label={t('elig.email')}
+          optional
+          optionalText={t('elig.optional')}
+          valid={!!String(a.email).trim() && isValidEmail(a.email)}
+        >
+          <input
+            type="email"
+            className={inputCls}
+            maxLength={80}
+            value={a.email}
+            onChange={(e) => set('email', e.target.value)}
+          />
+          {!!String(a.email).trim() && !isValidEmail(a.email) && <FieldError text={t('valid.email')} />}
         </Field>
       </div>
       <Radio label={t('elig.citizen')} options={['Yes', 'No']} value={a.citizen} onChange={(v) => set('citizen', v)} valid={!!a.citizen} t={t} />

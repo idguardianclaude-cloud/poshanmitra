@@ -7,6 +7,7 @@ import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { useT, LANGS } from '../lib/i18n.js'
 import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
+import { cleanName, isValidName } from '../lib/validate.js'
 
 const FOODS = ['Vegetarian', 'Non-vegetarian', 'Eggetarian', 'Jain']
 
@@ -20,10 +21,13 @@ export function Settings() {
   const [notif, setNotif] = useState(storage.getNotifications())
   const [saved, setSaved] = useState(false)
 
-  const dirty = name.trim() !== (profile?.name || '') || food !== (profile?.food || '')
+  const nameOk = isValidName(name)
+  const dirty =
+    (nameOk && cleanName(name) !== (profile?.name || '')) || food !== (profile?.food || '')
 
   function save() {
-    updateProfile({ name: name.trim() || profile?.name, food: food || null })
+    if (!nameOk) return
+    updateProfile({ name: cleanName(name), food: food || null })
     setSaved(true)
     setTimeout(() => setSaved(false), 1800)
   }
@@ -57,9 +61,11 @@ export function Settings() {
               <span className="text-[13px] font-medium text-ink mb-1.5 block">{t('settings.editName')}</span>
               <input
                 value={name}
+                maxLength={40}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               />
+              {name && !nameOk && <p className="mt-1 text-xs text-red-600">{t('valid.name')}</p>}
             </label>
 
             <label className="block">
@@ -101,7 +107,7 @@ export function Settings() {
             </div>
 
             <div className="flex items-center gap-3 pt-1">
-              <Button onClick={save} disabled={!dirty}>
+              <Button onClick={save} disabled={!dirty || !nameOk}>
                 {saved ? (
                   <>
                     <Check size={16} /> {t('settings.saved')}
