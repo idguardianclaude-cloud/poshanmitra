@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Play, Clock, Eye, TrendingUp, Bell, Check, MessageSquare, ExternalLink, BadgeCheck } from 'lucide-react'
+import { Search, Play, TrendingUp, Bell, Check, MessageSquare, ExternalLink, BadgeCheck } from 'lucide-react'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Button } from '../components/ui/Button.jsx'
@@ -150,11 +150,24 @@ export function Videos() {
                 const v = videos.find((x) => x.id === c.id)
                 return (
                   <li key={c.id}>
-                    <button onClick={() => v && setPlaying(v)} className="w-full text-left group">
-                      <p className="text-sm text-ink group-hover:text-indigo-600 line-clamp-2">{c.title}</p>
-                      <div className="mt-1.5 h-1.5 rounded-full bg-canvas overflow-hidden">
-                        <div className="h-full bg-indigo-600" style={{ width: `${c.progress}%` }} />
-                      </div>
+                    <button onClick={() => v && setPlaying(v)} className="w-full flex gap-3 text-left group">
+                      <span className="relative w-24 shrink-0 aspect-video rounded-lg overflow-hidden bg-canvas">
+                        {v?.youtubeId && (
+                          <img
+                            src={ytThumb(v.youtubeId)}
+                            alt=""
+                            loading="lazy"
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none'
+                            }}
+                          />
+                        )}
+                        <span className="absolute bottom-0 left-0 right-0 h-1 bg-black/25">
+                          <span className="block h-full bg-red-600" style={{ width: `${c.progress}%` }} />
+                        </span>
+                      </span>
+                      <p className="flex-1 text-sm text-ink group-hover:text-indigo-600 line-clamp-2">{c.title}</p>
                     </button>
                   </li>
                 )
@@ -172,11 +185,24 @@ export function Videos() {
                 const v = videos.find((x) => x.id === tr.id)
                 return (
                   <li key={`${tr.id}-${i}`}>
-                    <button onClick={() => v && setPlaying(v)} className="w-full flex items-start gap-3 text-left group">
+                    <button onClick={() => v && setPlaying(v)} className="w-full flex items-center gap-2.5 text-left group">
                       <span className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold flex items-center justify-center shrink-0">
                         {i + 1}
                       </span>
-                      <span>
+                      <span className="relative w-20 shrink-0 aspect-video rounded-md overflow-hidden bg-canvas">
+                        {v?.youtubeId && (
+                          <img
+                            src={ytThumb(v.youtubeId)}
+                            alt=""
+                            loading="lazy"
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none'
+                            }}
+                          />
+                        )}
+                      </span>
+                      <span className="min-w-0 flex-1">
                         <span className="block text-sm text-ink group-hover:text-indigo-600 line-clamp-2">{tr.title}</span>
                         <span className="block text-xs text-ink-faint line-clamp-1">{tr.channel}</span>
                       </span>
@@ -218,15 +244,34 @@ function dur(v) {
   return m * 60 + s
 }
 
+// Real YouTube thumbnail — public, keyless. hqdefault (480x360) always exists;
+// object-cover crops it to a clean 16:9 like YouTube's own cards.
+function ytThumb(id) {
+  return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+}
+
 function VideoCard({ video, onPlay }) {
   return (
     <div className="rounded-2xl bg-white border border-line shadow-card overflow-hidden">
-      <button onClick={onPlay} className="relative w-full h-36 flex items-center justify-center group" style={{ backgroundColor: video.tint }}>
-        <span className="w-12 h-12 rounded-full bg-white/85 flex items-center justify-center group-hover:scale-105 transition-transform">
-          <Play size={20} className="text-indigo-600 ml-0.5" />
+      <button onClick={onPlay} className="relative w-full aspect-video overflow-hidden group" style={{ backgroundColor: video.tint }}>
+        {video.youtubeId && (
+          <img
+            src={ytThumb(video.youtubeId)}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none'
+            }}
+          />
+        )}
+        <span className="absolute inset-0 flex items-center justify-center">
+          <span className="w-12 h-12 rounded-full bg-black/55 group-hover:bg-red-600 flex items-center justify-center transition-colors">
+            <Play size={20} className="text-white ml-0.5" fill="currentColor" />
+          </span>
         </span>
-        <span className="absolute bottom-2 right-2 flex items-center gap-1 text-[11px] text-white bg-black/60 rounded px-1.5 py-0.5">
-          <Clock size={11} /> {video.duration}
+        <span className="absolute bottom-2 right-2 text-[11px] font-medium text-white bg-black/80 rounded px-1.5 py-0.5">
+          {video.duration}
         </span>
       </button>
       <div className="p-3">
@@ -240,9 +285,7 @@ function VideoCard({ video, onPlay }) {
         </div>
         <p className="mt-2 text-sm font-medium text-ink line-clamp-2">{video.title}</p>
         {video.channel && (
-          <p className="mt-1 flex items-center gap-1 text-xs text-ink-faint line-clamp-1">
-            <Eye size={12} /> {video.channel}
-          </p>
+          <p className="mt-1 text-xs text-ink-faint line-clamp-1">{video.channel}</p>
         )}
       </div>
     </div>
