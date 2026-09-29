@@ -76,10 +76,23 @@ below is designed to need **none** of that.
 - [ ] **Clinician review** of generated medical content (weekly info, diet) before real users.
 - [ ] **IFCT/ICMR-verified** diet numbers (stays "Sample plan" until provided).
 
+## Deployment hardening (done 30 Sep 2026 — no account needed)
+- [x] **Code-split routing** — lazy-load every page except Login/Dashboard behind a
+      Suspense spinner. Leaflet (map), charts (Reports) and Gemini (Chat) download only
+      when opened. Initial bundle **190KB → 92KB gzipped (~52% smaller)**; >500KB warning
+      gone. Matters for Tier 2-3 mobile connections. Verified in-browser (spinner → chunk
+      → page render, 0 errors).
+- [x] **ErrorBoundary** — top-level boundary so a component crash can't white-screen the
+      app; localized (EN/HI/MR) recovery card with Reload / Go-to-Dashboard, disclaimer
+      footer kept. `src/components/ErrorBoundary.jsx`.
+
 ## Notes / status
 - Gemini chat: WORKING with the user's key (`AQ.Ab8…WhGA`). Caretaker + safety verified.
   Now RAG-grounded over the app's own vetted content (`src/lib/rag.js`).
-- Build: green. Tests: 126 passing (added rag, reports, reminders, whatsapp suites).
-  Reports/Campaigns/Reminders + WhatsApp share verified in a headless-Chromium smoke test
-  (all 10 routes render, 0 console errors, add-reading & add-reminder flows work).
+- Build: green. Tests: 126 passing (validate, redflags, eligibility, rag, reports,
+  reminders, whatsapp suites).
+- **Full in-browser smoke test (fresh tabs): all 11 routes render with 0 console errors**
+  — /, /chat, /diet, /videos, /schemes, /schemes/eligibility, /hospitals (real OSM map),
+  /settings, /checkup, /campaigns, /reports.
+- **No "coming soon" remains anywhere.** Videos was the last, now real Stanford embeds.
 - Live preview artifact (keyless): https://claude.ai/artifact/Jpk2JGydwg3ZP4AH5gsAzW

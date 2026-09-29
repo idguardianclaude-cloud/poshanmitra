@@ -203,3 +203,24 @@ Ran a two-agent audit (pages + libs/data) before deploy and fixed everything act
   or provision keys myself.
 
 See `NEXT_STEPS.md` for the longer-term list.
+
+## Videos real + performance + resilience (30 Sep 2026)
+
+- **Videos are now real, embedded and playable.** Researched and verified (via YouTube
+  oEmbed) the **Stanford Center for Health Education "Grow Great"** maternal series and
+  embedded 9 credibility-checked videos (recognising pregnancy, nutrition, danger signs,
+  breastfeeding, feeding on a budget, baby's first foods, mental health, bonding,
+  immunization). Each card shows a "Verified" badge + the channel; category counts are
+  real; fabricated view/rating fields removed. This closed the last "coming soon".
+- **Code-split routing.** Every page except the first-paint screens (Login, Dashboard) is
+  lazy-loaded behind a Suspense spinner. Heavy deps (Leaflet for the Hospitals map, the
+  chart code for Reports, Gemini for Chat) now download only when their page is opened.
+  Initial bundle: **622KB → 269KB (190KB → 92KB gzipped)**, ~52% smaller — this matters
+  for the target audience on Tier 2-3 mobile connections. The >500KB warning is gone.
+- **ErrorBoundary.** A top-level boundary wraps the app so one throwing component can't
+  white-screen it; it falls back to a calm, localized (EN/HI/MR) recovery card with
+  Reload / Go-to-Dashboard, keeping the disclaimer footer. Details go to console only.
+- **Full smoke test (fresh tabs, production-equivalent):** all 11 routes render with
+  **0 console errors** — /, /chat, /diet, /videos, /schemes, /schemes/eligibility,
+  /hospitals (real Pune OSM map + markers), /settings (reminders), /checkup, /campaigns,
+  /reports. Build green, **126 tests pass**. Pushed to origin/claude/awesome-ramanujan-bbb0f1.
