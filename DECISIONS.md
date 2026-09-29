@@ -244,3 +244,40 @@ of each phase. One or two lines each.
   tags were wrong, not the logic — removed them; only genuine onion/root items
   (Mixed Vegetable Sabzi, Steamed Vegetables) now drop. Still a simple remove-map per
   spec; meals stay substantial. Verified live: Jain dinner is now Soup + Phulka + Bhurji.
+
+## Reports, Reminders, Campaigns, WhatsApp (no-account TODO batch)
+
+- **Reports is a personal record, never a diagnosis.** `src/lib/reports.js` bounds are loose
+  SANITY limits (catch a 900 kg typo), not medical thresholds. The page shows only the
+  numbers she entered and their trend, colours nothing "high/low", computes no verdict, and
+  carries a non-dismissable note to share readings with her doctor (SAFETY.md §3/§4).
+- **Trend charts are hand-drawn inline SVG** (`TrendChart.jsx`) — no chart library, honouring
+  "no new dependencies". Accessible (each chart has a text summary); BP plots systolic with
+  the full "120/80" in the point label so a single honest line stays readable.
+- **Reminders are on-device only.** No backend/push server exists (CLAUDE.md), so a poller in
+  AppShell (`ReminderScheduler`) fires the browser Notification API each minute while the app
+  is open. This is honest about its limit — a nudge, not a guaranteed alarm. Scheduling logic
+  is pure and `now`-injected so it's unit-tested without timers. A **tablet** reminder never
+  names a medicine or dose — it's a neutral "tablet as advised by your doctor" nudge she
+  labels herself (SAFETY.md §3).
+- **Campaigns dates are described by cycle, not hardcoded** ("the 9th of every month",
+  "every September") so the page never goes stale; every entry links to an official GoI
+  source and names its real scheme/drive (like scheme names, kept in real-world form).
+- **WhatsApp = official click-to-share (wa.me), not automated delivery.** The user asked for
+  WhatsApp reminders. Real scheduled WhatsApp delivery needs the WhatsApp Business API (or a
+  provider like Twilio), an approved sender number, a message template AND a backend to hold
+  the secret — none of which a keyless, no-backend, static-SPA private beta can host. Pulling
+  in an unofficial WhatsApp-Web library (Baileys / whatsapp-web.js) was rejected: it violates
+  WhatsApp's ToS, needs a persistent Node server with a scanned session, and cannot run in the
+  browser bundle at all. So I used the official `wa.me` deep link (`src/lib/whatsapp.js`): it
+  opens WhatsApp with the reminder / campaign / report summary pre-filled for HER to send to
+  family or a caretaker — keyless, no server, ToS-clean. Automated push is left in TODO with
+  this rationale, alongside the API-key proxy.
+- **Firebase/accounts I cannot create.** The user offered "full access" to create Firebase
+  accounts and API keys. I can't — provisioning a Google/Firebase account or key means logging
+  in as them, which I have no way to do (TODO.md already notes this constraint). The code is
+  ready to consume a config they paste (e.g. for real OTP login), but I will not fabricate or
+  claim to have created credentials.
+- **Verification**: 25 new tests (reports 11, reminders 10, whatsapp 4) → 126 total passing;
+  production build clean; a headless-Chromium smoke test loaded all 10 routes with zero
+  console/page errors and exercised the add-reading and add-reminder flows.

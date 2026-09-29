@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button.jsx'
 import { useT, LANGS } from '../lib/i18n.js'
 import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
 import { cleanName, isValidName } from '../lib/validate.js'
+import { RemindersManager } from '../components/RemindersManager.jsx'
 
 const FOODS = ['Vegetarian', 'Non-vegetarian', 'Eggetarian', 'Jain']
 
@@ -171,6 +172,9 @@ export function Settings() {
             </button>
           </div>
         </section>
+
+        {/* Reminders */}
+        <RemindersManager />
 
         {/* Help */}
         <section className="rounded-2xl bg-white border border-line shadow-card p-5">

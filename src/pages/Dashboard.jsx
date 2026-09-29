@@ -33,6 +33,9 @@ import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
 import { formatIN, nextCheckupDate } from '../lib/dates.js'
 import { Illustration } from '../components/Illustration.jsx'
 import { useT } from '../lib/i18n.js'
+import { storage } from '../lib/storage.js'
+import { upcoming, nextOccurrence } from '../lib/reminders.js'
+import { Bell, Clock } from 'lucide-react'
 
 const PLAN_KEY = 'poshanmitra_plan'
 function loadPlan() {
@@ -280,11 +283,57 @@ export function Dashboard() {
             </div>
           </section>
 
+          {/* Upcoming reminders */}
+          <RemindersCard />
+
           {/* Health Tip */}
           <HealthTip />
         </div>
       </div>
     </>
+  )
+}
+
+function RemindersCard() {
+  const t = useT()
+  const { lang } = useProfile()
+  const list = upcoming(storage.getReminders())
+
+  return (
+    <section className="rounded-2xl bg-white border border-line shadow-card p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-base font-semibold text-ink flex items-center gap-2">
+          <Bell size={17} className="text-indigo-600" /> {t('reminders.upcoming')}
+        </h2>
+        <Link to="/settings" className="text-sm text-indigo-600 hover:text-indigo-700">
+          {t('reminders.manage')}
+        </Link>
+      </div>
+      {list.length === 0 ? (
+        <p className="text-sm text-ink-faint">{t('reminders.noneDash')}</p>
+      ) : (
+        <ul className="space-y-2">
+          {list.map((r) => {
+            const next = nextOccurrence(r)
+            return (
+              <li key={r.id} className="flex items-center gap-3 rounded-xl border border-line px-3 py-2.5">
+                <span className="w-8 h-8 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <Clock size={15} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-ink truncate">
+                    {r.title || t(`reminders.kind.${r.kind}`)}
+                  </p>
+                  <p className="text-xs text-ink-faint">
+                    {r.time} · {next ? formatIN(next, lang) : t(`reminders.repeat.${r.repeat}`)}
+                  </p>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </section>
   )
 }
 

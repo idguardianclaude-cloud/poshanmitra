@@ -8,6 +8,8 @@ const LOGIN_KEY = 'poshanmitra_logged_in'
 const CHAT_KEY = 'poshanmitra_chat'
 const ONBOARD_KEY = 'poshanmitra_onboarding'
 const LANG_KEY = 'poshanmitra_lang'
+const REPORTS_KEY = 'poshanmitra_reports'
+const REMINDERS_KEY = 'poshanmitra_reminders'
 
 function read(key, fallback = null) {
   try {
@@ -52,6 +54,16 @@ export const storage = {
 
   getLang: () => read(LANG_KEY, 'en'),
   setLang: (lang) => write(LANG_KEY, lang),
+
+  // Health reports — a personal on-device log (Hb, BP, blood sugar, weight).
+  // A flat array of readings; the Reports page groups and trends them. This is
+  // her own record, never a clinical result and never interpreted as diagnosis.
+  getReports: () => read(REPORTS_KEY, []),
+  setReports: (list) => write(REPORTS_KEY, list),
+
+  // Local reminders (ANC visits, tablets). On-device schedule only — no backend.
+  getReminders: () => read(REMINDERS_KEY, []),
+  setReminders: (list) => write(REMINDERS_KEY, list),
 
   getNotifications: () => read('poshanmitra_notifications', true) !== false,
   setNotifications: (v) => write('poshanmitra_notifications', v),

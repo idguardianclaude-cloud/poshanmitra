@@ -27,13 +27,30 @@ below is designed to need **none** of that.
       section in the system prompt tells her to prefer these facts but that it NEVER loosens a
       safety rule. Runs only after the red-flag layer clears a message. 14 new tests (101 total
       passing); build green. See DECISIONS.md.
-- [ ] **Reports** (`/reports`) — real local tracking: manually log Hb, BP, blood sugar,
-      weight; simple trend charts; stored on-device. Replaces the stub.
-- [ ] **Local reminders** — ANC-visit / tablet reminders via the browser Notification API
-      + on-device schedule (no backend). Surface on dashboard + a manage UI in Settings.
-- [ ] **Campaigns** (`/campaigns`) — real content: current GoI maternal-child health
-      drives (Poshan Maah, Mission Indradhanush, PMSMA, etc.) with what/when/where + links.
-      Replaces the stub.
+- [x] **Reports** (`/reports`) — real local tracking: log Hb, BP, blood sugar, weight;
+      dependency-free inline-SVG trend charts; stored on-device (`storage.getReports`).
+      `src/lib/reports.js` (sanity bounds, series/trend helpers — NEVER diagnostic),
+      `src/components/TrendChart.jsx`, `src/pages/Reports.jsx`. Non-dismissable note: it is
+      a personal record, not medical advice; "Send to WhatsApp" shares latest with family/
+      doctor. 11 tests. Verified in-browser (0 console errors, add-reading flow works).
+- [x] **Local reminders** — ANC-visit / tablet / custom reminders via the browser
+      Notification API + on-device schedule (`src/lib/reminders.js`, pure & tested).
+      `ReminderScheduler` polls each minute while the app is open; managed in Settings
+      (`RemindersManager`), surfaced on the Dashboard (upcoming card). Each reminder has a
+      "Send to WhatsApp" share (wa.me) for family/caretakers. A tablet reminder never names
+      a medicine/dose (SAFETY.md). 10 tests. Verified in-browser.
+- [x] **Campaigns** (`/campaigns`) — real GoI maternal-child drives (PMSMA, Poshan Maah,
+      Poshan Pakhwada, Anemia Mukt Bharat, Intensified Mission Indradhanush, SUMAN, VHSND,
+      World Breastfeeding Week) with what/when/where/action + official links; recurring
+      dates described by cycle so they never go stale. `src/data/campaigns.js`,
+      `src/pages/Campaigns.jsx`. Per-campaign "Send to WhatsApp". Verified in-browser.
+
+### WhatsApp sharing (added on request)
+- [x] **WhatsApp click-to-share** (`src/lib/whatsapp.js`, wa.me) on reminders, campaigns and
+      the reports summary — keyless, no backend, fits the no-server architecture. Automated
+      *scheduled* WhatsApp delivery is NOT done: it needs the WhatsApp Business API (or a
+      provider) + an approved number + a backend to hold the secret — out of scope for this
+      keyless private beta (same reason as the API-key proxy). 4 tests.
 - [ ] **Videos** — research credible sources myself (MoHFW/UNICEF/WHO/hospital/OB-GYN
       channels), verify, embed real YouTube IDs (free). Replaces "Video coming soon".
 - [ ] **Chat image upload** — wire multimodal (Gemini vision, same key) so she can send a
@@ -50,5 +67,7 @@ below is designed to need **none** of that.
 ## Notes / status
 - Gemini chat: WORKING with the user's key (`AQ.Ab8…WhGA`). Caretaker + safety verified.
   Now RAG-grounded over the app's own vetted content (`src/lib/rag.js`).
-- Build: green. Tests: 101 passing (added rag.test.js). Dev server managed by preview_start on :5173.
+- Build: green. Tests: 126 passing (added rag, reports, reminders, whatsapp suites).
+  Reports/Campaigns/Reminders + WhatsApp share verified in a headless-Chromium smoke test
+  (all 10 routes render, 0 console errors, add-reading & add-reminder flows work).
 - Live preview artifact (keyless): https://claude.ai/artifact/Jpk2JGydwg3ZP4AH5gsAzW

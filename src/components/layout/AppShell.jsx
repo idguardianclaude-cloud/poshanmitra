@@ -3,12 +3,14 @@ import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar.jsx'
 import { Header } from './Header.jsx'
 import { DisclaimerFooter } from './DisclaimerFooter.jsx'
+import { ReminderScheduler } from '../ReminderScheduler.jsx'
 
 export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-canvas">
+      <ReminderScheduler />
       <Sidebar open={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />
 
       {/* Backdrop for mobile drawer */}

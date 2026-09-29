@@ -162,8 +162,30 @@ Ran a two-agent audit (pages + libs/data) before deploy and fixed everything act
   milestone+movement FAQ).
 - **Tests**: added `src/lib/rag.test.js` (14 tests). **101 tests pass**; `npm run build` clean.
 
-## If you want to pick something up next
+## Reports + Reminders + Campaigns + WhatsApp (29 Sep 2026)
 
-See `NEXT_STEPS.md` and the remaining unchecked boxes in `TODO.md` (Reports, Local
-reminders, Campaigns, Videos, Chat image upload, API-key proxy). Next up in TODO order:
-**Reports** (`/reports`) — local Hb/BP/sugar/weight tracking with trend charts.
+- **Reports** (`/reports`): on-device log of Hb / BP / blood sugar / weight with
+  dependency-free inline-SVG trend charts. Personal record only — no diagnosis, no
+  thresholds, non-dismissable "share with your doctor" note. `src/lib/reports.js`,
+  `src/components/TrendChart.jsx`, `src/pages/Reports.jsx`.
+- **Local reminders**: ANC / tablet / custom reminders via the Notification API +
+  an on-device poller (`ReminderScheduler`, runs while the app is open). Managed in
+  Settings (`RemindersManager`), surfaced on the Dashboard. Tablet reminders never name a
+  medicine/dose. `src/lib/reminders.js`.
+- **Campaigns** (`/campaigns`): real GoI maternal-child drives (PMSMA, Poshan Maah, AMB,
+  IMI, SUMAN, VHSND, Breastfeeding Week…) with official links; recurring dates by cycle so
+  nothing goes stale. `src/data/campaigns.js`, `src/pages/Campaigns.jsx`.
+- **WhatsApp share** (`src/lib/whatsapp.js`, official wa.me): send a reminder / campaign /
+  report summary to family or a caretaker — keyless, no backend. Automated scheduled
+  WhatsApp delivery is NOT built (needs WhatsApp Business API + backend; see TODO/DECISIONS).
+- Deleted the now-unused `StubPage.jsx`. **126 tests pass**; build clean; headless-Chromium
+  smoke test: all 10 routes render with 0 console errors, add-reading & add-reminder flows work.
+
+## Still open in TODO
+
+Videos (verified YouTube IDs — held on safety grounds; improving with official channel
+links instead), Chat image upload (Gemini vision), and the API-key proxy (deferred:
+CLAUDE.md says not to build a proxy for this beta). The "Needs the user" items (real OTP
+login, clinician review, IFCT/ICMR diet numbers) need accounts/keys I can't create.
+
+See `NEXT_STEPS.md` for the longer-term list.
