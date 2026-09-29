@@ -16,6 +16,7 @@ import { useProfile } from '../context/ProfileContext.jsx'
 import { storage } from '../lib/storage.js'
 import { checkRedFlags } from '../lib/redflags.js'
 import { askMitra, FALLBACKS } from '../lib/gemini.js'
+import { readAndDownscaleImage, isImageFile } from '../lib/image.js'
 import { startListening, speak, stopSpeaking, speechSupported } from '../lib/speech.js'
 import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
 import { formatIN, nextCheckupDate } from '../lib/dates.js'
@@ -56,6 +57,8 @@ export function Chatbot() {
   const [emergency, setEmergency] = useState(null) // null | { lang }
   const [autoSpeak, setAutoSpeak] = useState(false)
   const [listening, setListening] = useState(false)
+  const [pendingImage, setPendingImage] = useState(null) // { dataUrl, base64, mimeType }
+  const fileInputRef = useRef(null)
   const stopListenRef = useRef(null)
   const endRef = useRef(null)
   const [params, setParams] = useSearchParams()
@@ -88,28 +91,46 @@ export function Chatbot() {
   }
 
   async function send(rawText) {
+    const image = pendingImage
     const text = cleanMessage(String(rawText || '').trim())
-    if (!text || typing) return
+    // Allow sending an image with no caption; otherwise require text.
+    if ((!text && !image) || typing) return
     setInput('')
+    setPendingImage(null)
 
     // Snapshot history BEFORE adding the new user turn (for Gemini context).
+    // Past image turns carry a short placeholder so history text is never empty.
     const history = messages.map((m) => ({
       role: m.role === 'user' ? 'user' : 'model',
-      text: m.text,
+      text: m.text || (m.image ? '[shared a photo]' : ''),
     }))
 
-    pushMessage({ role: 'user', text })
+    pushMessage({ role: 'user', text, image: image?.dataUrl || null })
 
-    // ---- SAFETY LAYER 1: red flags. Never reaches Gemini on a match. ----
-    const flag = checkRedFlags(text)
-    if (flag.matched) {
-      setEmergency({ lang })
-      return
+    // ---- SAFETY LAYER 1: red flags on the caption. Never reaches Gemini on a
+    // match. (An image alone can't be red-flag scanned; the image-safety rules
+    // in the system prompt and the urgency re-check below still apply.) ----
+    if (text) {
+      const flag = checkRedFlags(text)
+      if (flag.matched) {
+        setEmergency({ lang })
+        return
+      }
     }
+
+    // A photo with no caption gets a neutral, safe prompt.
+    const promptText =
+      text || 'I am sharing a photo. Please give me general information only, and tell me if I should see my doctor.'
 
     // ---- Clean → Gemini (SAFETY LAYER 2 re-checks urgency) ----
     setTyping(true)
-    const res = await askMitra({ message: text, lang, history, profile })
+    const res = await askMitra({
+      message: promptText,
+      lang,
+      history,
+      profile,
+      image: image ? { data: image.base64, mimeType: image.mimeType } : null,
+    })
     setTyping(false)
 
     if (res.error === 'no-key') {
@@ -139,6 +160,18 @@ export function Chatbot() {
   function handleSubmit(e) {
     e.preventDefault()
     send(input)
+  }
+
+  async function handleImagePick(e) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-picking the same file
+    if (!isImageFile(file)) return
+    try {
+      const img = await readAndDownscaleImage(file)
+      setPendingImage(img)
+    } catch {
+      /* ignore unreadable images */
+    }
   }
 
   function toggleVoice() {
@@ -244,12 +277,21 @@ export function Chatbot() {
                 </button>
 
                 <button
-                  disabled
-                  title={t('common.comingSoon')}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[13px] font-medium text-ink-faint bg-white cursor-not-allowed"
+                  onClick={() => fileInputRef.current?.click()}
+                  title={t('chat.uploadImage')}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-[13px] font-medium text-ink bg-white hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 >
                   <ImagePlus size={14} /> {t('chat.uploadImage')}
                 </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImagePick}
+                  className="hidden"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                />
 
                 <button
                   onClick={injectHealthSummary}
@@ -274,6 +316,24 @@ export function Chatbot() {
                 </button>
               </div>
 
+              {pendingImage && (
+                <div className="mb-3 inline-flex items-center gap-3 rounded-xl border border-line bg-canvas p-2">
+                  <img
+                    src={pendingImage.dataUrl}
+                    alt={t('chat.imageAttached')}
+                    className="w-14 h-14 rounded-lg object-cover"
+                  />
+                  <span className="text-xs text-ink-muted">{t('chat.imageAttached')}</span>
+                  <button
+                    onClick={() => setPendingImage(null)}
+                    aria-label={t('chat.removeImage')}
+                    className="p-1 rounded-lg text-ink-faint hover:text-red-600 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="flex items-center gap-2">
                 <input
                   value={input}
@@ -285,7 +345,7 @@ export function Chatbot() {
                 />
                 <button
                   type="submit"
-                  disabled={!input.trim() || typing}
+                  disabled={(!input.trim() && !pendingImage) || typing}
                   className="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white w-12 h-12 hover:bg-indigo-700 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
                   aria-label="Send"
                 >
@@ -356,9 +416,18 @@ function MessageBubble({ msg, lang, isLastMitra, onChip }) {
     return (
       <div className="flex justify-end">
         <div className="max-w-[80%]">
-          <div className="rounded-2xl rounded-tr-sm bg-indigo-50 text-ink px-4 py-2.5 text-sm">
-            {msg.text}
-          </div>
+          {msg.image && (
+            <img
+              src={msg.image}
+              alt={t('chat.imageAttached')}
+              className="mb-1 ml-auto max-w-[200px] rounded-2xl rounded-tr-sm border border-line"
+            />
+          )}
+          {msg.text && (
+            <div className="rounded-2xl rounded-tr-sm bg-indigo-50 text-ink px-4 py-2.5 text-sm">
+              {msg.text}
+            </div>
+          )}
           <div className="flex items-center justify-end gap-1 mt-1 text-[11px] text-ink-faint">
             {fmtTime(msg.ts)} <CheckCheck size={13} className="text-indigo-500" />
           </div>

@@ -186,6 +186,8 @@ export const translations = {
       voiceInput: 'Voice Input',
       listening: 'Listening…',
       uploadImage: 'Upload Image',
+      imageAttached: 'Photo attached',
+      removeImage: 'Remove photo',
       healthSummary: 'My Health Summary',
       autoSpeakOn: 'Auto-speak on',
       autoSpeakOff: 'Auto-speak off',
@@ -408,6 +410,10 @@ export const translations = {
       comingSoon: 'Video coming soon',
       comingSoonBody:
         'We only show videos from verified, credible sources — hospitals, government health channels and qualified doctors. This one is still being verified.',
+      verifiedNote:
+        'We only embed videos from verified, credible sources. Until this one is verified, ask Mitra about it or read trusted information from an official health source.',
+      askAbout: 'Ask Mitra about this',
+      officialSource: 'Official source',
     },
     stub: {
       comingSoon: 'Coming soon in the next update.',
@@ -682,6 +688,8 @@ export const translations = {
       voiceInput: 'आवाज़ से बोलें',
       listening: 'सुन रही हूँ…',
       uploadImage: 'तस्वीर भेजें',
+      imageAttached: 'तस्वीर जोड़ी गई',
+      removeImage: 'तस्वीर हटाएं',
       healthSummary: 'मेरा स्वास्थ्य सारांश',
       autoSpeakOn: 'स्वतः बोलना चालू',
       autoSpeakOff: 'स्वतः बोलना बंद',
@@ -904,6 +912,10 @@ export const translations = {
       comingSoon: 'वीडियो जल्द आ रहा है',
       comingSoonBody:
         'हम केवल सत्यापित, भरोसेमंद स्रोतों — अस्पतालों, सरकारी स्वास्थ्य चैनलों और योग्य डॉक्टरों — के वीडियो दिखाते हैं। यह अभी सत्यापित किया जा रहा है।',
+      verifiedNote:
+        'हम केवल सत्यापित, भरोसेमंद स्रोतों के वीडियो दिखाते हैं। जब तक यह सत्यापित नहीं होता, इसके बारे में मित्रा से पूछें या किसी आधिकारिक स्वास्थ्य स्रोत से भरोसेमंद जानकारी पढ़ें।',
+      askAbout: 'इसके बारे में मित्रा से पूछें',
+      officialSource: 'आधिकारिक स्रोत',
     },
     stub: {
       comingSoon: 'अगले अपडेट में जल्द आ रहा है।',
@@ -1178,6 +1190,8 @@ export const translations = {
       voiceInput: 'आवाजाने बोला',
       listening: 'ऐकत आहे…',
       uploadImage: 'फोटो पाठवा',
+      imageAttached: 'फोटो जोडला',
+      removeImage: 'फोटो काढा',
       healthSummary: 'माझा आरोग्य सारांश',
       autoSpeakOn: 'स्वयं-बोलणे चालू',
       autoSpeakOff: 'स्वयं-बोलणे बंद',
@@ -1400,6 +1414,10 @@ export const translations = {
       comingSoon: 'व्हिडिओ लवकरच येत आहे',
       comingSoonBody:
         'आम्ही फक्त सत्यापित, विश्वासार्ह स्रोतांचे — रुग्णालये, सरकारी आरोग्य चॅनेल आणि पात्र डॉक्टर — व्हिडिओ दाखवतो. हा अजून तपासला जात आहे.',
+      verifiedNote:
+        'आम्ही फक्त सत्यापित, विश्वासार्ह स्रोतांचे व्हिडिओ दाखवतो. हा तपासेपर्यंत, याबद्दल मित्राला विचारा किंवा एखाद्या अधिकृत आरोग्य स्रोताकडून विश्वासार्ह माहिती वाचा.',
+      askAbout: 'याबद्दल मित्राला विचारा',
+      officialSource: 'अधिकृत स्रोत',
     },
     stub: {
       comingSoon: 'पुढील अपडेटमध्ये लवकरच येत आहे.',

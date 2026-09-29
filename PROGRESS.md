@@ -181,11 +181,25 @@ Ran a two-agent audit (pages + libs/data) before deploy and fixed everything act
 - Deleted the now-unused `StubPage.jsx`. **126 tests pass**; build clean; headless-Chromium
   smoke test: all 10 routes render with 0 console errors, add-reading & add-reminder flows work.
 
+## Chat image upload + Videos (29 Sep 2026)
+
+- **Chat image upload** (Gemini vision): the composer photo button is live — pick → preview
+  → send, with or without a caption. `src/lib/image.js` downscales via canvas (small
+  thumbnail + light payload). System prompt gains an IMAGES section (no diagnosis, no reading
+  medical reports, route to doctor); red-flag + urgency layers unchanged.
+- **Videos**: verified-source policy kept (no guessed embeds, SAFETY.md §9). The modal now
+  offers Ask Mitra (grounded) + a verified official source per topic (MoHFW / NHM / POSHAN /
+  UNICEF India) instead of a dead "coming soon".
+- 126 tests pass; build clean; headless-Chromium smoke re-run green (all routes, chat image UI).
+
 ## Still open in TODO
 
-Videos (verified YouTube IDs — held on safety grounds; improving with official channel
-links instead), Chat image upload (Gemini vision), and the API-key proxy (deferred:
-CLAUDE.md says not to build a proxy for this beta). The "Needs the user" items (real OTP
-login, clinician review, IFCT/ICMR diet numbers) need accounts/keys I can't create.
+- **Videos → real embedded YouTube IDs**: needs a human to verify each ID against a credible
+  channel (held on safety grounds, like clinician review).
+- **API-key proxy**: deferred — CLAUDE.md says not to build a proxy for this private beta.
+- **Needs the user** (accounts/keys I can't create): real OTP login (SMS provider), clinician
+  review of generated medical content, IFCT/ICMR-verified diet numbers. The code is ready to
+  consume a config if one is provided (e.g. Firebase for OTP), but I cannot create accounts
+  or provision keys myself.
 
 See `NEXT_STEPS.md` for the longer-term list.

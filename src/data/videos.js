@@ -108,6 +108,23 @@ export const videos = [
   },
 ]
 
+// Until a specific video ID is verified against a credible channel (SAFETY.md §9),
+// each category points to an official Government-of-India / UN health source, so a
+// woman always has a trustworthy place to go instead of an unverified embed. These
+// are established official domains (gov.in / unicef.org), safe to link.
+export const officialSources = {
+  'pregnancy-care': { label: 'National Health Mission', url: 'https://nhm.gov.in' },
+  nutrition: { label: 'POSHAN Abhiyaan', url: 'https://poshanabhiyaan.gov.in' },
+  exercise: { label: 'Ministry of Health & Family Welfare', url: 'https://www.mohfw.gov.in' },
+  'baby-dev': { label: 'UNICEF India', url: 'https://www.unicef.org/india' },
+  breastfeeding: { label: 'UNICEF India', url: 'https://www.unicef.org/india' },
+  'health-tips': { label: 'Ministry of Health & Family Welfare', url: 'https://www.mohfw.gov.in' },
+  mental: { label: 'National Health Mission', url: 'https://nhm.gov.in' },
+  labor: { label: 'National Health Mission', url: 'https://nhm.gov.in' },
+  postpartum: { label: 'National Health Mission', url: 'https://nhm.gov.in' },
+}
+export const DEFAULT_SOURCE = { label: 'Ministry of Health & Family Welfare', url: 'https://www.mohfw.gov.in' }
+
 export const continueWatching = [
   { id: 'v1', title: 'First Trimester Care Tips for a Healthy Pregnancy', progress: 60 },
   { id: 'v3', title: 'Safe Yoga Poses During Pregnancy', progress: 40 },

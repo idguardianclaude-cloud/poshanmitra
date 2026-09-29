@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
-import { Search, Play, Clock, Eye, TrendingUp, Bell, Check } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Search, Play, Clock, Eye, TrendingUp, Bell, Check, MessageSquare, ExternalLink } from 'lucide-react'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Modal } from '../components/ui/Modal.jsx'
 import { Illustration } from '../components/Illustration.jsx'
-import { categories, videos, continueWatching, trending } from '../data/videos.js'
+import { categories, videos, continueWatching, trending, officialSources, DEFAULT_SOURCE } from '../data/videos.js'
 import { useT } from '../lib/i18n.js'
 import { storage } from '../lib/storage.js'
 
@@ -268,12 +269,30 @@ function VideoModal({ video, onClose }) {
           />
         </div>
       ) : (
-        // SAFETY.md §9 — no verified source yet, so no embed.
-        <div className="rounded-xl border border-line bg-canvas p-8 text-center">
-          <Illustration name="shield-check" size={96} />
+        // SAFETY.md §9 — no verified embed. Instead offer safe, useful actions:
+        // ask Mitra (grounded in vetted content) and an official health source.
+        <div className="rounded-xl border border-line bg-canvas p-6 text-center">
+          <Illustration name="shield-check" size={88} />
           <p className="mt-4 text-base font-medium text-ink">{t('videos.comingSoon')}</p>
-          <p className="mt-1 text-sm text-ink-muted max-w-sm mx-auto">{t('videos.comingSoonBody')}</p>
-          <Badge tone="neutral" className="mt-3">
+          <p className="mt-1 text-sm text-ink-muted max-w-sm mx-auto">{t('videos.verifiedNote')}</p>
+          <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2">
+            <Button
+              as={Link}
+              to={`/chat?q=${encodeURIComponent(video.title)}`}
+              onClick={onClose}
+            >
+              <MessageSquare size={16} /> {t('videos.askAbout')}
+            </Button>
+            {(() => {
+              const src = officialSources[video.category] || DEFAULT_SOURCE
+              return (
+                <Button as="a" href={src.url} target="_blank" rel="noopener noreferrer" variant="secondary">
+                  {t('videos.officialSource')}: {src.label} <ExternalLink size={14} />
+                </Button>
+              )
+            })()}
+          </div>
+          <Badge tone="neutral" className="mt-4">
             {video.tag} · {video.duration}
           </Badge>
         </div>

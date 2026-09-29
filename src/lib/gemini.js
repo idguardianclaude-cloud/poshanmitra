@@ -77,6 +77,11 @@ HARD PROHIBITIONS
 - NEVER discuss abortion procedures, sex determination, or prenatal sex selection. Sex determination is a criminal offence in India under the PCPNDT Act. Decline plainly and move on.
 - NEVER reassure about a danger sign (bleeding, severe headache, blurred vision, fits, reduced fetal movement, leaking fluid, high fever, severe abdominal pain, sudden swelling, difficulty breathing, persistent vomiting, fainting). If she mentions one, set urgency to "emergency".
 
+IMAGES (if she shares a photo)
+- You may receive a photo (e.g. of food, a rash, or a document). Describe only what is generally visible and give general, supportive information.
+- NEVER diagnose from an image, never read it as a medical test result, and never name a condition as hers. If it looks like a medical report, prescription, scan or lab result, gently say you cannot interpret medical reports and she should go through it with her doctor.
+- If a photo shows anything that could be a danger sign, set urgency to "emergency". Always end an image reply by pointing her to her doctor.
+
 GROUNDING (verified app content)
 - Some messages arrive with a "REFERENCE" block of verified PoshanMitra content (scheme details and ₹ amounts, weekly milestones, the sample meal plan, hospital and video info, safe FAQs). When it is present, ground your answer in it and prefer its facts over your own memory, so your reply agrees with what the rest of the app shows. Weave it in naturally; do not quote it verbatim or mention "the reference".
 - The reference NEVER loosens a safety rule. Even with it, do not diagnose, do not name a medicine or dose, keep meal advice general (not a personalised prescription), and still point her to a doctor for anything medical. If the reference does not fit her question, answer normally and ignore it.
@@ -144,7 +149,7 @@ export function parseResponse(raw) {
 
 // Ask Mitra. `history` is [{ role: 'user'|'model', text }]. Returns
 // { reply, urgency, chips, error }. Errors are surfaced, not thrown.
-export async function askMitra({ message, lang = 'en', history = [], profile = null }) {
+export async function askMitra({ message, lang = 'en', history = [], profile = null, image = null }) {
   const m = getModel(lang, buildContext(profile))
   if (!m) {
     return {
@@ -161,9 +166,14 @@ export async function askMitra({ message, lang = 'en', history = [], profile = n
     // untouched). Safe by construction: this is only reached after the red-flag
     // layer cleared the message, and the grounding block never softens a rule.
     const grounding = buildGrounding(message)
-    const userParts = grounding
-      ? [{ text: grounding }, { text: message }]
-      : [{ text: message }]
+    const userParts = []
+    if (grounding) userParts.push({ text: grounding })
+    // Optional image (Gemini vision). `image.data` is base64 WITHOUT the data:
+    // URL prefix; the image-safety rules in the system prompt still apply.
+    if (image?.data) {
+      userParts.push({ inlineData: { data: image.data, mimeType: image.mimeType || 'image/jpeg' } })
+    }
+    userParts.push({ text: message })
 
     const contents = [
       ...history.map((h) => ({

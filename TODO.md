@@ -51,12 +51,22 @@ below is designed to need **none** of that.
       *scheduled* WhatsApp delivery is NOT done: it needs the WhatsApp Business API (or a
       provider) + an approved number + a backend to hold the secret — out of scope for this
       keyless private beta (same reason as the API-key proxy). 4 tests.
-- [ ] **Videos** — research credible sources myself (MoHFW/UNICEF/WHO/hospital/OB-GYN
-      channels), verify, embed real YouTube IDs (free). Replaces "Video coming soon".
-- [ ] **Chat image upload** — wire multimodal (Gemini vision, same key) so she can send a
-      photo (e.g., a report) — with safety guardrails. Depends on a working Gemini key.
-- [ ] **API-key proxy** — small serverless function on the (free) Vercel/Netlify deploy so
-      the key isn't in the client bundle. Pre-public-launch hardening.
+- [x] **Chat image upload** — multimodal Gemini vision wired (`src/lib/image.js` downscales
+      via canvas so the persisted thumbnail + payload stay small). The composer's photo button
+      is live: pick → preview → send (with or without a caption). `askMitra` sends an
+      `inlineData` part; a new IMAGES section in the system prompt forbids diagnosing from a
+      photo, reading it as a medical report, or naming a condition, and routes to a doctor.
+      Red-flag layer still screens any caption; urgency re-check still applies. Verified
+      in-browser (button enabled, preview, send-gating, 0 console errors).
+- [~] **Videos** — HELD on safety: I cannot verify specific YouTube IDs against credible
+      channels from here, and SAFETY.md §9 says an unverified embed is worse than an empty
+      slot. Instead of guessing IDs, the dead "coming soon" modal is now a useful, safe
+      action: **Ask Mitra** (grounded) + a link to a **verified official source** per topic
+      (MoHFW / NHM / POSHAN Abhiyaan / UNICEF India — established gov.in/unicef.org domains).
+      Embedding real IDs stays open until a human verifies them (like clinician review).
+- [ ] **API-key proxy** — DEFERRED. CLAUDE.md says explicitly "Do not spend time building a
+      proxy" for this private beta (the in-bundle key is an accepted, documented trade-off).
+      That hard rule overrides this item; it belongs to pre-public-launch hardening.
 
 ## Needs the user (small, optional — features still work without)
 - [ ] Real **OTP login** — needs an SMS provider account (MSG91/Twilio/Firebase). Until

@@ -281,3 +281,30 @@ of each phase. One or two lines each.
 - **Verification**: 25 new tests (reports 11, reminders 10, whatsapp 4) → 126 total passing;
   production build clean; a headless-Chromium smoke test loaded all 10 routes with zero
   console/page errors and exercised the add-reading and add-reminder flows.
+
+## Chat image upload (Gemini vision) + Videos
+
+- **Images are downscaled in the browser before use** (`src/lib/image.js`, canvas, max 512px,
+  JPEG q0.82). This keeps the persisted chat thumbnail inside localStorage's small quota and
+  keeps the Gemini payload light while staying clear enough for vision. The dataUrl is shown
+  in the bubble; the base64 (prefix stripped) goes in the `inlineData` part.
+- **Image safety is enforced in the prompt, not just the UI.** A new IMAGES section in the
+  system prompt: describe only what's generally visible, NEVER diagnose from a photo, never
+  read it as a medical report/scan/lab result, set urgency `emergency` if a photo shows a
+  danger sign, and always route to a doctor. The red-flag layer still screens any caption
+  text, and the second urgency layer still runs — the image path adds capability without
+  loosening a rule. A photo with no caption gets a neutral, safe default prompt.
+- **Videos: I did NOT embed guessed YouTube IDs.** SAFETY.md §9 is explicit (an unverified
+  embed is worse than an empty slot), and I cannot verify from here that a given video ID
+  belongs to a credible channel or is still live — the downside (pregnancy misinformation)
+  is severe. So the prior "all youtubeId null" decision stands. What changed: the dead
+  "coming soon" modal is now a safe, useful action — **Ask Mitra** (grounded in vetted
+  content) plus a link to a **verified official source** per category (MoHFW, NHM, POSHAN
+  Abhiyaan, UNICEF India — established gov.in / unicef.org domains, safe to link). Embedding
+  real verified IDs remains a one-line-per-item change once a human verifies them.
+- **API-key proxy deferred by CLAUDE.md.** CLAUDE.md says not to build a proxy for this beta
+  (the in-bundle key is an accepted, documented trade-off); that hard rule wins over the TODO
+  item, which is genuinely pre-public-launch hardening.
+- **Verification**: 126 tests still pass; production build clean; headless-Chromium smoke
+  confirms the chat image flow (upload button live, preview, send-gating, remove) and that
+  all 10 routes still render with zero console errors.
