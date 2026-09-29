@@ -1,17 +1,21 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, HashRouter } from 'react-router-dom'
 import App from './App.jsx'
 import { ProfileProvider } from './context/ProfileContext.jsx'
 import './index.css'
 
+// Normal deploys use clean-URL BrowserRouter. A single-file/sandboxed build (e.g.
+// the Artifact preview) sets window.__PM_HASH_ROUTER__ to fall back to HashRouter.
+const Router = typeof window !== 'undefined' && window.__PM_HASH_ROUTER__ ? HashRouter : BrowserRouter
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <ProfileProvider>
         <App />
       </ProfileProvider>
-    </BrowserRouter>
+    </Router>
   </React.StrictMode>
 )
 
