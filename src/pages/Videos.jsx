@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Play, TrendingUp, Bell, Check, MessageSquare, ExternalLink, BadgeCheck } from 'lucide-react'
+import { Search, Play, TrendingUp, Bell, Check, MessageSquare, ExternalLink, BadgeCheck, Globe } from 'lucide-react'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Modal } from '../components/ui/Modal.jsx'
 import { Illustration } from '../components/Illustration.jsx'
-import { categories, videos, continueWatching, trending, officialSources, DEFAULT_SOURCE } from '../data/videos.js'
+import { categories, videos, videoLangs, MARATHI_NOTE, continueWatching, trending, officialSources, DEFAULT_SOURCE } from '../data/videos.js'
 import { useT } from '../lib/i18n.js'
 import { storage } from '../lib/storage.js'
 
@@ -16,6 +16,7 @@ export function Videos() {
   const t = useT()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('')
+  const [lang, setLang] = useState('all')
   const [sort, setSort] = useState('Latest')
   const [visible, setVisible] = useState(8)
   const [playing, setPlaying] = useState(null)
@@ -23,6 +24,7 @@ export function Videos() {
 
   const filtered = useMemo(() => {
     let list = videos.filter((v) => {
+      if (lang !== 'all' && v.lang !== lang) return false
       if (category && v.category !== category) return false
       if (query && !v.title.toLowerCase().includes(query.toLowerCase())) return false
       return true
@@ -33,7 +35,7 @@ export function Videos() {
     else if (sort === 'Shortest') by((a, b) => dur(a) - dur(b))
     else if (sort === 'Longest') by((a, b) => dur(b) - dur(a))
     return list
-  }, [query, category, sort])
+  }, [query, category, lang, sort])
 
   const catCount = useMemo(() => {
     const map = {}
@@ -46,6 +48,9 @@ export function Videos() {
     setSubscribed(next)
     storage.setNotifications(next)
   }
+
+  // Featured video shown in the hero banner (with its real thumbnail).
+  const featured = videos[0]
 
   return (
     <>
@@ -61,6 +66,21 @@ export function Videos() {
             placeholder={t('videos.search')}
             className="w-full rounded-xl border border-line bg-white pl-9 pr-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           />
+        </div>
+        <div className="relative">
+          <Globe size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint pointer-events-none" />
+          <select
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
+            aria-label={t('videos.language')}
+            className="rounded-xl border border-line bg-white pl-8 pr-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            {videoLangs.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.code === 'all' ? t('videos.language') : l.label}
+              </option>
+            ))}
+          </select>
         </div>
         <select
           value={category}
@@ -85,13 +105,42 @@ export function Videos() {
         </select>
       </div>
 
-      {/* Hero */}
+      {/* Hero — with the featured video's real thumbnail */}
       <div className="rounded-2xl p-6 sm:p-8 mb-6 text-white bg-gradient-to-br from-indigo-600 to-indigo-700">
-        <h2 className="text-xl sm:text-2xl font-bold max-w-xl">{t('videos.heroTitle')}</h2>
-        <p className="mt-2 text-sm text-indigo-100 max-w-xl">{t('videos.heroSub')}</p>
-        <Button variant="secondary" className="mt-4" onClick={() => setPlaying(videos[0])}>
-          <Play size={16} /> {t('videos.watchPopular')}
-        </Button>
+        <div className="flex flex-col md:flex-row md:items-center gap-6">
+          <div className="flex-1">
+            <h2 className="text-xl sm:text-2xl font-bold max-w-xl">{t('videos.heroTitle')}</h2>
+            <p className="mt-2 text-sm text-indigo-100 max-w-xl">{t('videos.heroSub')}</p>
+            <Button variant="secondary" className="mt-4" onClick={() => setPlaying(featured)}>
+              <Play size={16} /> {t('videos.watchPopular')}
+            </Button>
+          </div>
+          <button
+            onClick={() => setPlaying(featured)}
+            className="group relative w-full md:w-80 shrink-0 aspect-video rounded-xl overflow-hidden ring-1 ring-white/25 shadow-lg text-left"
+          >
+            <img
+              src={ytThumb(featured.youtubeId)}
+              alt=""
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
+            <span className="absolute inset-0 flex items-center justify-center">
+              <span className="w-12 h-12 rounded-full bg-black/50 group-hover:bg-red-600 flex items-center justify-center transition-colors">
+                <Play size={20} className="text-white ml-0.5" fill="currentColor" />
+              </span>
+            </span>
+            <span className="absolute top-2 right-2 text-[11px] font-medium text-white bg-black/80 rounded px-1.5 py-0.5">
+              {featured.duration}
+            </span>
+            <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 pt-6 pb-2 text-xs font-medium text-white line-clamp-1">
+              {featured.title}
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Category strip */}
@@ -122,9 +171,26 @@ export function Videos() {
         <div className="xl:col-span-3">
           <h2 className="text-base font-semibold text-ink mb-3">{t('videos.popular')}</h2>
           {filtered.length === 0 ? (
-            <div className="rounded-2xl bg-white border border-line shadow-card p-10 text-center text-sm text-ink-muted">
-              {t('videos.noMatch')}
-            </div>
+            lang === 'mr' ? (
+              // No §9-verified Marathi embeds yet — offer a safe official source + Mitra.
+              <div className="rounded-2xl bg-white border border-line shadow-card p-8 text-center">
+                <Illustration name="shield-check" size={72} />
+                <p className="mt-4 text-base font-medium text-ink">{t('videos.mrTitle')}</p>
+                <p className="mt-1 text-sm text-ink-muted max-w-md mx-auto">{t('videos.mrBody')}</p>
+                <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-2">
+                  <Button as={Link} to="/chat">
+                    <MessageSquare size={16} /> {t('common.askMitra')}
+                  </Button>
+                  <Button as="a" href={MARATHI_NOTE.source.url} target="_blank" rel="noopener noreferrer" variant="secondary">
+                    {t('videos.officialSource')} <ExternalLink size={14} />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-white border border-line shadow-card p-10 text-center text-sm text-ink-muted">
+                {t('videos.noMatch')}
+              </div>
+            )
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.slice(0, visible).map((v) => (
@@ -275,12 +341,15 @@ function VideoCard({ video, onPlay }) {
         </span>
       </button>
       <div className="p-3">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <Badge tone="primary">{video.tag}</Badge>
           {video.youtubeId && (
             <Badge tone="success">
               <BadgeCheck size={11} /> Verified
             </Badge>
+          )}
+          {video.lang && video.lang !== 'en' && (
+            <Badge tone="neutral">{video.lang === 'hi' ? 'हिंदी' : 'मराठी'}</Badge>
           )}
         </div>
         <p className="mt-2 text-sm font-medium text-ink line-clamp-2">{video.title}</p>

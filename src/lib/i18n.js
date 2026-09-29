@@ -418,6 +418,10 @@ export const translations = {
         'We only embed videos from verified, credible sources. Until this one is verified, ask Mitra about it or read trusted information from an official health source.',
       askAbout: 'Ask Mitra about this',
       officialSource: 'Official source',
+      language: 'Language',
+      mrTitle: 'Marathi videos coming soon',
+      mrBody:
+        'We only show videos from verified, credible health sources, and verified Marathi ones aren’t available yet. Meanwhile, ask Mitra in Marathi or read an official source.',
     },
     stub: {
       comingSoon: 'Coming soon in the next update.',
@@ -924,6 +928,10 @@ export const translations = {
         'हम केवल सत्यापित, भरोसेमंद स्रोतों के वीडियो दिखाते हैं। जब तक यह सत्यापित नहीं होता, इसके बारे में मित्रा से पूछें या किसी आधिकारिक स्वास्थ्य स्रोत से भरोसेमंद जानकारी पढ़ें।',
       askAbout: 'इसके बारे में मित्रा से पूछें',
       officialSource: 'आधिकारिक स्रोत',
+      language: 'भाषा',
+      mrTitle: 'मराठी वीडियो जल्द आ रहे हैं',
+      mrBody:
+        'हम केवल सत्यापित, भरोसेमंद स्वास्थ्य स्रोतों के वीडियो दिखाते हैं, और सत्यापित मराठी वीडियो अभी उपलब्ध नहीं हैं। तब तक मित्रा से मराठी में पूछें या किसी आधिकारिक स्रोत को देखें।',
     },
     stub: {
       comingSoon: 'अगले अपडेट में जल्द आ रहा है।',
@@ -1430,6 +1438,10 @@ export const translations = {
         'आम्ही फक्त सत्यापित, विश्वासार्ह स्रोतांचे व्हिडिओ दाखवतो. हा तपासेपर्यंत, याबद्दल मित्राला विचारा किंवा एखाद्या अधिकृत आरोग्य स्रोताकडून विश्वासार्ह माहिती वाचा.',
       askAbout: 'याबद्दल मित्राला विचारा',
       officialSource: 'अधिकृत स्रोत',
+      language: 'भाषा',
+      mrTitle: 'मराठी व्हिडिओ लवकरच येत आहेत',
+      mrBody:
+        'आम्ही फक्त सत्यापित, विश्वासार्ह आरोग्य स्रोतांचे व्हिडिओ दाखवतो आणि सत्यापित मराठी व्हिडिओ अद्याप उपलब्ध नाहीत. तोपर्यंत मित्राला मराठीत विचारा किंवा अधिकृत स्रोत पाहा.',
     },
     stub: {
       comingSoon: 'पुढील अपडेटमध्ये लवकरच येत आहे.',
