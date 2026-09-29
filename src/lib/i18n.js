@@ -37,6 +37,10 @@ export const translations = {
       needHelp: 'Need help?',
       comingSoon: 'Coming soon',
       loading: 'Loading…',
+      errTitle: 'Something went wrong',
+      errBody: 'Sorry, this page ran into a problem. Your information is safe on this device. Please try again.',
+      errReload: 'Reload the app',
+      errHome: 'Go to Dashboard',
     },
     valid: {
       name: 'Please enter a valid name.',
@@ -539,6 +543,10 @@ export const translations = {
       needHelp: 'मदद चाहिए?',
       comingSoon: 'जल्द आ रहा है',
       loading: 'लोड हो रहा है…',
+      errTitle: 'कुछ गड़बड़ हो गई',
+      errBody: 'माफ़ करें, इस पेज में कोई समस्या आ गई। आपकी जानकारी इस डिवाइस पर सुरक्षित है। कृपया फिर से कोशिश करें।',
+      errReload: 'ऐप फिर से लोड करें',
+      errHome: 'डैशबोर्ड पर जाएँ',
     },
     valid: {
       name: 'कृपया एक मान्य नाम दर्ज करें।',
@@ -1041,6 +1049,10 @@ export const translations = {
       needHelp: 'मदत हवी?',
       comingSoon: 'लवकरच येत आहे',
       loading: 'लोड होत आहे…',
+      errTitle: 'काहीतरी चूक झाली',
+      errBody: 'क्षमस्व, या पानात अडचण आली. तुमची माहिती या डिव्हाइसवर सुरक्षित आहे. कृपया पुन्हा प्रयत्न करा.',
+      errReload: 'अ‍ॅप पुन्हा लोड करा',
+      errHome: 'डॅशबोर्डवर जा',
     },
     valid: {
       name: 'कृपया वैध नाव टाका.',
