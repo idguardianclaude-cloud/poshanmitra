@@ -3,6 +3,17 @@
 The week-two list. Ordered roughly by importance for moving from private beta to a
 wider release. Nothing here blocks the current private beta.
 
+## Launch gates (verify before real users)
+
+- **Hospital phone numbers** in `src/data/hospitals.js` are representative reception
+  lines, not individually verified. In a maternal-health context a wrong number can
+  misdirect — verify all 10 (and the addresses) before real users rely on the Call
+  button.
+- **Restrict the Gemini API key** (Google AI Studio / Cloud console): add HTTP-referrer
+  and API restrictions, keep quotas tight, and don't ship a billing-enabled key. The key
+  is bundled into the client build (documented private-beta tradeoff) — see the proxy item
+  below for the real fix.
+
 ## Safety & trust (do these first)
 
 - **Backend proxy for the Gemini key.** Today the key ships in the browser bundle

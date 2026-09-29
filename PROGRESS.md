@@ -115,6 +115,25 @@ Everything above is committed; build green; `npm test` green.
   named (doctor redirect held), and a red-flag message still shows the emergency screen
   with zero Gemini calls even with the live key present.
 
+## Deploy-readiness audit (29 Sep 2026)
+
+Ran a two-agent audit (pages + libs/data) before deploy and fixed everything actionable:
+
+- **Every dead control is now functional** — header search + Ctrl/Cmd+K, notification
+  bell panel, avatar menu (→ new /settings page), Hospitals "Use Current Location"
+  (real geolocation) + live stat chips, Videos sort options + Subscribe, Diet quick
+  actions (Swap Food / Grocery List modals). Verified in-browser.
+- **No more stale/hardcoded dates** — `src/lib/dates.js` computes everything from today;
+  localized ordinals fix "5th (2nd)" in Hindi/Marathi; Dashboard no longer fabricates
+  pregnancy weeks when the due date was skipped.
+- **Deploy config**: vercel.json + netlify.toml + _redirects (SPA fallback), .nvmrc,
+  DEPLOY.md. Verified deep-links, sw.js, manifest, icons all serve on the prod preview.
+- Confirmed sound (no change needed): red-flag safety layer, service worker, router
+  guards, storage, i18n fallback, key handling (never committed).
+- **Launch gates** (in NEXT_STEPS): verify hospital phone numbers; restrict the API key.
+- Gemini model re-verified live (`gemini-3.1-flash-lite`, HTTP 200); chat works in
+  English and Hindi. 79 tests pass; production build clean.
+
 ## If you want to pick something up next
 
 See `NEXT_STEPS.md`. First three: backend proxy for the API key, red-flag tuning
