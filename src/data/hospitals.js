@@ -166,6 +166,30 @@ export const hospitals = [
   },
 ]
 
+// Approximate real Pune coordinates for the map markers (Leaflet + OpenStreetMap).
+// The "Directions" link still uses the name+address query for reliable routing.
+const COORDS = {
+  'sahyadri-nagar': [18.552, 73.925],
+  'manipal-kharadi': [18.5510, 73.9410],
+  'ruby-wanowrie': [18.488, 73.9],
+  jehangir: [18.527, 73.874],
+  'ruby-main': [18.5305, 73.877],
+  deenanath: [18.503, 73.83],
+  sassoon: [18.53, 73.874],
+  kem: [18.516, 73.866],
+  noble: [18.501, 73.926],
+  'motherhood-kharadi': [18.5515, 73.94],
+}
+hospitals.forEach((h) => {
+  const c = COORDS[h.id]
+  if (c) {
+    h.lat = c[0]
+    h.lng = c[1]
+  }
+})
+
+export const PUNE_CENTER = [18.5204, 73.8567]
+
 // Directions link — use the place query, not raw coords, for reliable routing.
 export function directionsUrl(h) {
   const dest = encodeURIComponent(`${h.name}, ${h.address}`)

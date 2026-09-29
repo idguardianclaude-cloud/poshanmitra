@@ -14,6 +14,7 @@ import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Illustration } from '../components/Illustration.jsx'
+import { HospitalMap } from '../components/HospitalMap.jsx'
 import {
   hospitals,
   FACILITY_OPTIONS,
@@ -96,25 +97,9 @@ export function Hospitals() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         <div className="xl:col-span-2 space-y-5">
-          {/* Map placeholder */}
-          <div className="relative rounded-2xl border border-line overflow-hidden h-56" style={{ backgroundColor: '#EFF6FF' }}>
-            <MapGrid />
-            {hospitals.map((h, i) => (
-              <span
-                key={h.id}
-                className="absolute -translate-x-1/2 -translate-y-full flex flex-col items-center"
-                style={{ left: `${h.pin.x}%`, top: `${h.pin.y}%` }}
-                title={h.name}
-              >
-                <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-[11px] font-bold flex items-center justify-center shadow">
-                  {i + 1}
-                </span>
-                <span className="w-1.5 h-1.5 bg-indigo-600 rotate-45 -mt-1" />
-              </span>
-            ))}
-            <span className="absolute bottom-2 right-2 text-[11px] text-ink-faint bg-white/80 rounded px-2 py-0.5">
-              {t('hospitals.mapPreview')}
-            </span>
+          {/* Real interactive map — Leaflet + OpenStreetMap (free, no API key) */}
+          <div className="rounded-2xl border border-line overflow-hidden h-64 z-0">
+            <HospitalMap hospitals={filtered} />
           </div>
 
           {/* List */}
@@ -247,19 +232,6 @@ function StatChip({ icon: Icon, label, value }) {
         <p className="text-[11px] text-ink-muted">{label}</p>
       </div>
     </div>
-  )
-}
-
-function MapGrid() {
-  return (
-    <svg className="absolute inset-0 w-full h-full opacity-40" aria-hidden="true">
-      <defs>
-        <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
-          <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#C7D2FE" strokeWidth="1" />
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#grid)" />
-    </svg>
   )
 }
 
