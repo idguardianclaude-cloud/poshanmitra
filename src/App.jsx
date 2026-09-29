@@ -11,7 +11,8 @@ import { Schemes } from './pages/Schemes.jsx'
 import { SchemeEligibility } from './pages/SchemeEligibility.jsx'
 import { Hospitals } from './pages/Hospitals.jsx'
 import { Settings } from './pages/Settings.jsx'
-import { CheckupPage, CampaignsPage, ReportsPage } from './pages/StubPage.jsx'
+import { Checkup } from './pages/Checkup.jsx'
+import { CampaignsPage, ReportsPage } from './pages/StubPage.jsx'
 import { NotFound } from './pages/NotFound.jsx'
 
 // Route guard: no login flag → /login; logged in but no completed profile → /onboarding.
@@ -52,7 +53,7 @@ export default function App() {
         <Route path="/schemes/eligibility" element={<SchemeEligibility />} />
         <Route path="/hospitals" element={<Hospitals />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/checkup" element={<CheckupPage />} />
+        <Route path="/checkup" element={<Checkup />} />
         <Route path="/campaigns" element={<CampaignsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="*" element={<NotFound />} />
