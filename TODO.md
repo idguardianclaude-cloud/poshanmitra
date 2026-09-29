@@ -58,12 +58,14 @@ below is designed to need **none** of that.
       photo, reading it as a medical report, or naming a condition, and routes to a doctor.
       Red-flag layer still screens any caption; urgency re-check still applies. Verified
       in-browser (button enabled, preview, send-gating, 0 console errors).
-- [~] **Videos** — HELD on safety: I cannot verify specific YouTube IDs against credible
-      channels from here, and SAFETY.md §9 says an unverified embed is worse than an empty
-      slot. Instead of guessing IDs, the dead "coming soon" modal is now a useful, safe
-      action: **Ask Mitra** (grounded) + a link to a **verified official source** per topic
-      (MoHFW / NHM / POSHAN Abhiyaan / UNICEF India — established gov.in/unicef.org domains).
-      Embedding real IDs stays open until a human verifies them (like clinician review).
+- [x] **Videos — DONE, real embeds.** Researched + verified (via YouTube oEmbed) the
+      **Stanford Center for Health Education "Grow Great"** maternal series and embedded 9
+      real, playable, credibility-verified videos (How to Recognize Pregnancy, Nutrition,
+      Danger Signs, Breastfeeding, Feeding on a Budget, Baby's First Foods, Mental Health,
+      Bonding, Immunization). Each card shows a "Verified" badge + the channel; category
+      counts are now real; fabricated view/rating fields removed. Verified in-browser: the
+      YouTube player loads and plays. The official-source fallback remains for any future
+      null-id entry (exercise/labour have no verified video yet, so they simply show none).
 - [ ] **API-key proxy** — DEFERRED. CLAUDE.md says explicitly "Do not spend time building a
       proxy" for this private beta (the in-bundle key is an accepted, documented trade-off).
       That hard rule overrides this item; it belongs to pre-public-launch hardening.

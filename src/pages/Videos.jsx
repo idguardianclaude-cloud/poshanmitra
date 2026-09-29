@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Play, Clock, Eye, TrendingUp, Bell, Check, MessageSquare, ExternalLink } from 'lucide-react'
+import { Search, Play, Clock, Eye, TrendingUp, Bell, Check, MessageSquare, ExternalLink, BadgeCheck } from 'lucide-react'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Button } from '../components/ui/Button.jsx'
@@ -10,16 +10,7 @@ import { categories, videos, continueWatching, trending, officialSources, DEFAUL
 import { useT } from '../lib/i18n.js'
 import { storage } from '../lib/storage.js'
 
-const SORTS = ['Latest', 'Most Popular', 'Most Viewed', 'Highest Rated', 'Shortest', 'Longest', 'A–Z', 'Z–A']
-
-// Editorial rating per video (0–5), used by the "Highest Rated" sort.
-const RATING = { v1: 4.8, v2: 4.9, v3: 4.7, v4: 4.8, v5: 4.5, v6: 4.6, v7: 4.7, v8: 4.6 }
-function parseViews(v) {
-  const n = parseFloat(v)
-  if (/m/i.test(v)) return n * 1e6
-  if (/k/i.test(v)) return n * 1e3
-  return n || 0
-}
+const SORTS = ['Latest', 'Shortest', 'Longest', 'A–Z', 'Z–A']
 
 export function Videos() {
   const t = useT()
@@ -41,11 +32,14 @@ export function Videos() {
     else if (sort === 'Z–A') by((a, b) => b.title.localeCompare(a.title))
     else if (sort === 'Shortest') by((a, b) => dur(a) - dur(b))
     else if (sort === 'Longest') by((a, b) => dur(b) - dur(a))
-    else if (sort === 'Most Popular' || sort === 'Most Viewed')
-      by((a, b) => parseViews(b.views) - parseViews(a.views))
-    else if (sort === 'Highest Rated') by((a, b) => (RATING[b.id] || 0) - (RATING[a.id] || 0))
     return list
   }, [query, category, sort])
+
+  const catCount = useMemo(() => {
+    const map = {}
+    for (const v of videos) map[v.category] = (map[v.category] || 0) + 1
+    return map
+  }, [])
 
   function toggleSubscribe() {
     const next = !subscribed
@@ -119,7 +113,7 @@ export function Videos() {
             }`}
           >
             {c.label}{' '}
-            <span className={category === c.key ? 'text-indigo-100' : 'text-ink-faint'}>{c.count}</span>
+            <span className={category === c.key ? 'text-indigo-100' : 'text-ink-faint'}>{catCount[c.key] || 0}</span>
           </button>
         ))}
       </div>
@@ -184,7 +178,7 @@ export function Videos() {
                       </span>
                       <span>
                         <span className="block text-sm text-ink group-hover:text-indigo-600 line-clamp-2">{tr.title}</span>
-                        <span className="block text-xs text-ink-faint">{tr.views} {t('videos.views')}</span>
+                        <span className="block text-xs text-ink-faint line-clamp-1">{tr.channel}</span>
                       </span>
                     </button>
                   </li>
@@ -236,18 +230,20 @@ function VideoCard({ video, onPlay }) {
         </span>
       </button>
       <div className="p-3">
-        <Badge tone="primary">{video.tag}</Badge>
-        <p className="mt-2 text-sm font-medium text-ink line-clamp-2">{video.title}</p>
-        <div className="mt-2 flex items-center justify-between text-xs text-ink-faint">
-          <span className="flex items-center gap-1">
-            <Eye size={12} /> {video.views} · {video.age}
-          </span>
-          {RATING[video.id] && (
-            <span className="flex items-center gap-0.5 text-amber-500" title="Rating">
-              ★ <span className="text-ink-faint">{RATING[video.id].toFixed(1)}</span>
-            </span>
+        <div className="flex items-center gap-1.5">
+          <Badge tone="primary">{video.tag}</Badge>
+          {video.youtubeId && (
+            <Badge tone="success">
+              <BadgeCheck size={11} /> Verified
+            </Badge>
           )}
         </div>
+        <p className="mt-2 text-sm font-medium text-ink line-clamp-2">{video.title}</p>
+        {video.channel && (
+          <p className="mt-1 flex items-center gap-1 text-xs text-ink-faint line-clamp-1">
+            <Eye size={12} /> {video.channel}
+          </p>
+        )}
       </div>
     </div>
   )
