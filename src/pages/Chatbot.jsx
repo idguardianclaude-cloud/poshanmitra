@@ -108,7 +108,7 @@ export function Chatbot() {
 
     // ---- Clean → Gemini (SAFETY LAYER 2 re-checks urgency) ----
     setTyping(true)
-    const res = await askMitra({ message: text, lang, history })
+    const res = await askMitra({ message: text, lang, history, profile })
     setTyping(false)
 
     if (res.error === 'no-key') {

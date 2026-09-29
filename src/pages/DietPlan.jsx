@@ -60,9 +60,17 @@ export function DietPlan() {
         title={t('diet.title')}
         subtitle={t('diet.sub')}
         action={
-          <Button variant="secondary" onClick={() => window.print()}>
-            <Download size={16} /> {t('diet.download')}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              as={Link}
+              to="/chat?q=Based%20on%20my%20month%20and%20what%20I%20eat%2C%20what%20meals%20do%20you%20suggest%20for%20me%20today%3F"
+            >
+              <MessageSquare size={16} /> {t('common.askMitra')}
+            </Button>
+            <Button variant="secondary" onClick={() => window.print()}>
+              <Download size={16} /> {t('diet.download')}
+            </Button>
+          </div>
         }
       >
         {/* NOT "Personalized for You" — SAFETY.md §4. */}

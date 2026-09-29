@@ -156,6 +156,28 @@ of each phase. One or two lines each.
 - **API key handling:** the user pasted a real key into `.env.example` (a *tracked*
   file). Moved it to the gitignored `.env`, restored the placeholder, and verified
   `git log -S` finds the key in zero commits — it never entered history.
+## Caretaker mode (personalised companion) — with a safety line
+
+- **Mitra now knows her and speaks like a caretaker.** Her profile (name, week,
+  trimester, food preference, conditions) is built into the system prompt via
+  `buildContext(profile)` and passed with every message, so replies are personal and
+  continuous instead of one-off. The persisted chat thread already gives cross-visit
+  memory. Verified live: Mitra greeted her by name, referenced her week and food
+  preference, and offered warm follow-ups.
+- **Diet: general suggestions yes, therapeutic diets no.** The owner asked for an
+  AI-generated diet that adapts to her chat and conditions. Mitra may now give GENERAL
+  meal ideas tailored to trimester and food preference, but the system prompt forbids
+  designing a condition-specific/therapeutic diet or giving target numbers — for any
+  diagnosed condition it warmly routes her to a doctor/registered dietitian. This keeps
+  SAFETY.md §4 intact: an unverified model must not hand a pregnant woman a medical
+  nutrition prescription. The `/diet` page keeps its "Sample plan" label + disclaimer and
+  gains an "Ask Mitra" button that opens this safe, personalised conversation.
+- **Verified the guardrail live:** asked for "an exact diet plan with sugar limits" for
+  gestational diabetes, Mitra refused, routed to a dietitian, and gave only general tips.
+  I deliberately did NOT replace the labelled sample plan with AI-generated nutrition
+  numbers, and did NOT let it adapt therapeutically to conditions — that's the one part of
+  the request I held back, because real pregnant users could be harmed otherwise.
+
 - **Gemini model: gemini-1.5-flash → gemini-3.1-flash-lite.** 1.5-flash was retired
   (404) and 2.5-flash is blocked for new keys; picked a current stable low-cost model by
   querying the live ListModels API. Live chat verified end-to-end in English and Hindi.
