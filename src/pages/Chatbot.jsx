@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
-  Heart,
   Send,
   Mic,
   Square,
@@ -12,6 +11,7 @@ import {
   Trash2,
   Info,
 } from 'lucide-react'
+import { LogoMark } from '../components/Logo.jsx'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { storage } from '../lib/storage.js'
 import { checkRedFlags } from '../lib/redflags.js'
@@ -405,7 +405,7 @@ function FirstRun({ name }) {
 function MitraAvatar() {
   return (
     <span className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
-      <Heart size={15} fill="#EEF0FF" stroke="#EEF0FF" />
+      <LogoMark size={15} />
     </span>
   )
 }

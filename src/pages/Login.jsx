@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heart, ShieldCheck } from 'lucide-react'
+import { ShieldCheck } from 'lucide-react'
+import { LogoMark } from '../components/Logo.jsx'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Illustration } from '../components/Illustration.jsx'
@@ -35,7 +36,7 @@ export function Login() {
       <div className="lg:w-1/2 bg-gradient-to-br from-indigo-600 to-indigo-700 text-white p-10 lg:p-16 flex flex-col justify-between">
         <div className="flex items-center gap-3">
           <span className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white/15">
-            <Heart size={22} fill="#EEF0FF" stroke="#EEF0FF" />
+            <LogoMark size={22} />
           </span>
           <div>
             <p className="font-bold text-lg">{t('common.appName')}</p>

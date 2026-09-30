@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Heart, MessageCircle, Salad, FileText, MapPin, Video, Activity, Bell,
+  MessageCircle, Salad, FileText, MapPin, Video, Activity, Bell,
   Megaphone, ShieldCheck, Globe, Stethoscope, Lock, ArrowRight, Check,
   Sparkles, HeartPulse, Phone,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button.jsx'
+import { LogoMark } from '../components/Logo.jsx'
 import { DisclaimerFooter } from '../components/layout/DisclaimerFooter.jsx'
 import { useT } from '../lib/i18n.js'
 
@@ -120,7 +121,7 @@ export function Landing() {
         <div className="max-w-main mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <a href="#top" className="flex items-center gap-2.5 group">
             <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600 transition-transform group-hover:scale-105">
-              <Heart size={18} fill="#EEF0FF" stroke="#EEF0FF" />
+              <LogoMark size={20} />
             </span>
             <span className="font-bold text-[15px] leading-none">{t('common.appName')}</span>
           </a>
@@ -343,7 +344,7 @@ export function Landing() {
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2.5">
               <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-600">
-                <Heart size={18} fill="#EEF0FF" stroke="#EEF0FF" />
+                <LogoMark size={20} />
               </span>
               <span className="font-bold text-[15px]">{t('common.appName')}</span>
             </div>
@@ -381,7 +382,7 @@ function ChatPreview() {
       <div className="lp-float2 mx-auto w-full max-w-sm rounded-3xl bg-white border border-line shadow-xl shadow-indigo-600/10 overflow-hidden">
         <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white">
           <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/15">
-            <Heart size={17} fill="#EEF0FF" stroke="#EEF0FF" />
+            <LogoMark size={19} />
           </span>
           <div className="flex-1">
             <p className="text-sm font-semibold leading-none">Mitra</p>

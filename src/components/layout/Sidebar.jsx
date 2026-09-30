@@ -11,6 +11,7 @@ import {
   BarChart3,
   Heart,
 } from 'lucide-react'
+import { LogoMark } from '../Logo.jsx'
 import { Illustration } from '../Illustration.jsx'
 import { useT } from '../../lib/i18n.js'
 
@@ -37,7 +38,7 @@ export function Sidebar({ open, onNavigate }) {
       {/* Brand */}
       <div className="px-5 py-5 flex items-start gap-3">
         <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-indigo-600 text-white shrink-0">
-          <Heart size={20} fill="#EEF0FF" stroke="#EEF0FF" />
+          <LogoMark size={20} />
         </span>
         <div className="leading-tight">
           <p className="font-bold text-ink">{t('common.appName')}</p>

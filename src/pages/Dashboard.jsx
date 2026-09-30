@@ -13,9 +13,9 @@ import {
   Megaphone,
   Building2,
   BarChart3,
-  Heart,
   ArrowRight,
 } from 'lucide-react'
+import { LogoMark } from '../components/Logo.jsx'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { StatCard } from '../components/ui/StatCard.jsx'
 import { IconTile } from '../components/ui/IconTile.jsx'
@@ -215,7 +215,7 @@ export function Dashboard() {
           <section className="rounded-2xl bg-white border border-line shadow-card p-5">
             <div className="flex items-start gap-3">
               <span className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
-                <Heart size={20} fill="#EEF0FF" stroke="#EEF0FF" />
+                <LogoMark size={20} />
               </span>
               <div className="flex-1">
                 <h2 className="text-base font-semibold text-ink">{t('dash.chatTitle')}</h2>

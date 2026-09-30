@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Heart, Send } from 'lucide-react'
+import { Send } from 'lucide-react'
+import { LogoMark } from '../components/Logo.jsx'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { storage } from '../lib/storage.js'
 import { derivePregnancy } from '../lib/pregnancy.js'
@@ -144,7 +145,7 @@ export function Onboarding() {
       {/* Top bar */}
       <div className="bg-white border-b border-line px-6 py-4 flex items-center gap-3">
         <span className="inline-flex items-center justify-center w-9 h-9 rounded-2xl bg-indigo-600 text-white">
-          <Heart size={18} fill="#EEF0FF" stroke="#EEF0FF" />
+          <LogoMark size={18} />
         </span>
         <div className="flex-1">
           <p className="font-semibold text-ink">{t('onboarding.settingUp')}</p>
@@ -376,7 +377,7 @@ function Bubble({ role, text }) {
     return (
       <div className="flex items-start gap-2.5">
         <span className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
-          <Heart size={15} fill="#EEF0FF" stroke="#EEF0FF" />
+          <LogoMark size={15} />
         </span>
         <div className="max-w-[80%] rounded-2xl rounded-tl-sm bg-white border border-line px-4 py-2.5 text-sm text-ink shadow-card">
           {text}
