@@ -84,12 +84,69 @@ body {
   animation: shimmer 1.6s infinite;
 }
 
-/* Respect reduced motion — disable typing dots and shimmer */
+/* ===================== Landing page (/welcome) motion ===================== */
+@keyframes lp-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes lp-float2 {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(4deg); }
+}
+@keyframes lp-blob {
+  0%, 100% { border-radius: 42% 58% 60% 40% / 45% 45% 55% 55%; transform: translate(0, 0) scale(1); }
+  33% { border-radius: 60% 40% 45% 55% / 55% 60% 40% 45%; transform: translate(16px, -12px) scale(1.05); }
+  66% { border-radius: 45% 55% 55% 45% / 40% 45% 55% 60%; transform: translate(-14px, 12px) scale(0.97); }
+}
+@keyframes lp-gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes lp-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes lp-ring {
+  0% { transform: scale(0.7); opacity: 0.5; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes lp-pop {
+  0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+  100% { opacity: 1; transform: none; }
+}
+
+.lp-float { animation: lp-float 6s ease-in-out infinite; }
+.lp-float2 { animation: lp-float2 9s ease-in-out infinite; }
+.lp-blob { animation: lp-blob 18s ease-in-out infinite; }
+.lp-gradient { background-size: 200% 200%; animation: lp-gradient 9s ease infinite; }
+.lp-marquee { animation: lp-marquee 32s linear infinite; }
+.lp-ring { animation: lp-ring 2.6s ease-out infinite; }
+.lp-pop { animation: lp-pop 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.lp-marquee-track:hover .lp-marquee { animation-play-state: paused; }
+
+/* Soft mesh backdrop for the hero */
+.lp-mesh {
+  background-color: #f7f8fc;
+  background-image:
+    radial-gradient(38% 40% at 12% 18%, rgba(99, 102, 241, 0.18), transparent 62%),
+    radial-gradient(36% 40% at 88% 8%, rgba(79, 70, 229, 0.14), transparent 60%),
+    radial-gradient(48% 52% at 74% 82%, rgba(199, 210, 254, 0.38), transparent 62%);
+}
+
+/* Respect reduced motion — disable all decorative motion */
 @media (prefers-reduced-motion: reduce) {
   .typing-dot,
-  .shimmer::after {
+  .shimmer::after,
+  .lp-float,
+  .lp-float2,
+  .lp-blob,
+  .lp-gradient,
+  .lp-marquee,
+  .lp-ring,
+  .lp-pop {
     animation: none !important;
   }
+  .lp-marquee { transform: none !important; }
 }
 
 /* Print — used by the Diet Plan "Download" action */

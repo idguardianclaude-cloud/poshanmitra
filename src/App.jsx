@@ -11,6 +11,7 @@ import { Dashboard } from './pages/Dashboard.jsx'
 // the initial bundle small, which matters for the target audience: women on
 // Tier 2–3 mobile connections. named export → { default } for React.lazy.
 const lazyPage = (loader, name) => lazy(() => loader().then((m) => ({ default: m[name] })))
+const Landing = lazyPage(() => import('./pages/Landing.jsx'), 'Landing')
 const Onboarding = lazyPage(() => import('./pages/Onboarding.jsx'), 'Onboarding')
 const Chatbot = lazyPage(() => import('./pages/Chatbot.jsx'), 'Chatbot')
 const DietPlan = lazyPage(() => import('./pages/DietPlan.jsx'), 'DietPlan')
@@ -35,11 +36,12 @@ function RouteFallback() {
   )
 }
 
-// Route guard: no login flag → /login; logged in but no completed profile → /onboarding.
+// Route guard: no login flag → public landing (/welcome); logged in but no
+// completed profile → /onboarding.
 function RequireApp({ children }) {
   const { loggedIn, profile } = useProfile()
   const location = useLocation()
-  if (!loggedIn) return <Navigate to="/login" replace state={{ from: location }} />
+  if (!loggedIn) return <Navigate to="/welcome" replace state={{ from: location }} />
   if (!profile?.onboarded) return <Navigate to="/onboarding" replace />
   return children
 }
@@ -50,6 +52,10 @@ export default function App() {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
+        <Route
+          path="/welcome"
+          element={loggedIn && profile?.onboarded ? <Navigate to="/" replace /> : <Landing />}
+        />
         <Route
           path="/login"
           element={loggedIn && profile?.onboarded ? <Navigate to="/" replace /> : <Login />}
