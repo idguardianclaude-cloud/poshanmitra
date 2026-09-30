@@ -114,6 +114,10 @@ body {
   0% { opacity: 0; transform: translateY(10px) scale(0.98); }
   100% { opacity: 1; transform: none; }
 }
+@keyframes lp-fillbar {
+  from { width: 0; }
+  to { width: 100%; }
+}
 
 .lp-float { animation: lp-float 6s ease-in-out infinite; }
 .lp-float2 { animation: lp-float2 9s ease-in-out infinite; }

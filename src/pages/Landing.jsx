@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom'
 import {
   MessageCircle, Salad, FileText, MapPin, Video, Activity, Bell,
   Megaphone, ShieldCheck, Globe, Stethoscope, Lock, ArrowRight, Check,
-  Sparkles, HeartPulse, Phone,
+  Sparkles, HeartPulse, Phone, Play,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button.jsx'
 import { LogoMark } from '../components/Logo.jsx'
+import { ProductDemo } from '../components/ProductDemo.jsx'
 import { DisclaimerFooter } from '../components/layout/DisclaimerFooter.jsx'
 import { useT } from '../lib/i18n.js'
 
@@ -166,7 +167,7 @@ export function Landing() {
                 <Button as={Link} to="/login" className="sm:px-6 shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 transition-transform">
                   Get started free <ArrowRight size={16} />
                 </Button>
-                <Button as="a" href="#how" variant="secondary" className="sm:px-6">See how it works</Button>
+                <Button as="a" href="#demo" variant="secondary" className="sm:px-6"><Play size={15} fill="currentColor" /> Watch demo</Button>
               </div>
               <div className="lp-pop mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-muted" style={{ animationDelay: '0.3s' }}>
                 <span className="inline-flex items-center gap-1.5"><Check size={14} className="text-emerald-600" /> 3 languages</span>
@@ -193,6 +194,22 @@ export function Landing() {
 
         {/* Stats */}
         <StatsBand />
+
+        {/* Demo */}
+        <section id="demo" className="max-w-main mx-auto px-4 sm:px-6 py-16 sm:py-20">
+          <Reveal className="max-w-2xl mb-8">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1">
+              <Play size={12} fill="currentColor" /> Watch the demo
+            </span>
+            <h2 className="mt-4 text-2xl sm:text-3xl font-bold tracking-tight">See PoshanMitra in action</h2>
+            <p className="mt-3 text-ink-muted">A quick, narrated tour of how Mitra guides you — day by day, with safety first. Tap play for the voice-over.</p>
+          </Reveal>
+          <Reveal>
+            <div className="max-w-3xl mx-auto">
+              <ProductDemo />
+            </div>
+          </Reveal>
+        </section>
 
         {/* Features */}
         <section id="features" className="max-w-main mx-auto px-4 sm:px-6 py-16 sm:py-20">
