@@ -34,7 +34,14 @@ steps (Google OAuth creds, email template) are deliberately LAST — the user sa
       `reports.readingsFromExtract()` + `reports.summariseForMitra()`,
       `image.readAndDownscaleImage(file, maxDim)`.
 
-## ⏳ IN PROGRESS — Reports upload UI (resume HERE)
+## ✅ DONE (session 2)
+- [x] **Reports upload UI** — UploadReportModal: photo → Gemini extracts values → confirm → save; Chatbot passes reportsSummary so Mitra is aware. LIVE.
+- [x] **Campaigns** — location bar (city + geolocation + facilities link), perks/benefits/cost on each card, slot booking (BookingModal → My appointments + .ics + WhatsApp + email). LIVE.
+- [x] **Profile verification** — Settings "Verification & contact": verified email badge, ABHA link (official ABDM portal) + address field, alternate number. LIVE.
+- [x] **Navbar** — added quick "Ask Mitra" button + Poshan-score chip to the Header right side; Header shows real signed-in user. LIVE.
+- [x] **Weekly check-up separation** — "This week's check-up" log in the Checkup section only (separate store), distinct from Reports uploads. LIVE.
+
+## ⏳ Old in-progress note (now done — Reports upload UI)
 `src/pages/Reports.jsx` already imports: Upload, Loader2, Check, Sparkles, isImageFile,
 readAndDownscaleImage, extractReport, hasGeminiKey, readingsFromExtract. Still to do:
 - [ ] Add an **"Upload report"** button to the PageHeader action (next to Ask Mitra).
