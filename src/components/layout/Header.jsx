@@ -12,6 +12,8 @@ import {
   PlaySquare,
   Building2,
   CornerDownLeft,
+  MessageSquare,
+  Sparkles,
 } from 'lucide-react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { LANGS, useT } from '../../lib/i18n.js'
@@ -171,6 +173,25 @@ export function Header({ onToggleSidebar }) {
       </div>
 
       <div className="flex-1 md:hidden" />
+
+      {/* Poshan score chip */}
+      {profile?.poshanScore != null && (
+        <button
+          onClick={() => navigate('/')}
+          title={t('dash.poshanScore')}
+          className="hidden lg:inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 px-2.5 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        >
+          <Sparkles size={15} /> {profile.poshanScore}
+        </button>
+      )}
+
+      {/* Quick Ask Mitra */}
+      <button
+        onClick={() => navigate('/chat')}
+        className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+      >
+        <MessageSquare size={16} /> {t('common.askMitra')}
+      </button>
 
       {/* Language */}
       <div className="relative" ref={langRef}>

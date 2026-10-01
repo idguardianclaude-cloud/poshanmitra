@@ -1,19 +1,19 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Check, Trash2, Bell, Globe, MessageSquare, RefreshCw, ShieldCheck } from 'lucide-react'
+import { Check, Trash2, Bell, Globe, MessageSquare, RefreshCw, ShieldCheck, Phone, ExternalLink, BadgeCheck, IdCard } from 'lucide-react'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { storage } from '../lib/storage.js'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { useT, LANGS } from '../lib/i18n.js'
 import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
-import { cleanName, isValidName } from '../lib/validate.js'
+import { cleanName, isValidName, normalizeMobile, isValidMobile } from '../lib/validate.js'
 import { RemindersManager } from '../components/RemindersManager.jsx'
 
 const FOODS = ['Vegetarian', 'Non-vegetarian', 'Eggetarian', 'Jain']
 
 export function Settings() {
-  const { profile, updateProfile, lang, setLang, deleteAllData } = useProfile()
+  const { profile, authUser, updateProfile, lang, setLang, deleteAllData } = useProfile()
   const t = useT()
   const navigate = useNavigate()
 
@@ -21,6 +21,18 @@ export function Settings() {
   const [food, setFood] = useState(profile?.food || '')
   const [notif, setNotif] = useState(storage.getNotifications())
   const [saved, setSaved] = useState(false)
+
+  // Verification & contact
+  const [altPhone, setAltPhone] = useState(profile?.altPhone || '')
+  const [abha, setAbha] = useState(profile?.abha || '')
+  const [vSaved, setVSaved] = useState(false)
+  const altOk = !altPhone || isValidMobile(altPhone)
+  function saveVerification() {
+    if (!altOk) return
+    updateProfile({ altPhone: altPhone || null, abha: abha.trim().slice(0, 40) || null })
+    setVSaved(true)
+    setTimeout(() => setVSaved(false), 1800)
+  }
 
   const nameOk = isValidName(name)
   const dirty =
@@ -121,6 +133,69 @@ export function Settings() {
                 <RefreshCw size={15} /> {t('settings.redoSetup')}
               </Button>
             </div>
+          </div>
+        </section>
+
+        {/* Verification & contact */}
+        <section className="rounded-2xl bg-white border border-line shadow-card p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <BadgeCheck size={18} className="text-indigo-600" />
+            <h2 className="text-base font-semibold text-ink">Verification & contact</h2>
+          </div>
+          <p className="text-xs text-ink-muted mb-4">Optional. Helps us personalise care and reach you.</p>
+
+          <div className="space-y-4">
+            {/* Email (verified via Google / email sign-in) */}
+            {authUser?.email && (
+              <div className="flex items-center justify-between gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="text-[13px] font-medium text-ink truncate">{authUser.email}</p>
+                  <p className="text-xs text-emerald-700">Verified email ({authUser.provider === 'google' ? 'Google' : 'email'})</p>
+                </div>
+                <BadgeCheck size={18} className="text-emerald-600 shrink-0" />
+              </div>
+            )}
+
+            {/* ABHA */}
+            <div>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">ABHA (Ayushman Bharat Health Account)</span>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  value={abha}
+                  onChange={(e) => setAbha(e.target.value)}
+                  placeholder="Your ABHA address (e.g. priya@abdm)"
+                  className="flex-1 rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                />
+                <Button as="a" href="https://abha.abdm.gov.in" target="_blank" rel="noopener noreferrer" variant="secondary">
+                  <IdCard size={15} /> Create / Link ABHA <ExternalLink size={13} />
+                </Button>
+              </div>
+              <p className="text-xs text-ink-faint mt-1">Opens the official ABDM portal. We never see or store your Aadhaar — only the ABHA address you choose to type here.</p>
+            </div>
+
+            {/* Alternate number */}
+            <label className="block">
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">Alternate mobile number</span>
+              <div className="flex items-center rounded-xl border border-line bg-canvas focus-within:ring-2 focus-within:ring-indigo-500 max-w-xs">
+                <Phone size={15} className="ml-3 text-ink-faint" />
+                <span className="pl-2 pr-1 text-sm text-ink-muted">+91</span>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  value={altPhone}
+                  onChange={(e) => setAltPhone(normalizeMobile(e.target.value))}
+                  placeholder="98765 43210"
+                  className="flex-1 bg-transparent py-2.5 pr-3 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+                />
+              </div>
+              {!altOk && <p className="mt-1 text-xs text-red-600">{t('valid.mobile')}</p>}
+              <p className="text-xs text-ink-faint mt-1">A family member's number for emergencies. (Number OTP verification needs an SMS service — coming later.)</p>
+            </label>
+
+            <Button onClick={saveVerification} disabled={!altOk}>
+              {vSaved ? (<><Check size={16} /> Saved</>) : 'Save details'}
+            </Button>
           </div>
         </section>
 
