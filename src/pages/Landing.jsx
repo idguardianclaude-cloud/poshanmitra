@@ -125,7 +125,7 @@ export function Landing() {
               ))}
             </div>
             <Button as={Link} to="/login" variant="ghost" size="sm" className="hidden sm:inline-flex">{c.login}</Button>
-            <Button as={Link} to="/login" size="sm">{c.getStarted}</Button>
+            <Button as={Link} to="/signup" size="sm">{c.getStarted}</Button>
           </div>
         </div>
       </header>
@@ -151,7 +151,7 @@ export function Landing() {
                 <p className="text-sm text-ink-faint" lang="hi">स्वस्थ माँ · स्वस्थ शिशु · स्वस्थ भारत</p>
               </div>
               <div className="lp-pop mt-7 flex flex-col sm:flex-row gap-3" style={{ animationDelay: '0.24s' }}>
-                <Button as={Link} to="/login" className="sm:px-6 shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 transition-transform">
+                <Button as={Link} to="/signup" className="sm:px-6 shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 transition-transform">
                   {c.getStartedFree} <ArrowRight size={16} />
                 </Button>
                 <Button as="a" href="#demo" variant="secondary" className="sm:px-6"><Play size={15} fill="currentColor" /> {c.watchDemo}</Button>
@@ -274,7 +274,7 @@ export function Landing() {
             ))}
           </div>
           <Reveal className="mt-8">
-            <Button as={Link} to="/login" className="sm:px-6 hover:-translate-y-0.5 transition-transform">{c.createProfile} <ArrowRight size={16} /></Button>
+            <Button as={Link} to="/signup" className="sm:px-6 hover:-translate-y-0.5 transition-transform">{c.createProfile} <ArrowRight size={16} /></Button>
           </Reveal>
         </section>
 
@@ -324,7 +324,7 @@ export function Landing() {
               <h2 className="relative text-2xl sm:text-4xl font-bold max-w-2xl mx-auto">{c.cta.title}</h2>
               <p className="relative mt-3 text-indigo-100 max-w-xl mx-auto">{c.cta.sub}</p>
               <div className="relative mt-7 flex flex-col sm:flex-row gap-3 justify-center">
-                <Button as={Link} to="/login" variant="secondary" className="sm:px-7 hover:-translate-y-0.5 transition-transform">
+                <Button as={Link} to="/signup" variant="secondary" className="sm:px-7 hover:-translate-y-0.5 transition-transform">
                   {c.getStartedFree} <ArrowRight size={16} />
                 </Button>
               </div>

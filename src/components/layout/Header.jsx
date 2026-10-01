@@ -27,7 +27,7 @@ function useOutsideClose(ref, onClose) {
 }
 
 export function Header({ onToggleSidebar }) {
-  const { profile, lang, setLang, logout, deleteAllData } = useProfile()
+  const { profile, authUser, lang, setLang, logout, deleteAllData } = useProfile()
   const t = useT()
   const navigate = useNavigate()
   const [langOpen, setLangOpen] = useState(false)
@@ -45,7 +45,9 @@ export function Header({ onToggleSidebar }) {
   useOutsideClose(bellRef, () => setBellOpen(false))
   useOutsideClose(searchRef, () => setSearchOpen(false))
 
-  const name = profile?.name || 'Priya Sharma'
+  const name = profile?.name || authUser?.name || 'Priya Sharma'
+  const avatarUrl = authUser?.avatar || null
+  const subtitle = authUser?.email || t('common.pregnantWoman')
 
   // Ctrl/Cmd+K focuses the search box.
   useEffect(() => {
@@ -245,12 +247,16 @@ export function Header({ onToggleSidebar }) {
           onClick={() => setMenuOpen((v) => !v)}
           className="flex items-center gap-2 rounded-xl pl-1 pr-2 py-1 hover:bg-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
-          <span className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold">
-            {name.charAt(0)}
-          </span>
-          <span className="hidden sm:block text-left leading-tight">
-            <span className="block text-sm font-medium text-ink">{name}</span>
-            <span className="block text-[11px] text-ink-faint">{t('common.pregnantWoman')}</span>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="w-9 h-9 rounded-full object-cover" referrerPolicy="no-referrer" />
+          ) : (
+            <span className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold">
+              {name.charAt(0)}
+            </span>
+          )}
+          <span className="hidden sm:block text-left leading-tight max-w-[140px]">
+            <span className="block text-sm font-medium text-ink truncate">{name}</span>
+            <span className="block text-[11px] text-ink-faint truncate">{subtitle}</span>
           </span>
           <ChevronDown size={14} className="text-ink-faint" />
         </button>

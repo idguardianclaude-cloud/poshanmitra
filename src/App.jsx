@@ -12,6 +12,7 @@ import { Dashboard } from './pages/Dashboard.jsx'
 // Tier 2–3 mobile connections. named export → { default } for React.lazy.
 const lazyPage = (loader, name) => lazy(() => loader().then((m) => ({ default: m[name] })))
 const Landing = lazyPage(() => import('./pages/Landing.jsx'), 'Landing')
+const Signup = lazyPage(() => import('./pages/Signup.jsx'), 'Signup')
 const Onboarding = lazyPage(() => import('./pages/Onboarding.jsx'), 'Onboarding')
 const Chatbot = lazyPage(() => import('./pages/Chatbot.jsx'), 'Chatbot')
 const DietPlan = lazyPage(() => import('./pages/DietPlan.jsx'), 'DietPlan')
@@ -59,6 +60,10 @@ export default function App() {
         <Route
           path="/login"
           element={loggedIn && profile?.onboarded ? <Navigate to="/" replace /> : <Login />}
+        />
+        <Route
+          path="/signup"
+          element={loggedIn && profile?.onboarded ? <Navigate to="/" replace /> : <Signup />}
         />
         <Route
           path="/onboarding"
