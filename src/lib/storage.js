@@ -77,6 +77,11 @@ export const storage = {
   getLocation: () => read('poshanmitra_location', null),
   setLocation: (loc) => write('poshanmitra_location', loc),
 
+  // Weekly ANC check-up log — lives ONLY in the Weekly Check-up section (kept
+  // separate from the general hospital-report uploads on the Reports page).
+  getCheckups: () => read('poshanmitra_checkups', []),
+  setCheckups: (list) => write('poshanmitra_checkups', list),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.

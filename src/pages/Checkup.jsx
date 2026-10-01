@@ -1,14 +1,18 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Baby, Heart, CheckCircle2, Lightbulb, Briefcase, MessageSquare } from 'lucide-react'
+import { Baby, Heart, CheckCircle2, Lightbulb, Briefcase, MessageSquare, ClipboardList, Plus, Trash2, Check } from 'lucide-react'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Illustration } from '../components/Illustration.jsx'
 import { useT } from '../lib/i18n.js'
+import { storage } from '../lib/storage.js'
+import { formatIN } from '../lib/dates.js'
+import { todayISO } from '../lib/reports.js'
 import { weeklyMilestones, hospitalBag, milestoneForWeek } from '../data/checkup.js'
 
 export function Checkup() {
-  const { profile } = useProfile()
+  const { profile, lang } = useProfile()
   const t = useT()
   const week = profile?.weeks
 
@@ -100,6 +104,9 @@ export function Checkup() {
             </ul>
           </Card>
 
+          {/* Weekly check-up log — lives only here, separate from Reports uploads */}
+          <WeeklyCheckupLog week={week} lang={lang} />
+
           <div className="rounded-2xl border border-indigo-100 shadow-card p-5" style={{ backgroundColor: '#EEF0FF' }}>
             <p className="text-sm text-ink-muted">
               {t('checkup.forBaby')} · {t('checkup.weekLabel', { week })}
@@ -144,6 +151,90 @@ export function Checkup() {
         </ol>
       </section>
     </>
+  )
+}
+
+// A log of the woman's weekly antenatal check-ups. Stored separately from the
+// Reports page (which is for uploaded hospital/lab reports). Her own record.
+function WeeklyCheckupLog({ week, lang }) {
+  const [list, setList] = useState(() => storage.getCheckups())
+  const [open, setOpen] = useState(false)
+  const [date, setDate] = useState(todayISO())
+  const [weight, setWeight] = useState('')
+  const [sys, setSys] = useState('')
+  const [dia, setDia] = useState('')
+  const [note, setNote] = useState('')
+
+  function persist(next) {
+    setList(next)
+    storage.setCheckups(next)
+  }
+  function add(e) {
+    e.preventDefault()
+    const entry = {
+      id: `c-${Date.now()}`,
+      date: date || todayISO(),
+      week,
+      weight: weight ? Number(weight) : null,
+      bp: sys && dia ? `${Number(sys)}/${Number(dia)}` : null,
+      note: note.slice(0, 160),
+    }
+    persist([entry, ...list])
+    setWeight(''); setSys(''); setDia(''); setNote(''); setDate(todayISO()); setOpen(false)
+  }
+
+  return (
+    <div className="rounded-2xl bg-white border border-line shadow-card p-5">
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          <ClipboardList size={18} className="text-indigo-600" />
+          <h2 className="text-base font-semibold text-ink">This week's check-up</h2>
+        </div>
+        {!open && (
+          <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1 rounded-full border border-line px-2.5 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50">
+            <Plus size={13} /> Log visit
+          </button>
+        )}
+      </div>
+
+      {open && (
+        <form onSubmit={add} className="space-y-2.5 mb-3">
+          <div className="grid grid-cols-2 gap-2">
+            <input type="date" value={date} max={todayISO()} onChange={(e) => setDate(e.target.value)} className="rounded-xl border border-line bg-canvas px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" />
+            <input type="number" inputMode="decimal" value={weight} onChange={(e) => setWeight(e.target.value)} placeholder="Weight (kg)" className="rounded-xl border border-line bg-canvas px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <input type="number" inputMode="numeric" value={sys} onChange={(e) => setSys(e.target.value)} placeholder="BP systolic" className="rounded-xl border border-line bg-canvas px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" />
+            <input type="number" inputMode="numeric" value={dia} onChange={(e) => setDia(e.target.value)} placeholder="BP diastolic" className="rounded-xl border border-line bg-canvas px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" />
+          </div>
+          <input value={note} maxLength={160} onChange={(e) => setNote(e.target.value)} placeholder="Notes from the visit (optional)" className="w-full rounded-xl border border-line bg-canvas px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" />
+          <div className="flex items-center gap-2">
+            <Button type="submit" size="sm"><Check size={15} /> Save</Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>Cancel</Button>
+          </div>
+        </form>
+      )}
+
+      {list.length === 0 ? (
+        <p className="text-xs text-ink-faint">No check-ups logged yet. Add one after each ANC visit.</p>
+      ) : (
+        <ul className="divide-y divide-line">
+          {list.slice(0, 8).map((c) => (
+            <li key={c.id} className="flex items-start justify-between gap-2 py-2">
+              <div className="min-w-0">
+                <p className="text-sm text-ink">
+                  {formatIN(c.date, lang)}{c.week ? ` · wk ${c.week}` : ''}
+                  {c.weight ? ` · ${c.weight} kg` : ''}{c.bp ? ` · BP ${c.bp}` : ''}
+                </p>
+                {c.note && <p className="text-xs text-ink-faint">{c.note}</p>}
+              </div>
+              <button onClick={() => persist(list.filter((x) => x.id !== c.id))} aria-label="Remove" className="p-1 rounded-lg text-ink-faint hover:text-red-600 hover:bg-red-50 shrink-0"><Trash2 size={14} /></button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="mt-2 text-[11px] text-ink-faint">Your own record of each visit — not a diagnosis. Upload full lab reports in Reports.</p>
+    </div>
   )
 }
 
