@@ -14,6 +14,7 @@ import {
 import { LogoMark } from '../components/Logo.jsx'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { storage } from '../lib/storage.js'
+import { summariseForMitra } from '../lib/reports.js'
 import { checkRedFlags } from '../lib/redflags.js'
 import { askMitra, FALLBACKS } from '../lib/gemini.js'
 import { readAndDownscaleImage, isImageFile } from '../lib/image.js'
@@ -130,6 +131,7 @@ export function Chatbot() {
       history,
       profile,
       image: image ? { data: image.base64, mimeType: image.mimeType } : null,
+      reportsSummary: summariseForMitra(storage.getReports()),
     })
     setTyping(false)
 

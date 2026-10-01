@@ -34,6 +34,7 @@ export function Reports() {
   const { lang } = useProfile()
   const [reports, setReports] = useState(() => storage.getReports())
   const [adding, setAdding] = useState(null) // metric key or null
+  const [uploading, setUploading] = useState(false)
 
   function persist(next) {
     setReports(next)
@@ -50,6 +51,14 @@ export function Reports() {
 
   function handleDelete(id) {
     persist(removeReading(reports, id))
+  }
+
+  function handleSaveMany(readings) {
+    if (!readings?.length) return
+    let next = reports
+    for (const r of readings) next = addReading(next, r)
+    persist(next)
+    setUploading(false)
   }
 
   const recent = useMemo(
@@ -78,7 +87,10 @@ export function Reports() {
         title={t('reports.title')}
         subtitle={t('reports.sub')}
         action={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button onClick={() => setUploading(true)}>
+              <Upload size={15} /> Upload report
+            </Button>
             {hasAny && (
               <Button variant="secondary" onClick={shareLatest}>
                 <Share2 size={15} /> {t('common.whatsapp')}
@@ -222,7 +234,168 @@ export function Reports() {
           onSave={handleAdd}
         />
       )}
+
+      {uploading && <UploadReportModal onClose={() => setUploading(false)} onSave={handleSaveMany} />}
     </>
+  )
+}
+
+// Upload a photo of a lab / ANC report → Gemini reads the printed values → the
+// woman confirms them → they're added to her log. SAFETY: this is extraction into
+// HER OWN record, clearly labelled "not a diagnosis"; nothing here interprets the
+// values, and Mitra's rules are unchanged.
+function UploadReportModal({ onClose, onSave }) {
+  const t = useT()
+  const { lang } = useProfile()
+  const inputRef = useRef(null)
+  const [preview, setPreview] = useState(null)
+  const [stage, setStage] = useState('pick') // pick | extracting | review | error
+  const [readings, setReadings] = useState([])
+  const [other, setOther] = useState([])
+  const [err, setErr] = useState('')
+
+  async function onFile(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setErr('')
+    if (!isImageFile(file)) {
+      setErr('Please choose a photo (JPG or PNG) of your report.')
+      return
+    }
+    try {
+      const img = await readAndDownscaleImage(file, 1024)
+      setPreview(img.dataUrl)
+      if (!hasGeminiKey()) {
+        setErr('AI reading isn’t available right now. You can close this and add readings manually.')
+        setStage('error')
+        return
+      }
+      setStage('extracting')
+      const { data, error } = await extractReport({ image: { data: img.base64, mimeType: img.mimeType } })
+      if (error || !data) {
+        setErr('Couldn’t read the values from this photo. Try a clearer, well-lit photo — or add them manually.')
+        setStage('error')
+        return
+      }
+      const mapped = readingsFromExtract(data).map((r) => ({ ...r, include: true }))
+      setReadings(mapped)
+      setOther(Array.isArray(data.other) ? data.other.filter((o) => o && o.name).slice(0, 6) : [])
+      setStage(mapped.length || (data.other && data.other.length) ? 'review' : 'error')
+      if (!mapped.length && !(data.other && data.other.length)) {
+        setErr('No clear readings found. Try a sharper photo, or add them manually.')
+      }
+    } catch {
+      setErr('Couldn’t read that image. Please try another photo.')
+      setStage('error')
+    }
+  }
+
+  function toggle(id) {
+    setReadings((rs) => rs.map((r) => (r.id === id ? { ...r, include: !r.include } : r)))
+  }
+
+  function save() {
+    onSave(readings.filter((r) => r.include).map(({ include, ...r }) => r))
+  }
+
+  const chosen = readings.filter((r) => r.include).length
+
+  return (
+    <Modal open onClose={onClose} title="Upload a report">
+      <input ref={inputRef} type="file" accept="image/*" capture="environment" onChange={onFile} className="hidden" />
+
+      {stage === 'pick' && (
+        <div className="text-center">
+          <button
+            onClick={() => inputRef.current?.click()}
+            className="w-full rounded-2xl border-2 border-dashed border-line bg-canvas py-10 px-4 flex flex-col items-center gap-3 hover:border-indigo-300 hover:bg-indigo-50/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50">
+              <Upload size={22} className="text-indigo-600" />
+            </span>
+            <span className="text-sm font-medium text-ink">Choose a photo of your lab or ANC report</span>
+            <span className="text-xs text-ink-faint">Mitra will read the numbers so you don’t have to type them.</span>
+          </button>
+          {err && <p className="mt-3 text-xs text-red-600">{err}</p>}
+          <p className="mt-3 text-[11px] text-ink-faint inline-flex items-center gap-1 justify-center">
+            <Sparkles size={12} className="text-indigo-500" /> AI reads the printed values. Always confirm them — this is your record, not a diagnosis.
+          </p>
+        </div>
+      )}
+
+      {stage === 'extracting' && (
+        <div className="text-center py-6">
+          {preview && <img src={preview} alt="" className="mx-auto max-h-40 rounded-xl border border-line mb-4" />}
+          <p className="inline-flex items-center gap-2 text-sm text-ink-muted">
+            <Loader2 size={16} className="animate-spin text-indigo-600" /> Reading your report…
+          </p>
+        </div>
+      )}
+
+      {stage === 'review' && (
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            {preview && <img src={preview} alt="" className="w-20 h-20 object-cover rounded-xl border border-line shrink-0" />}
+            <p className="text-xs text-ink-muted">
+              We read these values off your report. Please check they’re correct, then save the ones you want. This is your personal record — <span className="font-medium text-ink">not a diagnosis</span>.
+            </p>
+          </div>
+
+          {readings.length > 0 ? (
+            <ul className="space-y-2">
+              {readings.map((r) => {
+                const m = getMetric(r.metric)
+                return (
+                  <li key={r.id}>
+                    <label className="flex items-center justify-between gap-3 rounded-xl border border-line bg-canvas px-3 py-2.5 cursor-pointer">
+                      <span className="flex items-center gap-2.5">
+                        <input type="checkbox" checked={r.include} onChange={() => toggle(r.id)} className="w-4 h-4 accent-indigo-600" />
+                        <span className="text-sm text-ink">{t(`reports.metric.${r.metric}`)}</span>
+                      </span>
+                      <span className="text-sm font-semibold text-ink">
+                        {displayValue(r)} <span className="text-ink-faint font-normal">{m?.unit}</span>
+                        <span className="ml-2 text-xs text-ink-faint font-normal">{formatIN(r.date, lang)}</span>
+                      </span>
+                    </label>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className="text-sm text-ink-muted">No chartable readings found, but here’s what we saw:</p>
+          )}
+
+          {other.length > 0 && (
+            <div className="rounded-xl bg-canvas border border-line px-3 py-2.5">
+              <p className="text-[11px] font-semibold text-ink-muted mb-1">Other results read (not charted):</p>
+              <ul className="text-xs text-ink-muted space-y-0.5">
+                {other.map((o, i) => (
+                  <li key={i}>{o.name}: <span className="text-ink">{o.value}</span></li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 pt-1">
+            <Button onClick={save} disabled={chosen === 0}>
+              <Check size={16} /> Save {chosen > 0 ? chosen : ''} to my log
+            </Button>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          </div>
+        </div>
+      )}
+
+      {stage === 'error' && (
+        <div className="text-center py-4">
+          {preview && <img src={preview} alt="" className="mx-auto max-h-32 rounded-xl border border-line mb-3" />}
+          <p className="text-sm text-ink-muted">{err}</p>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <Button variant="secondary" onClick={() => { setStage('pick'); setErr(''); setPreview(null) }}>Try another photo</Button>
+            <Button variant="ghost" onClick={onClose}>Close</Button>
+          </div>
+        </div>
+      )}
+    </Modal>
   )
 }
 
