@@ -68,6 +68,15 @@ export const storage = {
   getNotifications: () => read('poshanmitra_notifications', true) !== false,
   setNotifications: (v) => write('poshanmitra_notifications', v),
 
+  // Campaign slot bookings (on-device appointment records). Not an official govt
+  // booking — a personal reminder the woman can share/add to her calendar.
+  getBookings: () => read('poshanmitra_bookings', []),
+  setBookings: (list) => write('poshanmitra_bookings', list),
+
+  // Her chosen location (city + optional coords) for "near me" relevance.
+  getLocation: () => read('poshanmitra_location', null),
+  setLocation: (loc) => write('poshanmitra_location', loc),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.
