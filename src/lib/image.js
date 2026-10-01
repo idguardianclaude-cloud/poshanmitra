@@ -12,7 +12,7 @@ export function isImageFile(file) {
   return !!file && typeof file.type === 'string' && file.type.startsWith('image/')
 }
 
-export function readAndDownscaleImage(file) {
+export function readAndDownscaleImage(file, maxDim = MAX_DIM) {
   return new Promise((resolve, reject) => {
     if (!isImageFile(file)) {
       reject(new Error('not-an-image'))
@@ -22,7 +22,7 @@ export function readAndDownscaleImage(file) {
     const img = new Image()
     img.onload = () => {
       try {
-        const scale = Math.min(1, MAX_DIM / Math.max(img.width, img.height))
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height))
         const w = Math.max(1, Math.round(img.width * scale))
         const h = Math.max(1, Math.round(img.height * scale))
         const canvas = document.createElement('canvas')

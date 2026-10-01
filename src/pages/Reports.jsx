@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Trash2, TrendingUp, TrendingDown, Minus, Activity, MessageSquare, Info, Share2 } from 'lucide-react'
+import { Plus, Trash2, TrendingUp, TrendingDown, Minus, Activity, MessageSquare, Info, Share2, Upload, Loader2, Check, Sparkles } from 'lucide-react'
 import { PageHeader } from '../components/ui/PageHeader.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Modal } from '../components/ui/Modal.jsx'
@@ -11,6 +11,8 @@ import { useT } from '../lib/i18n.js'
 import { formatIN } from '../lib/dates.js'
 import { useProfile } from '../context/ProfileContext.jsx'
 import { shareOnWhatsApp } from '../lib/whatsapp.js'
+import { isImageFile, readAndDownscaleImage } from '../lib/image.js'
+import { extractReport, hasGeminiKey } from '../lib/gemini.js'
 import {
   METRICS,
   getMetric,
@@ -22,6 +24,7 @@ import {
   makeReading,
   addReading,
   removeReading,
+  readingsFromExtract,
   isValidReading,
   todayISO,
 } from '../lib/reports.js'

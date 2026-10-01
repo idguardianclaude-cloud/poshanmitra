@@ -153,10 +153,74 @@ export function parseResponse(raw) {
 
 // Ask Mitra. `history` is [{ role: 'user'|'model', text }]. Returns
 // { reply, urgency, chips, error }. Errors are surfaced, not thrown.
-export async function askMitra({ message, lang = 'en', history = [], profile = null, image = null }) {
+// Pull the first {...} JSON object out of a model reply, or null.
+function extractJson(raw) {
+  if (!raw) return null
+  let text = String(raw).trim().replace(/^```(?:json)?/i, '').replace(/```$/i, '').trim()
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start === -1 || end === -1 || end <= start) return null
+  try {
+    return JSON.parse(text.slice(start, end + 1))
+  } catch {
+    return null
+  }
+}
+
+// Read measured values off a photo of a lab/ANC report. Extraction only — the
+// result is the woman's own record to confirm; it is NEVER a diagnosis. Returns
+// { data, error }. `image.data` is base64 without the data: prefix.
+export async function extractReport({ image }) {
+  if (!PROXY_URL && !API_KEY) return { data: null, error: 'no-key' }
+  if (!image?.data) return { data: null, error: 'no-image' }
+  const instruction = `You are reading a photo of a medical lab report or antenatal (ANC) check-up card. Extract ONLY values that are clearly printed or written. Do NOT guess, do NOT infer, do NOT diagnose, and add NO commentary.
+Return ONLY a JSON object (no markdown):
+{"hb": number|null, "bp_systolic": number|null, "bp_diastolic": number|null, "sugar_fasting": number|null, "sugar_pp": number|null, "sugar_random": number|null, "weight_kg": number|null, "report_date": "YYYY-MM-DD"|null, "other": [{"name": string, "value": string}]}
+Units: hb g/dL, bp mmHg, sugar mg/dL, weight kg. Use null when a value is not clearly present. "other" holds up to 6 other clearly-labelled results as printed. report_date is the date printed on the report, if visible.`
+  const contents = [{ role: 'user', parts: [{ inlineData: { data: image.data, mimeType: image.mimeType || 'image/jpeg' } }, { text: instruction }] }]
+  const generationConfig = { temperature: 0, maxOutputTokens: 700 }
+  try {
+    let raw = ''
+    if (PROXY_URL) {
+      const res = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-pm-client': 'poshanmitra' },
+        body: JSON.stringify({ model: MODEL, contents, generationConfig }),
+      })
+      if (!res.ok) return { data: null, error: 'request-failed' }
+      const d = await res.json()
+      raw = d?.candidates?.[0]?.content?.parts?.map((p) => p?.text || '').join('') ?? ''
+    } else {
+      const genAI = new GoogleGenerativeAI(API_KEY)
+      const m = genAI.getGenerativeModel({ model: MODEL })
+      const result = await m.generateContent({ contents, generationConfig })
+      raw = result?.response?.text?.() ?? ''
+    }
+    const data = extractJson(raw)
+    return { data, error: data ? null : 'parse-failed' }
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[gemini] extractReport failed:', err?.message || err)
+    return { data: null, error: 'request-failed' }
+  }
+}
+
+export async function askMitra({ message, lang = 'en', history = [], profile = null, image = null, reportsSummary = '' }) {
   if (!PROXY_URL && !API_KEY) {
     return { reply: '', urgency: 'routine', chips: [], error: 'no-key' }
   }
+
+  // Combined caretaker context: who she is + her own recent logged readings (so
+  // Mitra can refer to them). This NEVER loosens a rule — she still must not
+  // diagnose, name a medicine/dose, or interpret a report as a clinical result.
+  const context = [
+    buildContext(profile),
+    reportsSummary
+      ? `Her recent self-logged health readings (her OWN record she typed/uploaded, NOT a clinical diagnosis — refer to them gently, never interpret them as a verdict): ${reportsSummary}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   // Retrieve vetted app content relevant to this message and inject it as a
   // leading part of the user turn (kept separate so her actual message is
@@ -188,7 +252,7 @@ export async function askMitra({ message, lang = 'en', history = [], profile = n
         headers: { 'Content-Type': 'application/json', 'x-pm-client': 'poshanmitra' },
         body: JSON.stringify({
           model: MODEL,
-          systemInstruction: { parts: [{ text: systemPrompt(lang, buildContext(profile)) }] },
+          systemInstruction: { parts: [{ text: systemPrompt(lang, context) }] },
           contents,
           generationConfig: { temperature: 0.6, maxOutputTokens: 800 },
         }),
@@ -204,7 +268,7 @@ export async function askMitra({ message, lang = 'en', history = [], profile = n
     }
 
     // Local dev: call Gemini directly with the in-env key via the SDK.
-    const m = getModel(lang, buildContext(profile))
+    const m = getModel(lang, context)
     const result = await m.generateContent({
       contents,
       generationConfig: { temperature: 0.6, maxOutputTokens: 800 },

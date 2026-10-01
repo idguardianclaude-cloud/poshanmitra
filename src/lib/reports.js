@@ -142,3 +142,40 @@ export function trendFor(list, metricKey) {
   if (b < a) return 'down'
   return 'flat'
 }
+
+// Map the JSON that Gemini extracted from a report photo into valid readings for
+// the four tracked metrics. Each reading still passes the same sanity bounds, so
+// a misread value is dropped rather than stored. The report's own printed date is
+// used when present. "other" results aren't stored as metrics (we have no chart
+// for them) — the UI shows them for the woman to note.
+export function readingsFromExtract(data, opts = {}) {
+  if (!data || typeof data !== 'object') return []
+  const date =
+    typeof data.report_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.report_date)
+      ? data.report_date
+      : opts.date || todayISO()
+  const out = []
+  const push = (metric, values) => {
+    const r = makeReading(metric, values, { date })
+    if (r) out.push(r)
+  }
+  if (data.hb != null) push('hb', { value: data.hb })
+  if (data.bp_systolic != null && data.bp_diastolic != null)
+    push('bp', { systolic: data.bp_systolic, diastolic: data.bp_diastolic })
+  const sugar = data.sugar_fasting ?? data.sugar_pp ?? data.sugar_random
+  if (sugar != null) push('sugar', { value: sugar })
+  if (data.weight_kg != null) push('weight', { value: data.weight_kg })
+  return out
+}
+
+// A one-line summary of her latest readings, so Mitra can gently refer to them.
+// Her own record — never a diagnosis (the system prompt keeps that boundary).
+export function summariseForMitra(list) {
+  if (!Array.isArray(list) || list.length === 0) return ''
+  const parts = []
+  for (const key of METRIC_KEYS) {
+    const latest = latestFor(list, key)
+    if (latest) parts.push(`${key} ${displayValue(latest)} (${latest.date})`)
+  }
+  return parts.join(', ')
+}
