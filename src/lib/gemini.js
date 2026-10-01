@@ -16,6 +16,10 @@ import { buildGrounding } from './rag.js'
 // Guarded so this module can be imported outside Vite (e.g. Node test runner),
 // where import.meta.env is undefined.
 const API_KEY = import.meta.env?.VITE_GEMINI_API_KEY
+// Production uses a Supabase Edge Function that holds the key server-side, so the
+// key is NEVER in the public bundle. When VITE_GEMINI_PROXY_URL is set we post the
+// request to it; otherwise (local dev) we call Gemini directly with API_KEY.
+const PROXY_URL = import.meta.env?.VITE_GEMINI_PROXY_URL
 // Pinned to a current, stable, low-cost flash model. Google retires older names
 // (1.5-flash and 2.5-flash both 404'd for new keys), so if this 404s in future,
 // list models at GET https://generativelanguage.googleapis.com/v1beta/models?key=…
@@ -114,7 +118,7 @@ function getModel(lang, context = '') {
 }
 
 export function hasGeminiKey() {
-  return Boolean(API_KEY)
+  return Boolean(API_KEY) || Boolean(PROXY_URL)
 }
 
 // Parse defensively. If JSON parsing fails, treat the raw text as `reply` with
@@ -150,46 +154,63 @@ export function parseResponse(raw) {
 // Ask Mitra. `history` is [{ role: 'user'|'model', text }]. Returns
 // { reply, urgency, chips, error }. Errors are surfaced, not thrown.
 export async function askMitra({ message, lang = 'en', history = [], profile = null, image = null }) {
-  const m = getModel(lang, buildContext(profile))
-  if (!m) {
-    return {
-      reply: '',
-      urgency: 'routine',
-      chips: [],
-      error: 'no-key',
-    }
+  if (!PROXY_URL && !API_KEY) {
+    return { reply: '', urgency: 'routine', chips: [], error: 'no-key' }
   }
 
+  // Retrieve vetted app content relevant to this message and inject it as a
+  // leading part of the user turn (kept separate so her actual message is
+  // untouched). Safe by construction: this is only reached after the red-flag
+  // layer cleared the message, and the grounding block never softens a rule.
+  const grounding = buildGrounding(message)
+  const userParts = []
+  if (grounding) userParts.push({ text: grounding })
+  // Optional image (Gemini vision). `image.data` is base64 WITHOUT the data:
+  // URL prefix; the image-safety rules in the system prompt still apply.
+  if (image?.data) {
+    userParts.push({ inlineData: { data: image.data, mimeType: image.mimeType || 'image/jpeg' } })
+  }
+  userParts.push({ text: message })
+
+  const contents = [
+    ...history.map((h) => ({
+      role: h.role === 'user' ? 'user' : 'model',
+      parts: [{ text: h.text }],
+    })),
+    { role: 'user', parts: userParts },
+  ]
+
   try {
-    // Retrieve vetted app content relevant to this message and inject it as a
-    // leading part of the user turn (kept separate so her actual message is
-    // untouched). Safe by construction: this is only reached after the red-flag
-    // layer cleared the message, and the grounding block never softens a rule.
-    const grounding = buildGrounding(message)
-    const userParts = []
-    if (grounding) userParts.push({ text: grounding })
-    // Optional image (Gemini vision). `image.data` is base64 WITHOUT the data:
-    // URL prefix; the image-safety rules in the system prompt still apply.
-    if (image?.data) {
-      userParts.push({ inlineData: { data: image.data, mimeType: image.mimeType || 'image/jpeg' } })
+    // Production: post to the Supabase Edge Function (key stays server-side).
+    if (PROXY_URL) {
+      const res = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-pm-client': 'poshanmitra' },
+        body: JSON.stringify({
+          model: MODEL,
+          systemInstruction: { parts: [{ text: systemPrompt(lang, buildContext(profile)) }] },
+          contents,
+          generationConfig: { temperature: 0.6, maxOutputTokens: 800 },
+        }),
+      })
+      if (!res.ok) {
+        // eslint-disable-next-line no-console
+        console.error('[gemini] proxy request failed:', res.status)
+        return { reply: '', urgency: 'routine', chips: [], error: 'request-failed' }
+      }
+      const data = await res.json()
+      const raw = data?.candidates?.[0]?.content?.parts?.map((p) => p?.text || '').join('') ?? ''
+      return { ...parseResponse(raw), error: null }
     }
-    userParts.push({ text: message })
 
-    const contents = [
-      ...history.map((h) => ({
-        role: h.role === 'user' ? 'user' : 'model',
-        parts: [{ text: h.text }],
-      })),
-      { role: 'user', parts: userParts },
-    ]
-
+    // Local dev: call Gemini directly with the in-env key via the SDK.
+    const m = getModel(lang, buildContext(profile))
     const result = await m.generateContent({
       contents,
       generationConfig: { temperature: 0.6, maxOutputTokens: 800 },
     })
     const raw = result?.response?.text?.() ?? ''
-    const parsed = parseResponse(raw)
-    return { ...parsed, error: null }
+    return { ...parseResponse(raw), error: null }
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('[gemini] request failed:', err?.message || err)
