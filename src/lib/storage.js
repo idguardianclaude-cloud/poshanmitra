@@ -112,6 +112,11 @@ export const storage = {
   getChecklist: () => read('poshanmitra_checklist', {}),
   setChecklist: (map) => write('poshanmitra_checklist', map),
 
+  // Baby growth log (postpartum) — [{ date, weightKg, heightCm }]. Her own notes,
+  // not a clinical assessment; the ANM/doctor tracks growth on the MCP card.
+  getBabyGrowth: () => read('poshanmitra_babygrowth', []),
+  setBabyGrowth: (list) => write('poshanmitra_babygrowth', list),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.
