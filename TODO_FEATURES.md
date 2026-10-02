@@ -25,6 +25,17 @@ screen (`ReadAloud.jsx` in Header, Web Speech TTS) · [x] Reports PDF export (pr
 via curl) · [x] **Cloud backup & restore** (`src/lib/cloudSync.js` + Settings `CloudBackup`,
 opt-in, whole-state blob in profiles.data, RLS auth.uid()=id).
 
+## 🚀 SESSION 3b — the "make a todolist & complete it" list. All LIVE on Netlify.
+- [x] **ANC visit scheduler** (ANCVisits) — visit windows from due date + one-tap reminders.
+- [x] **Immunization schedule** (ImmunizationSchedule, src/data/immunization.js) — India NIS, saves profile.babyDob + reminders.
+- [x] **Verified helpline directory** (Helplines) — 108/102/112/104/1098/181/KIRAN, one-tap call.
+- [x] **Baby growth tracker** (BabyGrowth, storage.getBabyGrowth) — postpartum weight/length log.
+- [x] **My care team** (CareTeam in Settings, profile.careTeam) — ASHA/ANM/doctor/hospital tap-to-call.
+- [x] **Source citations** (ui/SourceNote) on Food/Immunization/ANC/Symptom tools (MoHFW/ICMR/WHO/NIS).
+- [x] **"Ask Mitra about this"** context links across Diet, Schemes, Reports, BabyThisWeek, SymptomGuide.
+- [x] **Symptom self-care guide** (SymptomGuide, src/data/symptoms.js) — comfort tips + "see a doctor if" + danger signs/108. Safety-sensitive, non-diagnostic.
+- [ ] **Daily push notifications** — true BACKGROUND web-push needs a push server + VAPID to SEND = not $0 without infra. The app already fires LOCAL notifications while open (reminders.js). Left out honestly.
+
 ### ONLY remaining item: full Hindi/Marathi translation of the NEWER surfaces
 (tools, shop, info, auth, settings-verification, campaigns enrichments). Core journey
 (dashboard/chat/diet/schemes/hospitals/videos/checkup/onboarding) is already trilingual, and
