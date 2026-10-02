@@ -11,6 +11,8 @@ import { BirthPlan } from '../components/tools/BirthPlan.jsx'
 import { BabyThisWeek } from '../components/tools/BabyThisWeek.jsx'
 import { HospitalBag } from '../components/tools/HospitalBag.jsx'
 import { FoodSafety } from '../components/tools/FoodSafety.jsx'
+import { ANCVisits } from '../components/tools/ANCVisits.jsx'
+import { ImmunizationSchedule } from '../components/tools/ImmunizationSchedule.jsx'
 
 // Hub for self-contained pregnancy tools. Each tool is its own module under
 // components/tools/ and rendered here as a card. New tools are added over time.
@@ -22,6 +24,7 @@ export function Tools() {
       <PageHeader title={t('nav.tools')} subtitle="Simple, private tools for your pregnancy — right on your device." />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         <BabyThisWeek />
+        <ANCVisits />
         <EmergencySOS />
         <KickCounter lang={lang} />
         <WaterTracker />
@@ -31,6 +34,7 @@ export function Tools() {
         <MoodCheckin />
         <HospitalBag />
         <BirthPlan />
+        <ImmunizationSchedule />
       </div>
     </>
   )
