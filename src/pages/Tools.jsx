@@ -10,6 +10,7 @@ import { MoodCheckin } from '../components/tools/MoodCheckin.jsx'
 import { BirthPlan } from '../components/tools/BirthPlan.jsx'
 import { BabyThisWeek } from '../components/tools/BabyThisWeek.jsx'
 import { HospitalBag } from '../components/tools/HospitalBag.jsx'
+import { FoodSafety } from '../components/tools/FoodSafety.jsx'
 
 // Hub for self-contained pregnancy tools. Each tool is its own module under
 // components/tools/ and rendered here as a card. New tools are added over time.
@@ -26,6 +27,7 @@ export function Tools() {
         <WaterTracker />
         <ContractionTimer />
         <WeightTracker />
+        <FoodSafety />
         <MoodCheckin />
         <HospitalBag />
         <BirthPlan />
