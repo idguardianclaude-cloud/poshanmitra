@@ -47,7 +47,19 @@ export function Schemes() {
 
   return (
     <>
-      <PageHeader title={t('schemes.title')} subtitle={t('schemes.sub')} />
+      <PageHeader
+        title={t('schemes.title')}
+        subtitle={t('schemes.sub')}
+        action={
+          <Button
+            as={Link}
+            to="/chat?q=Which%20government%20schemes%20am%20I%20likely%20eligible%20for%2C%20and%20how%20do%20I%20apply%3F"
+            variant="secondary"
+          >
+            <MessageSquare size={16} /> {t('common.askMitra')}
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         <div className="xl:col-span-2 space-y-5">

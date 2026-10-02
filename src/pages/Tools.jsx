@@ -15,6 +15,7 @@ import { ANCVisits } from '../components/tools/ANCVisits.jsx'
 import { ImmunizationSchedule } from '../components/tools/ImmunizationSchedule.jsx'
 import { Helplines } from '../components/tools/Helplines.jsx'
 import { BabyGrowth } from '../components/tools/BabyGrowth.jsx'
+import { SymptomGuide } from '../components/tools/SymptomGuide.jsx'
 
 // Hub for self-contained pregnancy tools. Each tool is its own module under
 // components/tools/ and rendered here as a card. New tools are added over time.
@@ -32,6 +33,7 @@ export function Tools() {
         <KickCounter lang={lang} />
         <WaterTracker />
         <ContractionTimer />
+        <SymptomGuide />
         <WeightTracker />
         <FoodSafety />
         <MoodCheckin />
