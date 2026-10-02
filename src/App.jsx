@@ -24,6 +24,7 @@ const Settings = lazyPage(() => import('./pages/Settings.jsx'), 'Settings')
 const Checkup = lazyPage(() => import('./pages/Checkup.jsx'), 'Checkup')
 const Reports = lazyPage(() => import('./pages/Reports.jsx'), 'Reports')
 const Tools = lazyPage(() => import('./pages/Tools.jsx'), 'Tools')
+const Shop = lazyPage(() => import('./pages/Shop.jsx'), 'Shop')
 const Campaigns = lazyPage(() => import('./pages/Campaigns.jsx'), 'Campaigns')
 const NotFound = lazyPage(() => import('./pages/NotFound.jsx'), 'NotFound')
 
@@ -90,6 +91,7 @@ export default function App() {
           <Route path="/campaigns" element={<Campaigns />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/tools" element={<Tools />} />
+          <Route path="/shop" element={<Shop />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

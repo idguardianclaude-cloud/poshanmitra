@@ -11,6 +11,7 @@ import {
   BarChart3,
   Heart,
   Timer,
+  ShoppingBag,
 } from 'lucide-react'
 import { LogoMark } from '../Logo.jsx'
 import { Illustration } from '../Illustration.jsx'
@@ -27,6 +28,7 @@ const NAV = [
   { key: 'hospitals', icon: Building2, to: '/hospitals' },
   { key: 'reports', icon: BarChart3, to: '/reports' },
   { key: 'tools', icon: Timer, to: '/tools' },
+  { key: 'shop', icon: ShoppingBag, to: '/shop' },
 ]
 
 export function Sidebar({ open, onNavigate }) {

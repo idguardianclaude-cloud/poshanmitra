@@ -96,6 +96,10 @@ export const storage = {
   getWater: () => read('poshanmitra_water', {}),
   setWater: (map) => write('poshanmitra_water', map),
 
+  // Shopping cart — { [productId]: qty }. Checkout is a demo (no payment).
+  getCart: () => read('poshanmitra_cart', {}),
+  setCart: (map) => write('poshanmitra_cart', map),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.
