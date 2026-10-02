@@ -32,10 +32,14 @@ export function suggestDate(cadence) {
 }
 
 let seq = 0
+function demoRef() {
+  return 'PM-' + Math.random().toString(36).slice(2, 8).toUpperCase()
+}
 export function makeBooking(campaign, { date, time = '', place = '', name = '', phone = '' }) {
   if (!campaign || !date) return null
   return {
     id: `b-${Date.now()}-${seq++}`,
+    ref: demoRef(), // demo booking reference (not a real govt reference)
     campaignId: campaign.id,
     campaignName: campaign.name,
     date,

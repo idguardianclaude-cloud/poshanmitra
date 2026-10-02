@@ -1,5 +1,20 @@
 # Feature build — resume TODO ($0 plan)
 
+## 🔨 CURRENT DIRECTIVE (2 Oct): free = real, paid = labeled dummy
+Build the paid-blocked features as working **dummy/mock** flows (labeled "Demo"
+where they imitate a real external action, so no user is misled):
+- [x] **Phone OTP** (signup/login) — send → enter OTP → verify (accept any 6 digits). Dummy.
+- [x] **Alternate-number OTP** (Settings) — dummy verify → "Verified" badge.
+- [x] **Aadhaar verify** (Settings) — 12-digit input → "Verify (Demo)" → store MASKED only + verified flag. Never store full Aadhaar.
+- [x] **ABHA** — keep official link; add a demo "linked" state when an address is saved.
+- [x] **Updates channels** (Campaigns booking + reminders) — WhatsApp/SMS/Email toggles → dummy "you'll be notified" confirmation (no real send).
+- [x] **Slot booking** — demo booking reference (PM-XXXXXX) + "Demo" note (keep honest it's not a real govt slot).
+- [ ] Free & still real: Hindi/Marathi translation of the new screens (reports/campaigns/profile/auth).
+
+---
+# (original plan below)
+
+
 **How to resume after a limit reset:** read `CLAUDE.md`, `memory/live-deployment.md`,
 then this file top-to-bottom. Everything is free-tier. The Supabase *activation*
 steps (Google OAuth creds, email template) are deliberately LAST — the user said

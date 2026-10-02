@@ -258,9 +258,16 @@ function BookingModal({ campaign, defaultPlace, defaultName, lang, onClose, onBo
       ) : (
         <div className="space-y-4">
           <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3">
-            <p className="text-sm font-medium text-ink">{saved.campaignName}</p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium text-ink">{saved.campaignName}</p>
+              <span className="text-[11px] font-semibold text-emerald-700 bg-white rounded-full px-2 py-0.5">Ref {saved.ref}</span>
+            </div>
             <p className="text-sm text-ink-muted mt-0.5">{formatIN(saved.date, lang)}{saved.time ? ` · ${saved.time}` : ''}{saved.place ? ` · ${saved.place}` : ''}</p>
           </div>
+          <p className="text-sm text-ink-muted inline-flex items-start gap-1.5">
+            <MessageSquare size={15} className="text-indigo-500 shrink-0 mt-0.5" />
+            We'll remind you on WhatsApp & SMS before your visit. <span className="text-ink-faint">(Demo — delivery is simulated.)</span>
+          </p>
           <p className="text-sm text-ink-muted">Saved to <span className="font-medium text-ink">My appointments</span>. Get your details anytime:</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Button variant="secondary" size="sm" onClick={() => downloadICS(saved)}><CalendarPlus size={15} /> Add to calendar</Button>

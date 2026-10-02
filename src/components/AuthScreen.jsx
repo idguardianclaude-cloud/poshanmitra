@@ -55,6 +55,8 @@ export function AuthScreen({ mode = 'login' }) {
   const [otpSent, setOtpSent] = useState(false)
   const [otp, setOtp] = useState('')
   const [phone, setPhone] = useState('')
+  const [phoneStep, setPhoneStep] = useState('enter') // enter | otp
+  const [phoneOtp, setPhoneOtp] = useState('')
   const [busy, setBusy] = useState('') // '', 'google', 'email', 'otp', 'phone'
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -98,12 +100,20 @@ export function AuthScreen({ mode = 'login' }) {
     afterAuth()
   }
 
-  function onPhone(e) {
+  function onSendPhoneOtp(e) {
     e.preventDefault()
     setError('')
     if (!isValidMobile(phone)) return setError('Please enter a valid 10-digit mobile number.')
-    // Phone quick-start: local sign-in (no SMS). The number is saved as a profile
-    // detail during onboarding. Works with zero setup.
+    // DEMO OTP: real SMS needs a paid provider, so this is a simulated OTP step —
+    // any 6 digits verify. (Wire a real SMS provider later to make it live.)
+    setPhoneStep('otp')
+    setNotice(`OTP sent to +91 ${phone}. Demo — enter any 6 digits.`)
+  }
+
+  function onVerifyPhone(e) {
+    e.preventDefault()
+    setError('')
+    if (!/^\d{6}$/.test(phoneOtp)) return setError('Enter the 6-digit OTP.')
     login()
     afterAuth()
   }
@@ -223,26 +233,45 @@ export function AuthScreen({ mode = 'login' }) {
                 <span className="h-px flex-1 bg-line" /> or your phone <span className="h-px flex-1 bg-line" />
               </div>
 
-              {/* Phone quick-start (zero setup) */}
-              <form onSubmit={onPhone} className="space-y-2.5">
-                <div className="flex items-center rounded-xl border border-line bg-canvas focus-within:ring-2 focus-within:ring-indigo-500">
-                  <Phone size={15} className="ml-3 text-ink-faint" />
-                  <span className="pl-2 pr-1 text-sm text-ink-muted">+91</span>
+              {/* Phone OTP (demo — any 6 digits) */}
+              {phoneStep === 'enter' ? (
+                <form onSubmit={onSendPhoneOtp} className="space-y-2.5">
+                  <div className="flex items-center rounded-xl border border-line bg-canvas focus-within:ring-2 focus-within:ring-indigo-500">
+                    <Phone size={15} className="ml-3 text-ink-faint" />
+                    <span className="pl-2 pr-1 text-sm text-ink-muted">+91</span>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      autoComplete="tel"
+                      maxLength={10}
+                      value={phone}
+                      onChange={(e) => { setPhone(normalizeMobile(e.target.value)); setError('') }}
+                      placeholder="98765 43210"
+                      className="flex-1 bg-transparent py-2.5 pr-3 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+                    />
+                  </div>
+                  <Button type="submit" variant="secondary" className="w-full">
+                    Send OTP <ArrowRight size={15} />
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={onVerifyPhone} className="space-y-2.5">
                   <input
-                    type="tel"
                     inputMode="numeric"
-                    autoComplete="tel"
-                    maxLength={10}
-                    value={phone}
-                    onChange={(e) => { setPhone(normalizeMobile(e.target.value)); setError('') }}
-                    placeholder="98765 43210"
-                    className="flex-1 bg-transparent py-2.5 pr-3 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+                    maxLength={6}
+                    value={phoneOtp}
+                    onChange={(e) => { setPhoneOtp(e.target.value.replace(/\D/g, '')); setError('') }}
+                    placeholder="6-digit OTP"
+                    className="w-full rounded-xl border border-line bg-canvas px-3 py-2.5 text-center text-lg tracking-[0.3em] font-semibold text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                   />
-                </div>
-                <Button type="submit" variant="secondary" className="w-full" disabled={busy === 'phone'}>
-                  {isSignup ? 'Continue with phone' : 'Sign in with phone'} <ArrowRight size={15} />
-                </Button>
-              </form>
+                  <Button type="submit" variant="secondary" className="w-full">
+                    <Check size={16} /> Verify & {isSignup ? 'continue' : 'sign in'}
+                  </Button>
+                  <button type="button" onClick={() => { setPhoneStep('enter'); setPhoneOtp(''); setNotice('') }} className="w-full text-xs text-ink-muted hover:text-ink">
+                    ← Change number
+                  </button>
+                </form>
+              )}
 
               {notice && <p className="text-xs text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">{notice}</p>}
               {error && <p className="text-xs text-red-600">{error}</p>}

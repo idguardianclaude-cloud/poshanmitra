@@ -25,13 +25,34 @@ export function Settings() {
   // Verification & contact
   const [altPhone, setAltPhone] = useState(profile?.altPhone || '')
   const [abha, setAbha] = useState(profile?.abha || '')
+  const [aadhaar, setAadhaar] = useState('')
   const [vSaved, setVSaved] = useState(false)
   const altOk = !altPhone || isValidMobile(altPhone)
+  const aadhaarVerified = Boolean(profile?.aadhaarVerified)
+  const altVerified = Boolean(profile?.altPhoneVerified)
+  const abhaLinked = Boolean(profile?.abha)
+  const channels = profile?.updateChannels || { whatsapp: true, sms: false, email: Boolean(authUser?.email) }
+
   function saveVerification() {
     if (!altOk) return
     updateProfile({ altPhone: altPhone || null, abha: abha.trim().slice(0, 40) || null })
     setVSaved(true)
     setTimeout(() => setVSaved(false), 1800)
+  }
+  // DEMO: real Aadhaar verification needs a UIDAI licence. We NEVER store the full
+  // number — only a masked form + a verified flag, and it's clearly marked "Demo".
+  function verifyAadhaar() {
+    const digits = aadhaar.replace(/\D/g, '')
+    if (digits.length !== 12) return
+    updateProfile({ aadhaarMasked: `XXXX XXXX ${digits.slice(-4)}`, aadhaarVerified: true })
+    setAadhaar('')
+  }
+  function verifyAlt() {
+    if (!isValidMobile(altPhone)) return
+    updateProfile({ altPhone, altPhoneVerified: true }) // DEMO OTP (no SMS)
+  }
+  function toggleChannel(k) {
+    updateProfile({ updateChannels: { ...channels, [k]: !channels[k] } })
   }
 
   const nameOk = isValidName(name)
@@ -156,9 +177,40 @@ export function Settings() {
               </div>
             )}
 
+            {/* Aadhaar (demo verification) */}
+            <div>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">Aadhaar <span className="text-ink-faint font-normal">(demo verification)</span></span>
+              {aadhaarVerified ? (
+                <div className="flex items-center justify-between gap-3 rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2.5">
+                  <div>
+                    <p className="text-[13px] font-medium text-ink">{profile?.aadhaarMasked || 'XXXX XXXX ••••'}</p>
+                    <p className="text-xs text-emerald-700">Verified · Demo</p>
+                  </div>
+                  <BadgeCheck size={18} className="text-emerald-600 shrink-0" />
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    inputMode="numeric"
+                    maxLength={14}
+                    value={aadhaar}
+                    onChange={(e) => setAadhaar(e.target.value.replace(/[^\d ]/g, ''))}
+                    placeholder="1234 5678 9012"
+                    className="flex-1 rounded-xl border border-line bg-canvas px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  />
+                  <Button variant="secondary" onClick={verifyAadhaar} disabled={aadhaar.replace(/\D/g, '').length !== 12}>
+                    <ShieldCheck size={15} /> Verify (Demo)
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-ink-faint mt-1">Demo only — real Aadhaar verification needs a UIDAI licence. We store only the last 4 digits, never the full number.</p>
+            </div>
+
             {/* ABHA */}
             <div>
-              <span className="text-[13px] font-medium text-ink mb-1.5 block">ABHA (Ayushman Bharat Health Account)</span>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">
+                ABHA (Ayushman Bharat Health Account){abhaLinked && <span className="ml-1 text-xs text-emerald-700">· Linked</span>}
+              </span>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   value={abha}
@@ -170,28 +222,53 @@ export function Settings() {
                   <IdCard size={15} /> Create / Link ABHA <ExternalLink size={13} />
                 </Button>
               </div>
-              <p className="text-xs text-ink-faint mt-1">Opens the official ABDM portal. We never see or store your Aadhaar — only the ABHA address you choose to type here.</p>
+              <p className="text-xs text-ink-faint mt-1">Opens the official ABDM portal. We store only the ABHA address you type — never your Aadhaar.</p>
             </div>
 
-            {/* Alternate number */}
-            <label className="block">
-              <span className="text-[13px] font-medium text-ink mb-1.5 block">Alternate mobile number</span>
-              <div className="flex items-center rounded-xl border border-line bg-canvas focus-within:ring-2 focus-within:ring-indigo-500 max-w-xs">
-                <Phone size={15} className="ml-3 text-ink-faint" />
-                <span className="pl-2 pr-1 text-sm text-ink-muted">+91</span>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={10}
-                  value={altPhone}
-                  onChange={(e) => setAltPhone(normalizeMobile(e.target.value))}
-                  placeholder="98765 43210"
-                  className="flex-1 bg-transparent py-2.5 pr-3 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
-                />
+            {/* Alternate number + demo OTP verify */}
+            <div>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">
+                Alternate mobile number{altVerified && <span className="ml-1 text-xs text-emerald-700">· Verified</span>}
+              </span>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex items-center rounded-xl border border-line bg-canvas focus-within:ring-2 focus-within:ring-indigo-500 flex-1">
+                  <Phone size={15} className="ml-3 text-ink-faint" />
+                  <span className="pl-2 pr-1 text-sm text-ink-muted">+91</span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    value={altPhone}
+                    onChange={(e) => setAltPhone(normalizeMobile(e.target.value))}
+                    placeholder="98765 43210"
+                    className="flex-1 bg-transparent py-2.5 pr-3 text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+                  />
+                </div>
+                <Button variant="secondary" onClick={verifyAlt} disabled={!isValidMobile(altPhone) || altVerified}>
+                  {altVerified ? (<><BadgeCheck size={15} /> Verified</>) : 'Verify (Demo)'}
+                </Button>
               </div>
               {!altOk && <p className="mt-1 text-xs text-red-600">{t('valid.mobile')}</p>}
-              <p className="text-xs text-ink-faint mt-1">A family member's number for emergencies. (Number OTP verification needs an SMS service — coming later.)</p>
-            </label>
+              <p className="text-xs text-ink-faint mt-1">For emergencies. OTP verification is simulated here (real SMS needs a provider).</p>
+            </div>
+
+            {/* Update channels (demo) */}
+            <div>
+              <span className="text-[13px] font-medium text-ink mb-1.5 block">Get updates & reminders on</span>
+              <div className="flex flex-wrap gap-2">
+                {[['whatsapp', 'WhatsApp'], ['sms', 'SMS'], ['email', 'Email']].map(([k, label]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => toggleChannel(k)}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${channels[k] ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-line text-ink-muted hover:bg-canvas'}`}
+                  >
+                    {channels[k] && <Check size={14} />} {label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-ink-faint mt-1">Demo — WhatsApp/SMS delivery is simulated for now (needs a paid gateway); email works once your sign-in email is set.</p>
+            </div>
 
             <Button onClick={saveVerification} disabled={!altOk}>
               {vSaved ? (<><Check size={16} /> Saved</>) : 'Save details'}
