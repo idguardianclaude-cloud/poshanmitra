@@ -100,6 +100,14 @@ export const storage = {
   getCart: () => read('poshanmitra_cart', {}),
   setCart: (map) => write('poshanmitra_cart', map),
 
+  // Daily mood check-ins — [{ date, mood 1-5, note }]. Wellbeing, never a diagnosis.
+  getMoods: () => read('poshanmitra_moods', []),
+  setMoods: (list) => write('poshanmitra_moods', list),
+
+  // Birth-plan preferences (an object of choices). Non-medical wishes to discuss.
+  getBirthPlan: () => read('poshanmitra_birthplan', {}),
+  setBirthPlan: (obj) => write('poshanmitra_birthplan', obj),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.

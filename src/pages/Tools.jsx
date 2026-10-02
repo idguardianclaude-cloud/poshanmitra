@@ -5,6 +5,9 @@ import { KickCounter } from '../components/tools/KickCounter.jsx'
 import { ContractionTimer } from '../components/tools/ContractionTimer.jsx'
 import { EmergencySOS } from '../components/tools/EmergencySOS.jsx'
 import { WaterTracker } from '../components/tools/WaterTracker.jsx'
+import { WeightTracker } from '../components/tools/WeightTracker.jsx'
+import { MoodCheckin } from '../components/tools/MoodCheckin.jsx'
+import { BirthPlan } from '../components/tools/BirthPlan.jsx'
 
 // Hub for self-contained pregnancy tools. Each tool is its own module under
 // components/tools/ and rendered here as a card. New tools are added over time.
@@ -19,6 +22,9 @@ export function Tools() {
         <KickCounter lang={lang} />
         <WaterTracker />
         <ContractionTimer />
+        <WeightTracker />
+        <MoodCheckin />
+        <BirthPlan />
       </div>
     </>
   )
