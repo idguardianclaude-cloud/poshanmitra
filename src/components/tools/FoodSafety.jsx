@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Apple, Search } from 'lucide-react'
 import { FOODS, FOOD_STATUS } from '../../data/foodSafety.js'
+import { SourceNote } from '../ui/SourceNote.jsx'
 
 // Food-safety checker — a searchable quick reference for everyday foods. General
 // information only; it says so plainly and always points to her doctor, because her
@@ -87,6 +88,7 @@ export function FoodSafety() {
       <p className="mt-3 text-[11px] text-ink-faint">
         General guidance, not medical advice. If you have diabetes, anaemia, allergies or any concern, follow your doctor.
       </p>
+      <SourceNote className="mt-1.5" sources={['MoHFW', 'ICMR', 'WHO']} />
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useProfile } from '../../context/ProfileContext.jsx'
 import { storage } from '../../lib/storage.js'
 import { makeReminder, toISODate } from '../../lib/reminders.js'
 import { formatIN } from '../../lib/dates.js'
+import { SourceNote } from '../ui/SourceNote.jsx'
 
 // Antenatal check-up (ANC) scheduler. Computes the recommended visit windows from
 // her due date and lets her set a one-tap reminder for each. These are the commonly
@@ -115,6 +116,7 @@ export function ANCVisits() {
           <p className="mt-3 text-[11px] text-ink-faint">
             Reminders run on this device while the app is open. Manage them in Settings → Reminders.
           </p>
+          <SourceNote className="mt-1.5" sources={['MoHFW', 'WHO']} />
         </>
       )}
     </div>

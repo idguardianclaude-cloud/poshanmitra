@@ -5,6 +5,7 @@ import { storage } from '../../lib/storage.js'
 import { makeReminder, toISODate } from '../../lib/reminders.js'
 import { formatIN } from '../../lib/dates.js'
 import { IMMUNIZATION } from '../../data/immunization.js'
+import { SourceNote } from '../ui/SourceNote.jsx'
 
 const MS_DAY = 86400000
 
@@ -120,6 +121,7 @@ export function ImmunizationSchedule() {
       <p className="mt-3 text-[11px] text-ink-faint">
         General schedule, not medical advice. Some vaccines (like JE) are only given in certain districts — your health worker will guide you.
       </p>
+      <SourceNote className="mt-1.5" sources={['India NIS', 'MoHFW']} />
     </div>
   )
 }

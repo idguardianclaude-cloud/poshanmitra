@@ -10,6 +10,7 @@ import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
 import { cleanName, isValidName, normalizeMobile, isValidMobile } from '../lib/validate.js'
 import { RemindersManager } from '../components/RemindersManager.jsx'
 import { CloudBackup } from '../components/CloudBackup.jsx'
+import { CareTeam } from '../components/CareTeam.jsx'
 
 const FOODS = ['Vegetarian', 'Non-vegetarian', 'Eggetarian', 'Jain']
 
@@ -325,6 +326,9 @@ export function Settings() {
             </button>
           </div>
         </section>
+
+        {/* My care team — ASHA/ANM, doctor, hospital contacts */}
+        <CareTeam />
 
         {/* Cloud backup & restore (opt-in, when signed in) */}
         <CloudBackup />
