@@ -82,6 +82,16 @@ export const storage = {
   getCheckups: () => read('poshanmitra_checkups', []),
   setCheckups: (list) => write('poshanmitra_checkups', list),
 
+  // Health-tool records (kick counter, contraction timer, etc.).
+  getKicks: () => read('poshanmitra_kicks', []),
+  setKicks: (list) => write('poshanmitra_kicks', list),
+  getContractions: () => read('poshanmitra_contractions', []),
+  setContractions: (list) => write('poshanmitra_contractions', list),
+
+  // Emergency contacts (name + number) for the SOS feature.
+  getEmergencyContacts: () => read('poshanmitra_emergency', []),
+  setEmergencyContacts: (list) => write('poshanmitra_emergency', list),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.
