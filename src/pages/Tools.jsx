@@ -4,6 +4,7 @@ import { useT } from '../lib/i18n.js'
 import { KickCounter } from '../components/tools/KickCounter.jsx'
 import { ContractionTimer } from '../components/tools/ContractionTimer.jsx'
 import { EmergencySOS } from '../components/tools/EmergencySOS.jsx'
+import { WaterTracker } from '../components/tools/WaterTracker.jsx'
 
 // Hub for self-contained pregnancy tools. Each tool is its own module under
 // components/tools/ and rendered here as a card. New tools are added over time.
@@ -16,6 +17,7 @@ export function Tools() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         <EmergencySOS />
         <KickCounter lang={lang} />
+        <WaterTracker />
         <ContractionTimer />
       </div>
     </>
