@@ -9,6 +9,7 @@ import { useT, LANGS } from '../lib/i18n.js'
 import { ordinalMonth, ordinalTrimester } from '../lib/pregnancy.js'
 import { cleanName, isValidName, normalizeMobile, isValidMobile } from '../lib/validate.js'
 import { RemindersManager } from '../components/RemindersManager.jsx'
+import { CloudBackup } from '../components/CloudBackup.jsx'
 
 const FOODS = ['Vegetarian', 'Non-vegetarian', 'Eggetarian', 'Jain']
 
@@ -324,6 +325,9 @@ export function Settings() {
             </button>
           </div>
         </section>
+
+        {/* Cloud backup & restore (opt-in, when signed in) */}
+        <CloudBackup />
 
         {/* Reminders */}
         <RemindersManager />
