@@ -67,6 +67,12 @@ export function ImmunizationSchedule() {
         India’s routine immunizations, free at government centres. Your ANM or doctor confirms the exact vaccines and timing.
       </p>
 
+      {/* Mother's own vaccine reminder during pregnancy */}
+      <div className="mb-4 rounded-xl bg-indigo-50 border border-indigo-100 px-3 py-2 text-xs text-ink">
+        <span className="font-semibold text-indigo-700">For you (Mother):</span> ask your ANM about your Td / TT tetanus
+        vaccine during pregnancy — it protects both you and your baby.
+      </div>
+
       {/* Birth-date entry (optional until baby arrives) */}
       <div className="mb-4 flex items-center gap-2 rounded-xl bg-canvas border border-line px-3 py-2">
         <Baby size={16} className="text-blue-600 shrink-0" />

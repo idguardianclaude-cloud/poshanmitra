@@ -17,6 +17,8 @@ import { Helplines } from '../components/tools/Helplines.jsx'
 import { BabyGrowth } from '../components/tools/BabyGrowth.jsx'
 import { SymptomGuide } from '../components/tools/SymptomGuide.jsx'
 import { Journal } from '../components/tools/Journal.jsx'
+import { NewbornCare } from '../components/tools/NewbornCare.jsx'
+import { PostpartumChecklist } from '../components/tools/PostpartumChecklist.jsx'
 
 // Hub for self-contained pregnancy tools. Each tool is its own module under
 // components/tools/ and rendered here as a card. New tools are added over time.
@@ -42,7 +44,9 @@ export function Tools() {
         <HospitalBag />
         <BirthPlan />
         <ImmunizationSchedule />
+        <NewbornCare />
         <BabyGrowth />
+        <PostpartumChecklist />
       </div>
     </>
   )
