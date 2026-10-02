@@ -12,6 +12,27 @@ where they imitate a real external action, so no user is misled):
 - [ ] Free & still real: Hindi/Marathi translation of the new screens (reports/campaigns/profile/auth).
 
 ---
+## 🚀 SESSION 3 (2 Oct) — "complete all + add more + apply all". All LIVE on Netlify.
+New /tools modules (hub now has 11): [x] Weight tracker (reuses Reports weight series) ·
+[x] Mood check-in (wellbeing, KIRAN helpline on low days, never a diagnosis) ·
+[x] Birth-plan builder (WhatsApp share + print/PDF) · [x] Baby-this-week (size-of-a-fruit,
+`src/data/babyWeekly.js`) · [x] Hospital-bag checklist · [x] Food-safety checker
+(`src/data/foodSafety.js`, enjoy/moderate/cook/avoid, balanced on papaya etc.).
+Other: [x] Public trust pages About/Privacy/Terms (`src/pages/Info.jsx`, routes /about /privacy
+/terms, footer links) · [x] PWA install prompt (`InstallPrompt.jsx`) · [x] Read-aloud on every
+screen (`ReadAloud.jsx` in Header, Web Speech TTS) · [x] Reports PDF export (print dialog) ·
+[x] **Gemini proxy hardened** (Edge Function v4: origin allowlist + x-pm-client marker; verified
+via curl) · [x] **Cloud backup & restore** (`src/lib/cloudSync.js` + Settings `CloudBackup`,
+opt-in, whole-state blob in profiles.data, RLS auth.uid()=id).
+
+### ONLY remaining item: full Hindi/Marathi translation of the NEWER surfaces
+(tools, shop, info, auth, settings-verification, campaigns enrichments). Core journey
+(dashboard/chat/diet/schemes/hospitals/videos/checkup/onboarding) is already trilingual, and
+Mitra answers in the chosen language. This is a LARGE i18n pass (new components use hardcoded
+English) and medical copy needs native-speaker review — recommend doing it as a focused phase
+per-screen rather than one unreviewed bulk pass. i18n lives in `src/lib/i18n.js` (useT, dot-path keys).
+
+---
 # (original plan below)
 
 
