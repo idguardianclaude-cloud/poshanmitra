@@ -26,6 +26,7 @@ const Reports = lazyPage(() => import('./pages/Reports.jsx'), 'Reports')
 const Tools = lazyPage(() => import('./pages/Tools.jsx'), 'Tools')
 const Shop = lazyPage(() => import('./pages/Shop.jsx'), 'Shop')
 const Campaigns = lazyPage(() => import('./pages/Campaigns.jsx'), 'Campaigns')
+const Info = lazyPage(() => import('./pages/Info.jsx'), 'Info')
 const NotFound = lazyPage(() => import('./pages/NotFound.jsx'), 'NotFound')
 
 // Shown while a code-split page chunk downloads. Deliberately minimal so it
@@ -71,6 +72,11 @@ export default function App() {
           path="/onboarding"
           element={!loggedIn ? <Navigate to="/login" replace /> : <Onboarding />}
         />
+
+        {/* Public trust pages — readable without signing in. */}
+        <Route path="/about" element={<Info />} />
+        <Route path="/privacy" element={<Info />} />
+        <Route path="/terms" element={<Info />} />
 
         <Route
           element={
