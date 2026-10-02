@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { LANGS, useT } from '../../lib/i18n.js'
+import { ReadAloud } from '../ReadAloud.jsx'
 
 function useOutsideClose(ref, onClose) {
   useEffect(() => {
@@ -192,6 +193,9 @@ export function Header({ onToggleSidebar }) {
       >
         <MessageSquare size={16} /> {t('common.askMitra')}
       </button>
+
+      {/* Read this page aloud (accessibility) */}
+      <ReadAloud />
 
       {/* Language */}
       <div className="relative" ref={langRef}>

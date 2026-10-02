@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar.jsx'
 import { Header } from './Header.jsx'
 import { DisclaimerFooter } from './DisclaimerFooter.jsx'
 import { ReminderScheduler } from '../ReminderScheduler.jsx'
+import { InstallPrompt } from '../InstallPrompt.jsx'
 
 export function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -11,6 +12,7 @@ export function AppShell() {
   return (
     <div className="min-h-screen bg-canvas">
       <ReminderScheduler />
+      <InstallPrompt />
       <Sidebar open={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />
 
       {/* Backdrop for mobile drawer */}

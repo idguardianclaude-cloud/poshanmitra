@@ -56,22 +56,30 @@ export function startListening({ lang = 'en', onResult, onEnd, onError } = {}) {
   }
 }
 
-// Read text aloud in the chosen language. No-op when unsupported.
-export function speak(text, lang = 'en') {
-  if (!ttsSupported() || !text) return
+// Read text aloud in the chosen language. No-op when unsupported. `onEnd` fires
+// when speech finishes or is cancelled, so callers can reset a "speaking" toggle.
+export function speak(text, lang = 'en', { onEnd } = {}) {
+  if (!ttsSupported() || !text) {
+    onEnd?.()
+    return
+  }
   try {
     window.speechSynthesis.cancel()
     const u = new SpeechSynthesisUtterance(String(text))
     u.lang = BCP47[lang] || 'en-IN'
     u.rate = 0.98
     u.pitch = 1
+    if (onEnd) {
+      u.onend = () => onEnd()
+      u.onerror = () => onEnd()
+    }
     // Prefer a voice matching the language if one is installed.
     const voices = window.speechSynthesis.getVoices?.() || []
     const match = voices.find((v) => v.lang === u.lang) || voices.find((v) => v.lang?.startsWith(lang))
     if (match) u.voice = match
     window.speechSynthesis.speak(u)
   } catch {
-    /* no-op */
+    onEnd?.()
   }
 }
 
