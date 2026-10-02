@@ -108,6 +108,10 @@ export const storage = {
   getBirthPlan: () => read('poshanmitra_birthplan', {}),
   setBirthPlan: (obj) => write('poshanmitra_birthplan', obj),
 
+  // Hospital-bag checklist — { [itemId]: true } for packed items.
+  getChecklist: () => read('poshanmitra_checklist', {}),
+  setChecklist: (map) => write('poshanmitra_checklist', map),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.
