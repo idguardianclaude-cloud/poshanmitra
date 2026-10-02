@@ -117,6 +117,14 @@ export const storage = {
   getBabyGrowth: () => read('poshanmitra_babygrowth', []),
   setBabyGrowth: (list) => write('poshanmitra_babygrowth', list),
 
+  // Private daily journal — [{ date, text }]. Just for her, on-device.
+  getJournal: () => read('poshanmitra_journal', []),
+  setJournal: (list) => write('poshanmitra_journal', list),
+
+  // Postpartum recovery checklist — { [itemId]: true }.
+  getPostpartum: () => read('poshanmitra_postpartum', {}),
+  setPostpartum: (map) => write('poshanmitra_postpartum', map),
+
   // Delete all my data — SAFETY.md §6. Must actually clear EVERYTHING, including
   // keys written outside this module (dashboard plan, eligibility wizard). Sweep
   // every poshanmitra_* key so nothing is left behind as new keys get added.

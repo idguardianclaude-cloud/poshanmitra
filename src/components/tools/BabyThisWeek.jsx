@@ -1,8 +1,26 @@
 import { useMemo } from 'react'
-import { Baby, MessageSquare } from 'lucide-react'
+import { Baby, MessageSquare, Heart, CalendarHeart } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useProfile } from '../../context/ProfileContext.jsx'
 import { babyForWeek } from '../../data/babyWeekly.js'
+
+const MS_DAY = 86400000
+// "X weeks, Y days to go" from the due date — or a gentle line once it's here/past.
+function countdown(dueDate) {
+  if (!dueDate) return null
+  const due = new Date(dueDate)
+  if (Number.isNaN(due.getTime())) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const days = Math.round((due - today) / MS_DAY)
+  if (days < 0) return 'Your due date has passed — your little one may arrive any moment!'
+  if (days === 0) return 'Your due date is today! 🎉'
+  const w = Math.floor(days / 7)
+  const d = days % 7
+  const wk = w > 0 ? `${w} week${w > 1 ? 's' : ''}` : ''
+  const dd = d > 0 ? `${d} day${d > 1 ? 's' : ''}` : ''
+  return `${[wk, dd].filter(Boolean).join(', ')} to go`
+}
 
 // "Your baby this week" — a warm, motivating glimpse of typical development with a
 // familiar size comparison. General educational info, NOT a measurement of her own
@@ -13,6 +31,7 @@ export function BabyThisWeek() {
   const { profile } = useProfile()
   const weeks = profile?.weeks
   const entry = useMemo(() => babyForWeek(weeks), [weeks])
+  const countdownText = useMemo(() => countdown(profile?.dueDate), [profile?.dueDate])
 
   const hasWeek = weeks != null
   const pct = hasWeek ? Math.min(100, Math.round((weeks / 40) * 100)) : 0
@@ -41,6 +60,14 @@ export function BabyThisWeek() {
             </div>
           </div>
 
+          {/* For you this week (mother-focused) */}
+          {entry.mom && (
+            <div className="mt-3 flex items-start gap-2 rounded-xl bg-indigo-50 border border-indigo-100 p-3">
+              <Heart size={15} className="text-indigo-500 shrink-0 mt-0.5" fill="#EEF2FF" />
+              <p className="text-xs text-ink"><span className="font-semibold text-indigo-700">For you this week:</span> {entry.mom}</p>
+            </div>
+          )}
+
           <div className="mt-4">
             <div className="flex items-center justify-between text-[11px] text-ink-faint mb-1">
               <span>Week {weeks}</span>
@@ -49,6 +76,11 @@ export function BabyThisWeek() {
             <div className="h-2 w-full rounded-full bg-canvas overflow-hidden">
               <div className="h-full rounded-full bg-rose-400 transition-all" style={{ width: `${pct}%` }} />
             </div>
+            {countdownText && (
+              <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-rose-600">
+                <CalendarHeart size={14} /> {countdownText}
+              </p>
+            )}
           </div>
 
           <Link

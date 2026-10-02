@@ -11,6 +11,7 @@ import { cleanName, isValidName, normalizeMobile, isValidMobile } from '../lib/v
 import { RemindersManager } from '../components/RemindersManager.jsx'
 import { CloudBackup } from '../components/CloudBackup.jsx'
 import { CareTeam } from '../components/CareTeam.jsx'
+import { ProfileCompleteness } from '../components/ProfileCompleteness.jsx'
 
 const FOODS = ['Vegetarian', 'Non-vegetarian', 'Eggetarian', 'Jain']
 
@@ -88,6 +89,9 @@ export function Settings() {
       <PageHeader title={t('settings.title')} subtitle={t('settings.sub')} />
 
       <div className="max-w-2xl space-y-6">
+        {/* Profile completeness nudge (hidden once 100%) */}
+        <ProfileCompleteness />
+
         {/* Profile */}
         <section className="rounded-2xl bg-white border border-line shadow-card p-5">
           <h2 className="text-base font-semibold text-ink mb-4">{t('settings.profile')}</h2>
